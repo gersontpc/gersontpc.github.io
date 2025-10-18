@@ -7,14 +7,14 @@ date: 2025-10-18 18:28:00 -0300
 categories: [Containers, Docker, Kubernetes]
 tags: [writing]
 render_with_liquid: false
-media_subpath: './img/bg-distroless.png'
+# media_subpath: './img/bg-distroless.png'
 ---
 
 ## Distroless
 
-<p align="center">
+<!-- <p align="center">
   <img src="./img/distroless-logo.svg" alt="Distroless logo" width="300" />
-</p>
+</p> -->
 
 As imagens "Distroless" contêm apenas seu aplicativo e suas dependências de tempo de execução. Elas não contêm gerenciadores de pacotes, shells ou quaisquer outros programas que você esperaria encontrar em uma distribuição Linux padrão.
 
@@ -394,7 +394,7 @@ O build multi-plataforma refere-se a uma única execução de build que gera ima
 
 Diferença entre imagens single-platform e multi-platform
 
-![](./img/single-vs-multiplatform-image.svg)
+<!-- ![](./img/single-vs-multiplatform-image.svg) -->
 
 Imagens single-platform possuem uma estrutura simples: um único manifesto que aponta para uma configuração e um conjunto de camadas. Já imagens multi-platform possuem uma lista de manifestos, cada um apontando para uma configuração e camadas distintas para uma arquitetura específica.
 
