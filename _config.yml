@@ -14,9 +14,9 @@ timezone: America/Sao_Paulo
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: Gerson Carneiro 🐏 # the main title
+title: Gerson Carneiro # the main title
 
-tagline: Blog Técnico Pessoal # it will display as the subtitle
+tagline: Blog Técnico Pessoal 👨🏻‍💻 # it will display as the subtitle
 
 description: >- # used by seo meta and the atom feed
   A minimal, responsive and feature-rich Jekyll theme for technical writing.
@@ -29,7 +29,7 @@ github:
   username: gersontpc # change to your GitHub username
 
 twitter:
-  username: gerson.tpc # change to your Twitter username
+  username: gersontpc # change to your Twitter username
 
 social:
   # Change to your full name.
@@ -38,11 +38,11 @@ social:
   email: example@domain.com # change to your email address
   links:
     # The first element serves as the copyright owner's link
-    - https://twitter.com/gerson.tpc # change to your Twitter homepage
+    - https://twitter.com/gersontpc # change to your Twitter homepage
     - https://github.com/gersontpc # change to your GitHub homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
-    # - https://www.linkedin.com/in/username
+    - https://www.linkedin.com/in/gersoncarneiro
 
 # Site Verification Settings
 webmaster_verifications:
