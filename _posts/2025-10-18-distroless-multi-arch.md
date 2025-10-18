@@ -7,7 +7,7 @@ date: 2025-10-18 18:28:00 -0300
 categories: [Containers, Docker, Kubernetes]
 tags: [writing]
 render_with_liquid: false
-media_subpath: './img/distroless.png'
+media_subpath: './img/bg-distroless.png'
 ---
 
 ## Distroless
