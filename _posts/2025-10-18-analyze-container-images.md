@@ -5,9 +5,9 @@ description: >-
 author: Gerson Carneiro
 date: 2025-10-18 18:28:00 -0300
 categories: [Containers, Docker, Kubernetes]
-tags: [writing]
+tags: [Containers, Docker, Kubernetes]
 render_with_liquid: false
-# media_subpath: './img/bg-distroless.png'
+media_subpath: './img/bg-distroless.png'
 ---
 
 ## Análise das TOP 10 imagens de Containers mais utilizadas

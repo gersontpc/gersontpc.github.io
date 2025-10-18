@@ -5,7 +5,7 @@ description: >-
 author: Gerson Carneiro
 date: 2025-10-18 18:28:00 -0300
 categories: [Containers, Docker, Kubernetes]
-tags: [writing]
+tags: [Containers, Docker, Kubernetes]
 render_with_liquid: false
 # media_subpath: './img/bg-distroless.png'
 ---
@@ -645,7 +645,7 @@ root        73  0.0  0.0   3260  1884 pts/0    R+   05:52   0:00 ps -aux
 Desta forma é possível ter uma imagem toolkit "canivete suíço" para acessar containers que utilizam imagens do tipo distroless, para realizar troubleshooting
 
 
-### Observações principais:
+### Considerações finais:
 
 As imagens base tradicionais geralmente incluem centenas de pacotes, o que aumenta a superfície de ataque devido à maior quantidade de componentes sujeitos a vulnerabilidades.
 
