@@ -34,11 +34,11 @@ Para essa análise, será listado o conteúdo completo da imagem por meio do SBO
 
 1. Abaixo iremos listar as dependencias da imagens *SBOM* da imagem amazoncorreto java 21 utilizando Alpine 3.22.
 
-```shell
+```terminal
 docker sbom amazoncorretto:21.0.8-alpine3.22
 ```
 Output:
-```shell
+```terminal
 Syft v0.43.0
  ✔ Pulled image
  ✔ Loaded image
@@ -71,11 +71,11 @@ Repare na quantidade de bibliotecas que tem esta imagem, apesar de utilizar o al
 
 2. Checando vulnerabilidades da imagem `amazoncorretto:21.0.8-alpine3.22` utilizando a ferramenta [grype](https://github.com/anchore/grype).
 
-```shell
+```terminal
 grype amazoncorretto:21.0.8-alpine3.22
 ```
 Output:
-```shell
+```terminal
  ✔ Loaded image                                                                                                                                                                              amazoncorretto:21.0.8-alpine3.22 
  ✔ Parsed image                                                                                                                                       sha256:47ed9633034573dd42097d58b69bbc20b6ce33b1f9904ad5526001485051e28b 
  ✔ Cataloged contents                                                                                                                                        d7dfe789edbb3d5175b1ddec3de72b4ef9f1133df1a0ba952bd1b2bddba44a83 
@@ -103,11 +103,11 @@ Conforme o output abaixo, a imagem `amazoncorretto:21.0.8-alpine3.22` apresenta 
 
 3. Como podemos ver a imagem tem 521MB.
 
-```shell
+```terminal
 docker image ls
 ```
 Output:
-```shell
+```terminal
 REPOSITORY       TAG                 IMAGE ID       CREATED        SIZE
 amazoncorretto   21.0.8              0f096ec2cb6f   2 weeks ago    521MB
 ```
@@ -214,7 +214,7 @@ Output:
 
 3. Importe a imagem utilizando o Docker.
 
-```shell
+```terminal
 docker load < java21.tar
 ```
 Output:
@@ -225,7 +225,7 @@ Loaded image: gersontpc/java-base21:latest-arm64
 
 4. Liste a imagem. Como podemos ver a imagem tem 285MB, quase a metade da imagem do amazon correto.
 
-```shell
+```terminal
 docker image ls
 ```
 Output:
@@ -236,7 +236,7 @@ gersontpc/java-base21   latest-arm64      719bb2801e42   2 days ago    283MB
 
 5. Agora iremos checar as dependências da imagem utilizando o `docker sbom`.
 
-```shell
+```terminal
 docker sbom java-base21:latest-arm64
 ```
 Output:
@@ -288,11 +288,11 @@ zlib                    1.3.1-r51     apk
 
 6. Execute o `grype` para checar as vulnerabilidades da imagem
 
-```shell
+```terminal
 grype java-base21:latest-arm64
 ```
 Output:
-```
+```terminal
  ✔ Loaded image                                                                                                                                                                                      java-base21:latest-arm64
  ✔ Parsed image                                                                                                                                       sha256:320e925c69d102b5bdc578b926eefe5074d3bf7cd8cc6704d39b7d19188b8d9f 
  ✔ Cataloged contents                                                                                                                                        878669b7c78a859d1e9268101d9157a86805f836c1bea2b686849231c668700e 
@@ -314,18 +314,18 @@ Como podemos ver, a imagem distroless criada com o apko apresenta um tamanho sig
 
 Antes de criar uma imagem multi plataforma, iremos realizar o build de uma imagem `amazoncorretto:21.0.8-alpine3.22` utilizando o `docker build`.
 
-```Dockerfile
+```terminal
 FROM amazoncorretto:21.0.8-alpine3.22
 ```
 
 1. Realize o build da imagem e em seguida o push para o docker hub.
 
-```
+```terminal
 docker image build -t gersontpc/amazoncorretto-single-arch:21.0.8-alpine3.22 . && docker image push gersontpc/amazoncorretto-single-arch:21.0.8-alpine3.22
 ```
 
 Output:
-```
+```terminal
 [+] Building 0.0s (5/5) FINISHED                                                    docker:desktop-linux
  => [internal] load build definition from Dockerfile                                                0.0s
  => => transferring dockerfile: 74B                                                                 0.0s
@@ -348,11 +348,11 @@ The push refers to repository [docker.io/gersontpc/amazoncorretto-single-arch]
 
 3. Para verfificar a arquitetura da imagem utilize o comando `docker manifest`.
 
-```
+```terminal
 docker manifest inspect --verbose gersontpc/amazoncorretto-single-arch:21.0.8-alpine3.22 | jq .Descriptor.platform
 ```
 Output:
-```json
+```terminal
 {
   "architecture": "arm64",
   "os": "linux"
@@ -362,11 +362,11 @@ Como a imagem que eu fiz o build foi do meu notebook a arquitetura `arm64`, util
 
 4. Vamos verificar a arquitetura da imgem anets de fazer o build
 
-```shell
+```terminal
 docker manifest inspect --verbose amazoncorretto:21.0.8-alpine3.22 | jq '.[].Descriptor.platform'
 ```
 Output:
-```json
+```terminal
 {
   "architecture": "amd64",
   "os": "linux"
@@ -406,11 +406,11 @@ Para criar a imagem multi arquitetura iremos utilizar o `buildx`, e para isso a 
 
 1. Push da imagem local para o dockerhub.
 
-```bash
+```terminal
 docker image push gersontpc/java-base21:latest-arm64 
 ```
 Outuput:
-```bash
+```terminal
 The push refers to repository [docker.io/gersontpc/java-base21]
 e33e883d2456: Pushed 
 latest-arm64: digest: sha256:80029d2f2c4be85527e1cb862a7087ee93e014987d211c879a22a46b893304c5 size: 528
@@ -418,18 +418,18 @@ latest-arm64: digest: sha256:80029d2f2c4be85527e1cb862a7087ee93e014987d211c879a2
 
 2. Crie um Dockerfile referenciando a imagem criada pelo APKO.
 
-```Dockerfile
+```terminal
 FROM gersontpc/java-base21:latest-arm64
 ```
 
 3. Agora realize o build da imagem utilizando o `buildx` utilizando o dockerfile
 
-```bash
+```terminal
 docker buildx build --platform linux/arm64,linux/amd64 -t gersontpc/java21:latest --push .
 ```
 Output:
 
-```bash
+```terminal
 [+] Building 8.3s (9/9) FINISHED                                                                                                                                                                                                 docker-container:mybuilder
  => [internal] load build definition from Dockerfile                                                                                                  0.0s
  => => transferring dockerfile: 76B                                                                                                                   0.0s
@@ -460,11 +460,11 @@ Output:
 
 > QEMU (Quick Emulator) é um software livre de virtualização e emulação que permite executar sistemas operacionais e aplicativos projetados para uma arquitetura de hardware em outra diferente. Ele emula processadores como x86, ARM, PowerPC, entre outros, permitindo a execução de máquinas virtuais completas. QEMU pode funcionar como emulador puro ou usar aceleração por hardware para melhorar o desempenho. É amplamente usado para testes multiplataforma, desenvolvimento e emulação de sistemas legados.
 
-```bash
+```terminal
 docker run --rm --privileged tonistiigi/binfmt --install all
 ```
 Output:
-```bash
+```terminal
 Unable to find image 'tonistiigi/binfmt:latest' locally
 latest: Pulling from tonistiigi/binfmt
 307625515e5a: Pull complete
@@ -509,11 +509,11 @@ installing: mips64 OK
 
 Para inspecionar as configurações, execute o comando:
 
-```bash
+```terminal
 docker buildx inspect --bootstrap
 ```
 Output:
-```
+```terminal
 Name:          mybuilder
 Driver:        docker-container
 Last Activity: 2025-10-13 02:22:06 +0000 UTC
@@ -558,22 +558,22 @@ GC Policy rule#3:
 
 
 ### Teste da imagem linux/arm64
-```bash
+```terminal
 docker run --rm --platform linux/arm64 gersontpc/java-base21:latest java --version
 ```
 Output:
-```
+```terminal
 openjdk 21.0.8 2025-07-15
 OpenJDK Runtime Environment (build 21.0.8+-wolfi-r4)
 OpenJDK 64-Bit Server VM (build 21.0.8+-wolfi-r4, mixed mode, sharing)
 ```
 
 ### Teste da imagem linux/amd64
-```bash
+```terminal
 docker run --rm --platform linux/amd64 gersontpc/java-base21:latest java --version
 ```
 Output:
-```
+```terminal
 openjdk 21.0.8 2025-07-15
 OpenJDK Runtime Environment (build 21.0.8+-wolfi-r4)
 OpenJDK 64-Bit Server VM (build 21.0.8+-wolfi-r4, mixed mode, sharing)
@@ -587,21 +587,21 @@ Mas antes iremos aplique o  `deployment` que foi criado com a imagem distroless.
 
 1. Aplique o deployment
 
-```bash
+```terminal
 kubectl apply -f deploy.yaml
 ```
 Output:
-```bash
+```terminal
 deployment.apps/k8s-pod-deployment created
 ```
 
 2. Consulte os pods criados
 
-```bash
+```terminal
 k get pods
 ```
 Output:
-```
+```terminal
 NAME                                  READY   STATUS    RESTARTS   AGE
 k8s-distroless-app-55c8c95dc9-8lrvd   1/1     Running   0          3s
 k8s-distroless-app-55c8c95dc9-n9jdr   1/1     Running   0          3s
@@ -613,7 +613,7 @@ k8s-distroless-app-55c8c95dc9-n9jdr   1/1     Running   0          3s
 k exec -it k8s-distroless-app-55c8c95dc9-8lrvd -- sh
 ```
 Output:
-```
+```terminal
 OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown
 command terminated with exit code 127
 ```
@@ -627,7 +627,7 @@ kubectl debug -it pod/k8s-distroless-app-55c8c95dc9-bwrlw \
   --profile=general -- sh
 ```
 Output:
-```
+```terminal
 Targeting container "distroless-app". If you don't see processes from this container it may be because the container runtime doesn't support this feature.
 Defaulting debug container name to debugger-ww8md.
 All commands and output from this session will be recorded in container logs, including credentials and sensitive information passed through the command prompt.
