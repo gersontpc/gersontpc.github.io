@@ -8,7 +8,7 @@ categories: [Containers, Docker, Kubernetes]
 tags: [Containers, Docker, Kubernetes]
 render_with_liquid: false
 image:
-  path: ./img/bg-distroless.png
+  path: img/bg-distroless.png
 ---
 
 ## Análise das TOP 10 imagens de Containers mais utilizadas

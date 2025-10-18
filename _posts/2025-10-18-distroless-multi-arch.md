@@ -7,7 +7,9 @@ date: 2025-10-18 18:28:00 -0300
 categories: [Containers, Docker, Kubernetes]
 tags: [Containers, Docker, Kubernetes]
 render_with_liquid: false
-# media_subpath: './img/bg-distroless.png'
+image:
+  path: /commons/bg-distroless.png
+  alt: Responsive rendering of Chirpy theme on multiple devices.
 ---
 
 ## Distroless
