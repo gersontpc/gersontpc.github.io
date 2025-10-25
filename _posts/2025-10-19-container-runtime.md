@@ -1,1 +1,0 @@
-https://www.wiz.io/academy/container-runtimes

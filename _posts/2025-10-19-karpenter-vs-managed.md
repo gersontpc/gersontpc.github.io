@@ -1,1 +1,0 @@
-https://aws.plainenglish.io/karpenter-self-managed-vs-eks-auto-mode-which-path-should-you-take-53952e0c5856
