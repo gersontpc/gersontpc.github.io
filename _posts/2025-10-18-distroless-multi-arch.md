@@ -15,9 +15,8 @@ image:
 
 ## Distroless
 
-<p align="center">
-  <img src="../commons/distroless-logo.svg" alt="Distroless logo" width="300" />
-</p>
+![](../commons/distroless-logo.svg)
+
 
 As imagens "Distroless" contêm apenas seu aplicativo e suas dependências de tempo de execução. Elas não contêm gerenciadores de pacotes, shells ou quaisquer outros programas que você esperaria encontrar em uma distribuição Linux padrão.
 
