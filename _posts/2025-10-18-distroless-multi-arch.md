@@ -15,7 +15,7 @@ image:
 
 ## Distroless
 
-![Distroless](/img/container-runtime.jpg)
+![Distroless](/img/container-runtime.jpg){: .w-30 }
 
 As imagens "Distroless" contêm apenas seu aplicativo e suas dependências de tempo de execução. Elas não contêm gerenciadores de pacotes, shells ou quaisquer outros programas que você esperaria encontrar em uma distribuição Linux padrão.
 
