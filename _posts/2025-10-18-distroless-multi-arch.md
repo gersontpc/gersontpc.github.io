@@ -15,8 +15,7 @@ image:
 
 ## Distroless
 
-![Distroless](/commons/distroless-logo.png){: .w-30 }
-
+![Distroless](/commons/distroless-logo.png)
 As imagens "Distroless" contêm apenas seu aplicativo e suas dependências de tempo de execução. Elas não contêm gerenciadores de pacotes, shells ou quaisquer outros programas que você esperaria encontrar em uma distribuição Linux padrão.
 
 Restringir o que está em seu contêiner de tempo de execução precisamente ao que é necessário para seu aplicativo é uma prática recomendada, principalemente em ambientes produtivos. É ai que o distroless vem para ajudar a resolver este problema, criando imagens somente com o que é necessário.
