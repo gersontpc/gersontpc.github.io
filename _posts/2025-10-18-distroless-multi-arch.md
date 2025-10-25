@@ -15,9 +15,9 @@ image:
 
 ## Distroless
 
-<!-- <p align="center">
-  <img src="./img/distroless-logo.svg" alt="Distroless logo" width="300" />
-</p> -->
+<p align="center">
+  <img src="../commons/distroless-logo.svg" alt="Distroless logo" width="300" />
+</p>
 
 As imagens "Distroless" contêm apenas seu aplicativo e suas dependências de tempo de execução. Elas não contêm gerenciadores de pacotes, shells ou quaisquer outros programas que você esperaria encontrar em uma distribuição Linux padrão.
 
@@ -308,9 +308,9 @@ Output:
 No vulnerabilities found
 ```
 
-### Conclusão entre as imagens
+### Conclusão
 
-Como podemos ver, a imagem distroless criada com o apko apresenta um tamanho significativamente menor, com 285MB, em comparação com os 521MB da imagem comum baseada em Amazon Correto Alpine. Além disso, a análise de vulnerabilidades com grype indicou que a imagem distroless não possui vulnerabilidades conhecidas, enquanto a imagem comum apresenta diversas CVEs em diferentes níveis de severidade. Isso reforça que imagens distroless, ao conter apenas o essencial para execução, oferecem maior segurança e controle, tornando-se uma escolha preferencial para ambientes produtivos que priorizam a redução da superfície de ataque e maior confiabilidade.
+Como podemos ver, a imagem distroless criada com o apko apresenta um tamanho significativamente menor, com 285MB, em comparação com os 521MB da imagem baseada em Amazon Correto Alpine. Além disso, a análise de vulnerabilidades com grype indicou que a imagem distroless não possui vulnerabilidades, enquanto a imagem Correto apresenta diversas CVEs em diferentes níveis de severidade. Isso reforça que imagens distroless, ao conter apenas o essencial para execução, oferecem maior segurança e controle, tornando-se uma escolha preferencial para ambientes produtivos que priorizam a redução da superfície de ataque e maior confiabilidade.
 
 ## Multi Plataforma
 
@@ -658,7 +658,12 @@ Imagens como Ubuntu e Debian, mesmo sendo populares, exibem maior complexidade e
 
 Imagens mais recentes e focadas em segurança, como Wolfi Linux (baseada na filosofia distroless), apresentam um número muito reduzido de pacotes e vulnerabilidades, priorizando um ambiente minimalista que reduz a superfície de ataque.
 
-## References
+## Referências
 
-- [Docker Multi-platform](https://docs.docker.com/build/building/multi-platform/)
+- [Docker - Multi-platform](https://docs.docker.com/build/building/multi-platform/)
+- [Docker - Multi-arch build and images, the simple way](https://www.docker.com/blog/multi-arch-build-and-images-the-simple-way/?utm_source=chatgpt.com)
 - [Ephemeral Container](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container)
+
+# Créditos
+
+Eu ouvi falar a primeira vez sobre APKO através do [Matheus Fidelis](https://fidelissauro.dev), vai aqui meus agradecimentos a este mano que gosto muito e admiro! <3
