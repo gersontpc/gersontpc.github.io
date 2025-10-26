@@ -4,7 +4,7 @@ icon: fas fa-user-circle-o
 order: 4
 ---
 
-### About with me! 👨🏻‍💻
+### About me! 👨🏻‍💻
 
 ![image](/commons/this-is-fine-profile.png)
 
