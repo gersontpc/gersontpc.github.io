@@ -4,7 +4,7 @@ icon: fa fa-user-circle-o
 order: 4
 ---
 
-### About with me! :open_hands:	
+### About with me! 👨🏻‍💻
 
 ![image](/commons/this-is-fine-profile.png)
 
