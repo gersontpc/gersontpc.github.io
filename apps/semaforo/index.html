@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Semáforo de Fala</title>
+
+<meta name="theme-color" content="#121212">
+
+<!-- iOS: permite rodar em tela cheia ao adicionar à Tela de Início -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Semáforo">
+<style>
+  :root {
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: #121212;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 16px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #aaa;
+    margin: 0;
+  }
+  .voltar {
+    font-size: 0.85rem;
+  }
+  .voltar a {
+    color: #888;
+    text-decoration: none;
+  }
+  .voltar a:hover {
+    color: #ccc;
+    text-decoration: underline;
+  }
+  .semaforo {
+    background: #1a1a1a;
+    border-radius: 32px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    border: 1px solid #2a2a2a;
+  }
+  .luz {
+    width: 22vmin;
+    height: 22vmin;
+    max-width: 160px;
+    max-height: 160px;
+    min-width: 90px;
+    min-height: 90px;
+    border-radius: 50%;
+    background: #2a0000;
+    opacity: 0.25;
+    transition: opacity 0.15s ease, box-shadow 0.15s ease;
+  }
+  .luz.verde { background: #1db954; }
+  .luz.amarelo { background: #ffcc00; }
+  .luz.vermelho { background: #ff3b30; }
+
+  .luz.on { opacity: 1; }
+  .luz.verde.on { box-shadow: 0 0 40px 8px rgba(29,185,84,0.6); }
+  .luz.amarelo.on { box-shadow: 0 0 40px 8px rgba(255,204,0,0.6); }
+  .luz.vermelho.on { box-shadow: 0 0 40px 8px rgba(255,59,48,0.6); }
+
+  .status {
+    font-size: 1.3rem;
+    font-weight: 600;
+    min-height: 1.6em;
+  }
+
+  .controles {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 10px 24px;
+    border-radius: 999px;
+    border: none;
+    background: #333;
+    color: #eee;
+    cursor: pointer;
+  }
+  button:hover { background: #444; }
+  button:disabled { opacity: 0.4; cursor: default; }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #999;
+  }
+  input[type=range] { width: 160px; }
+
+  .erro {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    max-width: 320px;
+  }
+
+  footer {
+    font-size: 0.75rem;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+  <h1>Semáforo de Fala</h1>
+
+  <div class="semaforo">
+    <div class="luz vermelho" id="luzVermelho"></div>
+    <div class="luz amarelo" id="luzAmarelo"></div>
+    <div class="luz verde" id="luzVerde"></div>
+  </div>
+
+  <div class="status" id="status">Clique em Iniciar</div>
+
+  <div class="controles">
+    <button id="btnToggle">Iniciar</button>
+    <div class="slider-row">
+      <span>Sensibilidade</span>
+      <input type="range" id="sensibilidade" min="1" max="100" value="35">
+    </div>
+    <div class="erro" id="erro"></div>
+  </div>
+
+  <footer>O áudio nunca sai do seu navegador — só o volume é analisado localmente.</footer>
+
+  <div class="voltar"><a href="/tools/">&larr; Voltar para Tools</a></div>
+
+<script>
+(() => {
+  const btnToggle = document.getElementById('btnToggle');
+  const statusEl = document.getElementById('status');
+  const erroEl = document.getElementById('erro');
+  const sensInput = document.getElementById('sensibilidade');
+  const luzVerde = document.getElementById('luzVerde');
+  const luzAmarelo = document.getElementById('luzAmarelo');
+  const luzVermelho = document.getElementById('luzVermelho');
+
+  const TRANSICAO_MS = 2000;   // tempo em amarelo antes de virar vermelho
+  const SILENCIO_MS = 600;     // silêncio contínuo necessário para voltar ao verde
+
+  let audioCtx, analyser, source, stream, dataArray;
+  let rafId = null;
+  let running = false;
+
+  let state = 'GREEN'; // GREEN | YELLOW | RED
+  let speechStartTime = null;
+  let silenceStartTime = null;
+  let yellowTimer = null;
+
+  function setLights(active) {
+    luzVerde.classList.toggle('on', active === 'GREEN');
+    luzAmarelo.classList.toggle('on', active === 'YELLOW');
+    luzVermelho.classList.toggle('on', active === 'RED');
+  }
+
+  function setState(newState) {
+    if (state === newState) return;
+    state = newState;
+    setLights(state);
+    if (state === 'GREEN') statusEl.textContent = 'Silêncio';
+    if (state === 'YELLOW') statusEl.textContent = 'Detectando fala...';
+    if (state === 'RED') statusEl.textContent = 'Alguém está falando';
+  }
+
+  function getThreshold() {
+    // slider 1-100 -> threshold aproximado no range do RMS (0-1)
+    return Number(sensInput.value) / 1000;
+  }
+
+  function loop() {
+    analyser.getByteTimeDomainData(dataArray);
+    let sumSquares = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      const v = (dataArray[i] - 128) / 128;
+      sumSquares += v * v;
+    }
+    const rms = Math.sqrt(sumSquares / dataArray.length);
+    const threshold = getThreshold();
+    const falando = rms > threshold;
+    const now = performance.now();
+
+    if (falando) {
+      silenceStartTime = null;
+      if (state === 'GREEN') {
+        speechStartTime = now;
+        setState('YELLOW');
+        clearTimeout(yellowTimer);
+        yellowTimer = setTimeout(() => {
+          // só vira vermelho se ainda estiver falando
+          if (state === 'YELLOW') setState('RED');
+        }, TRANSICAO_MS);
+      }
+      // se já está YELLOW ou RED, mantém
+    } else {
+      speechStartTime = null;
+      if (state !== 'GREEN') {
+        if (silenceStartTime === null) silenceStartTime = now;
+        if (now - silenceStartTime >= SILENCIO_MS) {
+          clearTimeout(yellowTimer);
+          setState('GREEN');
+        }
+      }
+    }
+
+    rafId = requestAnimationFrame(loop);
+  }
+
+  async function start() {
+    erroEl.textContent = '';
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      erroEl.textContent = 'Não foi possível acessar o microfone: ' + err.message;
+      return;
+    }
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    dataArray = new Uint8Array(analyser.fftSize);
+    source = audioCtx.createMediaStreamSource(stream);
+    source.connect(analyser);
+
+    running = true;
+    state = 'GREEN';
+    setLights('GREEN');
+    statusEl.textContent = 'Silêncio';
+    btnToggle.textContent = 'Parar';
+    loop();
+  }
+
+  function stop() {
+    running = false;
+    cancelAnimationFrame(rafId);
+    clearTimeout(yellowTimer);
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    if (audioCtx) audioCtx.close();
+    setLights(null);
+    statusEl.textContent = 'Clique em Iniciar';
+    btnToggle.textContent = 'Iniciar';
+  }
+
+  btnToggle.addEventListener('click', () => {
+    if (running) stop(); else start();
+  });
+})();
+</script>
+
+</body>
+</html>
