@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
 /* Layout: barra de abas fixa no topo; cada aula = cabeçalho + tópicos; cada tópico = slides conceituais (cards) seguidos do exercício prático. Modo apresentação projeta os slides em 16:9. */
 :root{
@@ -51,6 +52,8 @@ h1,h2,h3,h4{font-family:var(--f-display);font-stretch:78%;line-height:1.1;text-w
 .tab .prog{font:500 11px/1 var(--f-mono);color:var(--muted);background:var(--surface-2);border:1px solid var(--line);padding:3px 5px;border-radius:3px}
 .tab .prog.full{color:var(--ok);background:var(--ok-soft);border-color:transparent}
 .theme-btn{flex:none;appearance:none;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:var(--radius);font:500 13px var(--f-body);padding:6px 10px;cursor:pointer}
+.top-inner .btn{flex:none;font-size:13px;padding:6px 12px}
+.top-inner .btn svg{width:14px;height:14px}
 
 main{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:32px 80px}
 .panel{display:block}
@@ -58,6 +61,12 @@ main{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:32px 80px}
 /* Aula header */
 .aula-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;padding-bottom:28px;border-bottom:2px solid var(--ink);margin-bottom:28px}
 .eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--signal);margin-bottom:12px}
+.eyebrow .social{display:inline-flex;align-items:center;gap:8px;vertical-align:middle}
+.eyebrow .social a{font-size:1em;line-height:1;display:inline-flex;text-decoration:none}
+.eyebrow .social a:hover{opacity:.7}
+.eyebrow .social .fa-linkedin{color:#0A66C2}
+.eyebrow .social .fa-github{color:var(--ink)}
+.eyebrow .social .fa-x-twitter{color:var(--ink)}
 .aula-head h1{font-size:clamp(34px,5.4vw,60px);font-weight:750;letter-spacing:-.01em}
 .aula-head .subtitle{font-family:var(--f-display);font-stretch:80%;font-size:clamp(20px,2.4vw,26px);font-weight:600;color:var(--accent);margin:8px 0 0}
 .aula-intro{margin-bottom:48px}
@@ -212,6 +221,7 @@ td code{white-space:nowrap}
 /* Apresentação */
 .pres{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 24px calc(env(safe-area-inset-bottom,0px) + 14px)}
 .pres-top,.pres-bottom{display:flex;align-items:center;gap:14px;max-width:1400px;width:100%;margin:0 auto;font:500 13px var(--f-mono);color:var(--muted)}
+#presNext.end{background:var(--ok);border-color:var(--ok);color:#fff}
 .pres-top .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pres-stage{display:grid;place-items:center;min-height:0;padding:14px 0}
 .pres-frame{width:min(100%,calc((100vh - 150px) * 16 / 9),1400px);aspect-ratio:16/9;max-width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;scrollbar-width:none;container-type:inline-size;padding:4.2cqw 5cqw}
@@ -238,6 +248,10 @@ td code{white-space:nowrap}
 .pres-frame.practice .hp-goal{font-size:2cqw;font-weight:400;color:var(--ink);line-height:1.45}
 .pres-frame.practice .hp-meta{display:flex;gap:1.2cqw;margin-top:3cqw;flex-wrap:wrap}
 .pres-frame.practice .hp-meta span{font:500 1.25cqw var(--f-mono);padding:.5cqw 1cqw;border:1px solid var(--line);border-radius:4px;color:var(--muted)}
+.pres-frame.practice .hp-actions{margin-top:3.2cqw}
+.pres-frame.practice .hp-actions .btn{font-size:1.7cqw;padding:.9cqw 1.5cqw;gap:.7cqw}
+.pres-frame.practice .hp-actions .btn svg{width:1.7em;height:1.7em}
+.lab-back{margin-top:16px}
 .pres-frame .copy{display:none}
 .pres-frame .code pre{font-size:1.45cqw;padding:1.4cqw 1.6cqw}
 .figure{margin:0 0 10px;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px;max-width:880px}
@@ -755,10 +769,11 @@ td code{white-space:nowrap}
     <nav class="tabs" role="tablist" aria-label="Aulas">
       <button class="tab" role="tab" data-tab="inicio">Início</button>
       <button class="tab" role="tab" data-tab="aula-1">Aula 01 <span class="prog"></span></button>
-      <button class="tab" role="tab" data-tab="aula-2" hidden>Aula 02 <span class="prog"></span></button>
-      <button class="tab" role="tab" data-tab="aula-3" hidden>Aula 03 <span class="prog"></span></button>
-      <button class="tab" role="tab" data-tab="aula-4" hidden>Aula 04 <span class="prog"></span></button>
+      <button class="tab" role="tab" data-tab="aula-2">Aula 02 <span class="prog"></span></button>
+      <button class="tab" role="tab" data-tab="aula-3">Aula 03 <span class="prog"></span></button>
+      <button class="tab" role="tab" data-tab="aula-4">Aula 04 <span class="prog"></span></button>
     </nav>
+    <button class="btn" id="presentBtn" type="button" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="9" rx="1"/><path d="M5 14.5h6M8 11.5v3"/></svg>Apresentar aula</button>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Alternar tema">Tema</button>
   </div>
 </header>
@@ -767,7 +782,7 @@ td code{white-space:nowrap}
 <!-- ============ INÍCIO ============ -->
 <section class="panel" id="inicio" data-panel="inicio">
   <div class="hero">
-    <div class="eyebrow">MBA Cloud Computing &amp; DevOps · Prof. Gerson Carneiro</div>
+    <div class="eyebrow">MBA Cloud Computing &amp; DevOps · Prof. Gerson Carneiro · <span class="social"><a href="https://www.linkedin.com/in/gerson-carneiro/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a><a href="https://github.com/gersontpc" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a><a href="https://x.com/gersontpc" target="_blank" rel="noopener" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a></span></div>
     <h1>Container<br>Technologies</h1>
     <p>Do processo isolado no kernel Linux até o cluster Kubernetes gerenciado na AWS. Cada aula traz a apresentação conceitual e, logo abaixo de cada tópico, um exercício focado para reproduzir no GitHub Codespaces.</p>
   </div>
@@ -775,9 +790,9 @@ td code{white-space:nowrap}
   <div class="section-label">Trilha da disciplina</div>
   <div class="roadmap">
     <button data-go="aula-1"><span class="n">AULA 01</span><h3>Tudo começa na imagem</h3><p>VM × container, OCI, runtimes, anatomia da imagem, Dockerfile, camadas, Hadolint, multi-stage, Trivy, tags e Docker Hub.</p></button>
-    <button data-go="aula-2" hidden><span class="n">AULA 02</span><h3>Containers, redes e volumes</h3><p>Arquitetura do Docker, comandos do dia a dia, networks, volumes, log drivers, Compose e Swarm.</p></button>
-    <button data-go="aula-3" hidden><span class="n">AULA 03</span><h3>Orquestração de containers</h3><p>Orquestradores, Amazon ECS com Fargate e ECR, arquitetura do Kubernetes, Deployments, Services e Ingress.</p></button>
-    <button data-go="aula-4" hidden><span class="n">AULA 04</span><h3>Produção e EKS</h3><p>Probes, recursos, HPA, rollouts sem downtime, troubleshooting e Amazon EKS.</p></button>
+    <button data-go="aula-2"><span class="n">AULA 02</span><h3>Containers, redes e volumes</h3><p>Arquitetura do Docker, comandos do dia a dia, networks, volumes, log drivers, Compose e Swarm.</p></button>
+    <button data-go="aula-3"><span class="n">AULA 03</span><h3>Orquestração de containers</h3><p>Orquestradores, Amazon ECS com Fargate e ECR, arquitetura do Kubernetes, Deployments, Services e Ingress.</p></button>
+    <button data-go="aula-4"><span class="n">AULA 04</span><h3>Produção e EKS</h3><p>Probes, recursos, HPA, rollouts sem downtime, troubleshooting e Amazon EKS.</p></button>
   </div>
 
   <div class="section-label">Como praticar nesta disciplina</div>
@@ -790,13 +805,13 @@ td code{white-space:nowrap}
     </div>
     <div class="learn-src">
       <h3>Fontes de aprendizado</h3>
-      <div class="src"><b>Blogs</b><span><a href="https://www.docker.com/blog/" target="_blank" rel="noopener">Docker</a> · <a href="https://kubernetes.io/blog/" target="_blank" rel="noopener">Kubernetes</a> · <a href="https://aws.amazon.com/blogs/containers/" target="_blank" rel="noopener">AWS Containers</a> · <a href="https://azure.microsoft.com/blog/" target="_blank" rel="noopener">Microsoft Azure</a> · <a href="https://www.linuxfoundation.org/blog" target="_blank" rel="noopener">Linux Foundation</a> · <a href="https://www.cncf.io/blog/" target="_blank" rel="noopener">CNCF</a></span></div>
+      <div class="src"><b>Blogs</b><span><a href="https://www.docker.com/blog/" target="_blank" rel="noopener">Docker</a> · <a href="https://kubernetes.io/blog/" target="_blank" rel="noopener">Kubernetes</a> · <a href="https://aws.amazon.com/blogs/containers/" target="_blank" rel="noopener">AWS Containers</a> · <a href="https://azure.microsoft.com/blog/" target="_blank" rel="noopener">Microsoft Azure</a> · <a href="https://www.linuxfoundation.org/blog" target="_blank" rel="noopener">Linux Foundation</a> · <a href="https://www.cncf.io/blog/" target="_blank" rel="noopener">CNCF</a> · <a href="https://fidelissauro.dev/" target="_blank" rel="noopener">Matheus Fidelis</a></span></div>
       <div class="src"><b>Meetups</b><span>AWS User Groups · Golang SP · Azure Brasil · <a href="https://community.cncf.io/" target="_blank" rel="noopener">CNCF Community Groups</a></span></div>
-      <div class="src"><b>Podcasts</b><span><a href="https://kubernetespodcast.com/" target="_blank" rel="noopener">Kubernetes Podcast from Google</a> · Kubicast</span></div>
+      <div class="src"><b>Podcasts</b><span><a href="https://kubernetespodcast.com/" target="_blank" rel="noopener">Kubernetes Podcast from Google</a> · <a href="https://www.youtube.com/playlist?list=PLtjfMRpJlYQ0w-UUmr9EUE9aGaHenfK7N" target="_blank" rel="noopener">Kubicast</a></span></div>
       <div class="src"><b>Eventos</b><span><a href="https://reinvent.awsevents.com/" target="_blank" rel="noopener">AWS re:Invent</a> · <a href="https://www.cncf.io/kcds/" target="_blank" rel="noopener">KCD (Kubernetes Community Days)</a> · <a href="https://devopsdays.org/" target="_blank" rel="noopener">DevOpsDays</a> · <a href="https://2026.pythonbrasil.org.br/" target="_blank" rel="noopener">Python Brasil</a> · <a href="https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/" target="_blank" rel="noopener">KubeCon + CloudNativeCon</a></span></div>
-      <div class="src"><b>Livros</b><span><i>Kubernetes Up &amp; Running</i> (O’Reilly) · <i>Docker Deep Dive</i> (Nigel Poulton) · <i>Container Security</i> (Liz Rice)</span></div>
+      <div class="src"><b>YouTube</b><span><a href="https://www.youtube.com/@linuxtips" target="_blank" rel="noopener">LinuxTips</a> · <a href="https://www.youtube.com/@KCD_Brazil" target="_blank" rel="noopener">KCD Brasil</a> · <a href="https://www.youtube.com/@cncf" target="_blank" rel="noopener">CNCF</a> · <a href="https://www.youtube.com/@TechWorldwithNana" target="_blank" rel="noopener">TechWorld with Nana</a> · <a href="https://www.youtube.com/channel/UCYg157Qy_U7ZR1WUHTq0Q8Q" target="_blank" rel="noopener">Containers from the Couch</a> (AWS) · <a href="https://www.youtube.com/channel/UCveDIAq9X6cW9O5ZgbqcAAg" target="_blank" rel="noopener">Pisani da ArcH</a> · <a href="https://www.youtube.com/@RenatoAugustoTech" target="_blank" rel="noopener">Renato Augusto Tech</a></span></div>
       <div class="src"><b>Comunidades</b><span>Grupos no Telegram · <a href="https://slack.k8s.io/" target="_blank" rel="noopener">Slack do Kubernetes</a> · <a href="https://slack.cncf.io/" target="_blank" rel="noopener">Slack da CNCF</a></span></div>
-      <div class="src"><b>Paisagem</b><span><a href="https://landscape.cncf.io/" target="_blank" rel="noopener">CNCF Landscape</a> · <a href="https://platformengineering.org/platform-tooling/" target="_blank" rel="noopener">Platform Tooling Landscape</a> · <a href="https://digital.ai/learn/devsecops-periodic-table/" target="_blank" rel="noopener">Periodic Table of DevSecOps Tools</a></span></div>
+      <div class="src"><b>Landscapes</b><span><a href="https://landscape.cncf.io/" target="_blank" rel="noopener">CNCF Landscape</a> · <a href="https://platformengineering.org/platform-tooling/" target="_blank" rel="noopener">Platform Tooling Landscape</a> · <a href="https://digital.ai/learn/devsecops-periodic-table/" target="_blank" rel="noopener">Periodic Table of DevSecOps Tools</a></span></div>
     </div>
   </div>
 
@@ -869,8 +884,6 @@ docker run --rm hello-world</code></pre></div>
           <tr><td>Docker Compose</td><td>02</td><td>Aplicações multi-container</td></tr>
           <tr><td>Docker Swarm</td><td>02</td><td>Orquestração nativa do Docker</td></tr>
           <tr><td>k3d + kubectl</td><td>03–04</td><td>Cluster Kubernetes local</td></tr>
-          <tr><td>AWS Academy Learner Lab</td><td>03–04</td><td>Conta AWS da turma para ECS e EKS</td></tr>
-          <tr><td>AWS CLI</td><td>03–04</td><td>Provisionar ECS, ECR e EKS</td></tr>
           <tr><td>eksctl</td><td>04</td><td>Provisionar e operar o Amazon EKS</td></tr>
         </tbody>
       </table></div>
@@ -889,9 +902,8 @@ docker run --rm hello-world</code></pre></div>
     <h1>Tudo começa na imagem</h1>
     <p class="subtitle">Do conceito à prática</p>
     <p class="lead">Antes de rodar, escalar ou orquestrar, existe uma imagem. Nesta aula vamos do container como processo isolado aos padrões da OCI e aos runtimes, passando pela anatomia de uma imagem e pelo Dockerfile enxuto e seguro, até versionar e publicar no Docker Hub.</p>
-    <div class="meta"><span class="chip">11 tópicos</span><span class="chip">6 exercícios</span><span class="chip">OCI · runtimes · Dockerfile · Hadolint · Trivy · Docker Hub</span><span class="chip chip-gh">GitHub Codespaces</span></div>
+    <div class="meta"><span class="chip">11 tópicos</span><span class="chip">7 exercícios</span><span class="chip">OCI · runtimes · Dockerfile · Hadolint · Trivy · Docker Hub</span><span class="chip chip-gh">GitHub Codespaces</span></div>
   </div>
-  <div><button class="btn" type="button" data-present><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="9" rx="1"/><path d="M5 14.5h6M8 11.5v3"/></svg>Apresentar aula</button></div>
 </div>
 <div class="aula-intro">
   <div class="section-label">Roteiro da aula</div>
@@ -899,13 +911,13 @@ docker run --rm hello-world</code></pre></div>
     <div class="slide">
       <h3>Da ideia à imagem publicada</h3>
       <div class="flow">
-        <div class="node"><b>Entender</b><span>Tópicos 1.1–1.4 · bare metal, VM e container, por que containers, OCI, runtimes, anatomia da imagem</span><span class="ex-range">só conceitos</span></div>
+        <div class="node"><b>Entender</b><span>Tópicos 1.1–1.4 · bare metal, VM e container, por que containers, OCI, runtimes, anatomia da imagem</span><span class="ex-range">Exercício 1.2</span></div>
         <div class="arrow">→</div>
-        <div class="node"><b>Construir</b><span>Tópicos 1.5–1.7 · primeira imagem, anatomia e camadas, boas práticas e Hadolint</span><span class="ex-range">Exercícios 1.1–1.3</span></div>
+        <div class="node"><b>Construir</b><span>Tópicos 1.5–1.7 · primeira imagem, anatomia e camadas, boas práticas e Hadolint</span><span class="ex-range">Exercícios 1.1, 1.3–1.4</span></div>
         <div class="arrow">→</div>
-        <div class="node"><b>Otimizar</b><span>Tópicos 1.8–1.9 · medir tamanho, CVEs e SBOM (cadeia de suprimentos), resolver com multi-stage e distroless</span><span class="ex-range">Exercícios 1.4–1.5</span></div>
+        <div class="node"><b>Otimizar</b><span>Tópicos 1.8–1.9 · medir tamanho, CVEs e SBOM (cadeia de suprimentos), resolver com multi-stage e distroless</span><span class="ex-range">Exercícios 1.5–1.6</span></div>
         <div class="arrow">→</div>
-        <div class="node hl"><b>Distribuir</b><span>Tópico 1.10 · tags, SemVer, push e multi-plataforma</span><span class="ex-range">Exercício 1.6</span></div>
+        <div class="node hl"><b>Distribuir</b><span>Tópico 1.10 · tags, SemVer, push e multi-plataforma</span><span class="ex-range">Exercício 1.7</span></div>
       </div>
       <div class="cols">
         <div class="card-mini"><h4>Ao final da aula você vai saber</h4><ul>
@@ -1217,7 +1229,16 @@ docker run --rm hello-world</code></pre></div>
         <div class="card-mini"><h4>Como o Docker escolhe</h4><p>No <code>pull</code>/<code>run</code>, seleciona automaticamente a variante da arquitetura do host: <code>arm64</code> num Mac M-series ou Graviton, <code>amd64</code> num x86. Para forçar: <code>--platform linux/arm64</code>.</p></div>
         <div class="card-mini"><h4>Como construir</h4><ul><li><b>Emulação QEMU</b>: mais simples, sem mudar o Dockerfile, porém mais lenta</li><li><b>Nós nativos</b> por arquitetura no builder: mais rápido</li><li><b>Cross-compilation</b> com multi-stage (Go, Rust)</li></ul></div>
       </div>
-      <p class="note">Fonte: <a href="https://docs.docker.com/build/building/multi-platform/" target="_blank" rel="noopener">Docker docs · Multi-platform builds</a>. Na prática: exercício 1.6, parte 2.</p>
+      <p class="note">Fonte: <a href="https://docs.docker.com/build/building/multi-platform/" target="_blank" rel="noopener">Docker docs · Multi-platform builds</a>. Na prática: exercício 1.2, parte 3, e exercício 1.7, parte 2.</p>
+    </div>
+    <div class="slide">
+      <h3>Como emular outra arquitetura localmente?</h3>
+      <p>O host do Codespaces é <code>amd64</code>. Sem ajuda, o kernel dele não sabe executar um binário compilado para <code>arm64</code> — e vice-versa num Mac Apple Silicon. É aí que entra o <b>QEMU</b>.</p>
+      <div class="cols">
+        <div class="card-mini"><h4>O que é o QEMU</h4><p>Emulador de processador de código aberto, capaz de traduzir instruções de uma arquitetura para outra em tempo real (por exemplo, <code>arm64</code> → <code>amd64</code>).</p></div>
+        <div class="card-mini"><h4>binfmt_misc: a ponte com o kernel</h4><p>O Docker registra o QEMU no kernel do host via <code>binfmt_misc</code>. A partir daí, sempre que o kernel encontra um binário de outra arquitetura, ele encaminha a execução ao QEMU em vez de recusar — de forma transparente para o container e para quem roda o <code>docker run</code>.</p></div>
+      </div>
+      <p class="note">Emulado é <b>compatível, não rápido</b>: instrução por instrução traduzida custa tempo de CPU, então serve para testar e validar <code>--platform</code>, não para produção. Mãos à obra no exercício 1.2, parte 3.</p>
     </div>
     <div class="slide">
       <h3>Formato Docker × formato OCI</h3>
@@ -1233,6 +1254,53 @@ docker run --rm hello-world</code></pre></div>
       </table></div>
       <p class="note">O formato OCI nasceu do formato Docker, por isso são quase idênticos. Registries e runtimes atuais aceitam os dois.</p>
     </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.2</span><h3>Formato Docker × formato OCI na prática</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Usar <code>docker manifest inspect</code> para enxergar, num registry real, exatamente as peças da tabela acima: o índice multi-plataforma, o manifest de cada plataforma e as camadas. Depois, olhar por dentro da sua própria imagem para ver o mesmo formato Docker gravado em disco, e rodar localmente, via QEMU, cada uma das plataformas do índice inspecionado.</p>
+    <p class="section-label" style="margin-top:6px">Parte 1 · O índice multi-plataforma</p>
+    <ol class="steps">
+      <li><div><p>Peça o manifesto de uma imagem multi-plataforma do Docker Hub. Sem <code>--verbose</code>, o Docker resolve para a plataforma do seu host e mostra só aquele manifest:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker manifest inspect nginx:stable-alpine</code></pre></div>
+<p>Repare no <code>mediaType</code> do manifest (<code>…docker.distribution.manifest.v2+json</code>) e na lista <code>layers</code>, cada uma com seu próprio <code>mediaType</code> (<code>…docker.image.rootfs.diff.tar.gzip</code>) e <code>digest</code>.</p>
+      </div></li>
+      <li><div><p>Agora peça o manifesto <b>sem resolver a plataforma</b>: o <code>--verbose</code> mostra o índice completo, com um manifest por arquitetura:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker manifest inspect --verbose nginx:stable-alpine</code></pre></div>
+<p>O conjunto dessas entradas, uma por <code>Platform.architecture</code>, é a <b>manifest list</b> — o equivalente Docker do <b>image index</b> da OCI. Conte quantas plataformas aparecem.</p>
+      </div></li>
+    </ol>
+    <p class="section-label" style="margin-top:22px">Parte 2 · Sua imagem, o mesmo formato, gravado em disco</p>
+    <ol class="steps" style="counter-reset:s 2">
+      <li><div><p>A imagem do exercício 1.1 ainda não foi para um registry, então <code>docker manifest inspect</code> não a alcança — ele só lê de registries. Para ver o formato Docker <b>local</b>, exporte-a com <code>docker save</code> e liste o conteúdo do tar:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker save "$IMAGE:1.0.0" -o /tmp/site.tar
+tar -tvf /tmp/site.tar</code></pre></div>
+<p>Aparecem um <code>manifest.json</code>, um <code>repositories</code> e um arquivo por camada — exatamente a linha "Em disco" da tabela para o formato Docker, sem <code>oci-layout</code> nem <code>index.json</code>.</p>
+      </div></li>
+      <li><div><p>Abra o <code>manifest.json</code> e confira que ele referencia o <code>Config</code> e a lista de <code>Layers</code> da sua imagem, descritos no mesmo vocabulário do formato Docker que você viu na Parte 1:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>tar -xOf /tmp/site.tar manifest.json | python3 -m json.tool</code></pre></div>
+      </div></li>
+    </ol>
+    <p class="section-label" style="margin-top:22px">Parte 3 · Rodando as duas plataformas do índice, via QEMU</p>
+    <ol class="steps" style="counter-reset:s 4">
+      <li><div><p>Registre os emuladores QEMU no host (uma vez por Codespace):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --privileged --rm tonistiigi/binfmt --install all</code></pre></div>
+      </div></li>
+      <li><div><p><b>Emular a imagem de uma arquitetura ARM64</b> — o manifest <code>linux/arm64</code> do índice, traduzido instrução a instrução pelo QEMU:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --platform linux/arm64 alpine:3.22 uname -m   # → aarch64, emulado</code></pre></div>
+      </div></li>
+      <li><div><p><b>Emular a imagem de uma arquitetura AMD64</b> — o manifest <code>linux/amd64</code> do mesmo índice, nativo na arquitetura do Codespace:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --platform linux/amd64 alpine:3.22 uname -m   # → x86_64, nativo</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li>Sem <code>--verbose</code>: um manifest só, com <code>mediaType</code> <code>docker.distribution.manifest.v2+json</code> e uma lista de <code>layers</code>.</li>
+      <li>Com <code>--verbose</code>: várias entradas, uma por <code>Platform.architecture</code> (ao menos <code>amd64</code> e <code>arm64</code>), cada uma com seu próprio manifest e digest — a manifest list completa.</li>
+      <li><code>tar -tvf</code> lista <code>manifest.json</code>, <code>repositories</code> e um <code>.tar</code> por camada.</li>
+      <li><code>--platform linux/amd64</code> devolve <code>x86_64</code> sem aviso; <code>--platform linux/arm64</code> devolve <code>aarch64</code>, ambos a partir do mesmo índice inspecionado na Parte 1.</li>
+    </ul></div>
+    <div class="tip"><b>Por que não dá pra inspecionar a imagem local direto</b><p><code>docker manifest inspect</code> conversa com a <b>distribution-spec</b> de um registry; uma imagem que só existe no cache local (<code>docker image ls</code>) ainda não tem manifest publicado. É por isso que, no exercício 1.7, depois do <code>docker push</code>, você vai poder rodar <code>docker manifest inspect "$IMAGE:1.0.0"</code> nela também.</p></div>
+    <label class="done"><input type="checkbox" id="ex-1-2"> Exercício 1.2 concluído</label>
   </div>
 </article>
 
@@ -1374,7 +1442,7 @@ docker ps -a --filter name=site      # não deve listar nada</code></pre></div>
       <li><code>docker version</code> mostra <code>Client</code> e <code>Server</code>; o <code>uname -r</code> é igual no host e no container, mas o <code>os-release</code> muda (Ubuntu × Alpine).</li>
       <li>A imagem aparece com a tag <code>1.0.0</code>; o <code>docker ps</code> mostra o container <code>site</code> com <code>0.0.0.0:8080-&gt;80/tcp</code> e <code>(healthy)</code>.</li><li>O <code>curl</code> devolve o HTML da página, que também abre em <code>https://…-8080.app.github.dev</code>; depois do <code>docker rm -f</code>, o container some da lista.</li>
     </ul></div>
-    <div class="tip"><b>Mantenha o terminal aberto</b><p>As variáveis <code>DOCKERHUB_USER</code> e <code>IMAGE</code> são usadas até o exercício 1.6. Se abrir outro terminal, exporte-as de novo.</p></div>
+    <div class="tip"><b>Mantenha o terminal aberto</b><p>As variáveis <code>DOCKERHUB_USER</code> e <code>IMAGE</code> são usadas até o exercício 1.7. Se abrir outro terminal, exporte-as de novo.</p></div>
     <label class="done"><input type="checkbox" id="ex-1-1"> Exercício 1.1 concluído</label>
   </div>
 </article>
@@ -1469,16 +1537,43 @@ ENTRYPOINT [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]</pre></d
     </div>
     <div class="slide">
       <h3>Cache: do que muda menos para o que muda mais</h3>
+      <p>O build compara cada instrução com a do cache. Na <b>primeira</b> camada que mudar (ou cuja anterior já tenha mudado), o Docker para de reaproveitar e reconstrói dali para cima, na ordem do Dockerfile.</p>
       <div class="cols">
-        <div class="card-mini"><h4>Ruim</h4><p><code>COPY . .</code> antes de instalar dependências: qualquer mudança no código invalida o cache e reinstala tudo.</p></div>
-        <div class="card-mini"><h4>Bom</h4><p>Copie primeiro o manifesto de dependências (<code>go.mod</code>, <code>package.json</code>, <code>requirements.txt</code>), instale, e só depois copie o código.</p></div>
+        <div class="card-mini">
+          <h4 style="color:var(--signal)">Ruim: <code>COPY . .</code> antes de instalar</h4>
+          <div class="opt-df"><span>Dockerfile</span><pre>FROM node:20-alpine
+COPY . .
+RUN npm install
+CMD [&quot;node&quot;,&quot;server.js&quot;]</pre></div>
+          <div class="stk" style="margin-top:10px">
+            <div class="L hyp">CMD</div>
+            <div class="L hyp">RUN npm install<small>reinstala tudo de novo</small></div>
+            <div class="L hyp">COPY . .<small>muda a cada commit</small></div>
+            <div class="L app">FROM node:20-alpine<small>cache</small></div>
+          </div>
+        </div>
+        <div class="card-mini">
+          <h4 style="color:var(--ok)">Bom: manifesto antes do código</h4>
+          <div class="opt-df"><span>Dockerfile</span><pre>FROM node:20-alpine
+COPY package.json package-lock.json ./
+RUN npm install
+COPY . .
+CMD [&quot;node&quot;,&quot;server.js&quot;]</pre></div>
+          <div class="stk" style="margin-top:10px">
+            <div class="L hyp">CMD</div>
+            <div class="L hyp">COPY . .<small>muda sempre, mas é rápida</small></div>
+            <div class="L app">RUN npm install<small>cache hit — pulado</small></div>
+            <div class="L app">COPY package*.json<small>só muda com o manifesto</small></div>
+            <div class="L app">FROM node:20-alpine<small>cache</small></div>
+          </div>
+        </div>
       </div>
-      <p class="note">Quando uma camada muda, todas as seguintes são reconstruídas.</p>
+      <p class="note">Nos dois casos o <code>COPY . .</code> muda a cada commit — a diferença é o que está <b>abaixo</b> dele na pilha. No Bom, o <code>npm install</code> já rodou antes de copiar o código e continua em cache; no Ruim, ele é uma camada acima do código e é refeito toda vez.</p>
     </div>
   </div>
   <div class="section-label">Prática</div>
   <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 1.2</span><h3>Dissecando a imagem: configuração, camadas e cache</h3><span class="lab-time">~30 min</span></div>
+    <div class="lab-head"><span class="lab-tag">Exercício 1.3</span><h3>Explorando a imagem: configuração, camadas e cache</h3><span class="lab-time">~30 min</span></div>
     <p class="lab-goal">Abrir a imagem criada no exercício 1.1 para ver na prática a anatomia OCI (tópico 1.4) e o efeito das camadas e do cache no tamanho e no tempo de build.</p>
     <p class="section-label" style="margin-top:6px">Parte 1 · Anatomia da sua imagem</p>
     <ol class="steps">
@@ -1536,7 +1631,7 @@ docker build -t "$IMAGE:1.0.1" .</code></pre></div>
       <li>O <code>docker info</code> mostra <code>overlayfs</code> com <code>driver-type: io.containerd.snapshotter.v1</code> (containerd image store) ou <code>overlay2</code> (driver clássico).</li><li><code>camadas:ruim</code> tem cerca de 60 MB; <code>camadas:bom</code> fica no tamanho do Alpine.</li>
       <li>No último build, só o <code>COPY</code> em diante é refeito; o resto vem do cache.</li>
     </ul></div>
-    <label class="done"><input type="checkbox" id="ex-1-2"> Exercício 1.2 concluído</label>
+    <label class="done"><input type="checkbox" id="ex-1-3"> Exercício 1.3 concluído</label>
   </div>
 </article>
 
@@ -1565,7 +1660,7 @@ docker build -t "$IMAGE:1.0.1" .</code></pre></div>
   </div>
   <div class="section-label">Prática</div>
   <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 1.3</span><h3>Validando Dockerfiles com Hadolint</h3><span class="lab-time">~20 min</span></div>
+    <div class="lab-head"><span class="lab-tag">Exercício 1.4</span><h3>Validando Dockerfiles com Hadolint</h3><span class="lab-time">~20 min</span></div>
     <p class="lab-goal">Validar o Dockerfile do exercício 1.1, depois corrigir um Dockerfile cheio de más práticas até o Hadolint aprovar.</p>
     <ol class="steps">
       <li><div><p>Valide o Dockerfile que você já criou:</p>
@@ -1601,7 +1696,7 @@ docker build -t lint-ok . &amp;&amp; docker run --rm lint-ok</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>O Dockerfile do site passa (ou só gera avisos informativos).</li><li>O Dockerfile problemático aponta, entre outras, <code>DL3007</code>, <code>DL4000</code>, <code>DL3008</code>, <code>DL3009</code>, <code>DL3015</code>, <code>DL3020</code>, <code>DL3025</code> e <code>DL3059</code>.</li><li>A versão corrigida imprime “Dockerfile OK” e o container mostra <code>ola, containers</code>.</li></ul></div>
-    <label class="done"><input type="checkbox" id="ex-1-3"> Exercício 1.3 concluído</label>
+    <label class="done"><input type="checkbox" id="ex-1-4"> Exercício 1.4 concluído</label>
   </div>
 </article>
 
@@ -1696,6 +1791,37 @@ docker build -t lint-ok . &amp;&amp; docker run --rm lint-ok</code></pre></div>
       <p class="note">Imagens construídas com apko (como as do <code>image-base</code> e da pesquisa) geram SBOM automaticamente a cada build.</p>
     </div>
     <div class="slide">
+      <h3>A mesma ideia, numa caixa de cereal</h3>
+      <p>O rótulo de informação nutricional de uma embalagem já resolve, há décadas, o mesmo problema do SBOM: dizer exatamente o que tem dentro, para quem precisa decidir algo a partir disso.</p>
+      <div class="mp dxo">
+        <div class="mp-col">
+          <div class="stk-t" style="display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 34 34" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><rect x="4" y="8" width="26" height="22" rx="1.5" stroke-width="2.2"/><path d="M4 8L17 3L30 8" stroke-width="1.8"/><rect x="10" y="14" width="14" height="11" rx="1" stroke-width="1.4" stroke="var(--signal)"/><path d="M12.5 17.5h9M12.5 20.5h9M12.5 23.5h6" stroke-width="1.2"/></svg>Rótulo da caixa de cereal</div>
+          <div class="dx-dl">
+            <div class="dx-k">Identificação</div><div class="dx-v">Nome do produto, marca e lote</div>
+            <div class="dx-k">Lista de itens</div><div class="dx-v">Ingredientes, em ordem decrescente de quantidade</div>
+            <div class="dx-k">Quantidade</div><div class="dx-v">Gramas e % VD por porção</div>
+            <div class="dx-k">Origem</div><div class="dx-v">Fabricante, CNPJ, país de origem</div>
+            <div class="dx-k">Alerta</div><div class="dx-v">"Contém glúten", "contém leite"</div>
+            <div class="dx-k">Validade</div><div class="dx-v">Data de fabricação e validade</div>
+            <div class="dx-k">Selo</div><div class="dx-v">Registro ANVISA/Inmetro no rótulo</div>
+          </div>
+        </div>
+        <div class="mp-col oci">
+          <div class="stk-t" style="display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 34 34" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><rect x="2" y="7" width="30" height="20" rx="1.5" stroke-width="2.2"/><path d="M2 10.5h30M2 23.5h30" stroke-width="1.4"/><path d="M7 12.5v9M11 12.5v9M15 12.5v9M19 12.5v9" stroke-width="1.8"/><path d="M23.5 10.5v13" stroke-width="1.4"/><path d="M26.5 12.5v9M29 12.5v9" stroke-width="1.8" stroke="var(--signal)"/></svg>SBOM da imagem</div>
+          <div class="dx-dl">
+            <div class="dx-k">Identificação</div><div class="dx-v">Nome:tag da imagem e digest <code>sha256</code></div>
+            <div class="dx-k">Lista de itens</div><div class="dx-v">Componentes: pacotes do SO e bibliotecas da aplicação</div>
+            <div class="dx-k">Quantidade</div><div class="dx-v">Versão exata de cada componente</div>
+            <div class="dx-k">Origem</div><div class="dx-v">Fornecedor de cada pacote (campo <code>purl</code>)</div>
+            <div class="dx-k">Alerta</div><div class="dx-v">CVEs conhecidas por componente</div>
+            <div class="dx-k">Validade</div><div class="dx-v">Data de geração do SBOM</div>
+            <div class="dx-k">Selo</div><div class="dx-v">Assinatura e proveniência (Sigstore/cosign, SLSA)</div>
+          </div>
+        </div>
+      </div>
+      <p class="note">A pergunta que o rótulo responde é sempre a mesma, só muda o produto: <b>"isso é seguro para eu consumir?"</b>. Um recall de lote de alimento é o mesmo gesto que um alerta de CVE: olhar o rótulo/SBOM de tudo que está em uso e achar quem tem aquele item.</p>
+    </div>
+    <div class="slide">
       <h3>Trivy: scan de vulnerabilidades</h3>
       <div class="cols">
         <div class="card-mini"><h4>O que encontra</h4><ul><li>CVEs em pacotes do SO e bibliotecas da aplicação</li><li>Misconfigurações (Dockerfile, Kubernetes, Terraform)</li><li>Segredos expostos e licenças</li></ul></div>
@@ -1705,7 +1831,7 @@ docker build -t lint-ok . &amp;&amp; docker run --rm lint-ok</code></pre></div>
   </div>
   <div class="section-label">Prática</div>
   <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 1.4</span><h3>Medindo o problema: reproduzindo a pesquisa com Trivy</h3><span class="lab-time">~25 min</span></div>
+    <div class="lab-head"><span class="lab-tag">Exercício 1.5</span><h3>Medindo o problema: reproduzindo a pesquisa com Trivy</h3><span class="lab-time">~25 min</span></div>
     <p class="lab-goal">Antes de otimizar, medir. Comparar tamanho, pacotes e vulnerabilidades de imagens base, avaliar a sua própria imagem, usar o Trivy como gate de pipeline e gerar o SBOM da imagem.</p>
     <ol class="steps">
       <li><div><p>Crie um alias para o Trivy (via container, com cache persistente):</p>
@@ -1738,7 +1864,7 @@ python3 -c "import json; d=json.load(open('$HOME/labs/sbom-site.json')); c=d['co
       <li>Wolfi e Alpine têm poucas dezenas de pacotes; Ubuntu e Debian, mais de cem.</li>
       <li><code>python:3.4-alpine</code> retorna exit <code>1</code>: num pipeline, o build seria barrado.</li><li>O SBOM lista dezenas de componentes da sua imagem com versão; é com ele que se responde “estamos afetados?” quando sai uma CVE nova.</li>
     </ul></div>
-    <label class="done"><input type="checkbox" id="ex-1-4"> Exercício 1.4 concluído</label>
+    <label class="done"><input type="checkbox" id="ex-1-5"> Exercício 1.5 concluído</label>
   </div>
 </article>
 
@@ -1783,7 +1909,7 @@ python3 -c "import json; d=json.load(open('$HOME/labs/sbom-site.json')); c=d['co
   </div>
   <div class="section-label">Prática</div>
   <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 1.5</span><h3>Resolvendo: da imagem grande à distroless</h3><span class="lab-time">~35 min</span></div>
+    <div class="lab-head"><span class="lab-tag">Exercício 1.6</span><h3>Resolvendo: da imagem grande à distroless</h3><span class="lab-time">~35 min</span></div>
     <p class="lab-goal">Construir a mesma aplicação Go em estágio único e em multi-stage com distroless, e provar a diferença com os números e com o Trivy. Guarde esta pasta: a aplicação volta na Aula 04.</p>
     <ol class="steps">
       <li><div><p>Crie a aplicação (responde em <code>/</code> e <code>/healthz</code> e trata SIGTERM):</p>
@@ -1869,7 +1995,7 @@ docker exec -it go1 sh                                  # deve falhar
 docker image inspect app-go:v1 -f 'User={{.Config.User}}'
 docker stop go1 &amp;&amp; docker logs go1 | tail -2 &amp;&amp; docker rm go1</code></pre></div>
       </div></li>
-      <li><div><p>Prove com o Trivy (alias do exercício 1.4):</p>
+      <li><div><p>Prove com o Trivy (alias do exercício 1.5):</p>
 <div class="code"><span class="lang">terminal</span><pre><code>for i in app-go:single app-go:v1; do echo "== $i"; trivy image --quiet --scanners vuln $i | grep -E '^Total' | head -3; done
 trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet app-go:v1 &gt; /dev/null; echo "app-go:v1 → exit $?"</code></pre></div>
       </div></li>
@@ -1880,7 +2006,7 @@ trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet app-go:v1 &gt; /dev/n
       <li>O Trivy encontra bem menos vulnerabilidades na distroless, e o gate passa com exit <code>0</code>.</li>
     </ul></div>
     <div class="challenge"><b>Desafio</b><p>Reproduza o lab de apko + melange do repositório <a href="https://github.com/gersontpc/kubeautoday-talk" target="_blank" rel="noopener">kubeautoday-talk</a>: uma imagem Python distroless multi-arquitetura, sem Dockerfile, com 1 camada. Ou troque a base final por <code>scratch</code> e descubra o que se perde.</p></div>
-    <label class="done"><input type="checkbox" id="ex-1-5"> Exercício 1.5 concluído</label>
+    <label class="done"><input type="checkbox" id="ex-1-6"> Exercício 1.6 concluído</label>
   </div>
 </article>
 
@@ -1928,7 +2054,7 @@ trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet app-go:v1 &gt; /dev/n
   </div>
   <div class="section-label">Prática</div>
   <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 1.6</span><h3>Publicando no Docker Hub, inclusive multi-plataforma</h3><span class="lab-time">~35 min</span></div>
+    <div class="lab-head"><span class="lab-tag">Exercício 1.7</span><h3>Publicando no Docker Hub, inclusive multi-plataforma</h3><span class="lab-time">~35 min</span></div>
     <p class="lab-goal">Fechar o ciclo da imagem: publicar com uma estratégia de tags, conferir os digests, executar a partir do registry e gerar uma versão para <code>amd64</code> e <code>arm64</code> (o índice OCI do tópico 1.2).</p>
     <p class="section-label" style="margin-top:6px">Parte 1 · Tags e push</p>
     <ol class="steps">
@@ -1971,7 +2097,7 @@ docker buildx imagetools inspect "$IMAGE:1.1.0"</code></pre></div>
       <li>Com <code>--platform linux/arm64</code> a saída é <code>aarch64</code>, e a <code>1.1.0</code> é um índice com manifests <code>linux/amd64</code> e <code>linux/arm64</code>.</li>
     </ul></div>
     <div class="tip"><b>Dica</b><p>Para não digitar o token, crie os secrets <code>DOCKERHUB_USER</code> e <code>DOCKERHUB_TOKEN</code> em Settings → Codespaces e use <code>echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin</code>. Entregue o link do repositório no portal.</p></div>
-    <label class="done"><input type="checkbox" id="ex-1-6"> Exercício 1.6 concluído</label>
+    <label class="done"><input type="checkbox" id="ex-1-7"> Exercício 1.7 concluído</label>
   </div>
 </article>
 
@@ -1984,7 +2110,7 @@ docker buildx imagetools inspect "$IMAGE:1.1.0"</code></pre></div>
       <h3>Para aprofundar</h3>
       <div class="cols">
         <div class="card-mini"><h4>Padrões</h4><ul>
-          <li id="ref-semver"><a href="https://semver.org/lang/pt-BR/" target="_blank" rel="noopener">Semantic Versioning (SemVer)</a>: <code>vMAJOR.MINOR.PATCH</code>. Nas tags de imagem, some o SHA curto do commit: <code>v1.0.0-3123a51</code></li>
+          <li id="ref-semver"><a href="https://semver.org/lang/pt-BR/" target="_blank" rel="noopener">Semantic Versioning (SemVer)</a></li>
           <li><a href="https://www.conventionalcommits.org/pt-br/v1.0.0/" target="_blank" rel="noopener">Conventional Commits (semantic commit)</a></li>
           <li><a href="https://github.com/opencontainers/image-spec" target="_blank" rel="noopener">OCI image-spec</a></li>
           <li><a href="https://github.com/opencontainers/runtime-spec" target="_blank" rel="noopener">OCI runtime-spec</a></li>
@@ -2007,7 +2133,6 @@ docker buildx imagetools inspect "$IMAGE:1.1.0"</code></pre></div>
           <li><a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener">runc</a></li>
         </ul></div>
         <div class="card-mini"><h4>Repositórios da disciplina</h4><ul>
-          <li><a href="https://github.com/gersontpc/containers" target="_blank" rel="noopener">gersontpc/containers</a></li>
           <li><a href="https://github.com/gersontpc/image-base" target="_blank" rel="noopener">gersontpc/image-base</a></li>
           <li><a href="https://github.com/gersontpc/kubeautoday-talk" target="_blank" rel="noopener">gersontpc/kubeautoday-talk</a></li>
         </ul></div>
@@ -2028,7 +2153,6 @@ docker buildx imagetools inspect "$IMAGE:1.1.0"</code></pre></div>
     <p class="lead">Da imagem ao container em execução, na ordem do Docker: imagem → container → network → volume, com logs, Docker Compose e uma introdução ao Docker Swarm.</p>
     <div class="meta"><span class="chip">7 tópicos</span><span class="chip">6 exercícios</span><span class="chip">docker run · network · volume · Compose · Swarm</span><span class="chip chip-gh">GitHub Codespaces</span></div>
   </div>
-  <div><button class="btn" type="button" data-present><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="9" rx="1"/><path d="M5 14.5h6M8 11.5v3"/></svg>Apresentar aula</button></div>
 </div>
 <div class="aula-body">
 <nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
@@ -2740,7 +2864,6 @@ for i in $(seq 6); do curl -s localhost:8084 | grep Hostname; done</code></pre><
     <p class="lead">Do “rodar containers” para “manter o estado desejado”: o que um orquestrador faz, o Amazon ECS com Fargate na conta do AWS Academy e, na sequência, a arquitetura do Kubernetes com Deployments, Services e Ingress num cluster local.</p>
     <div class="meta"><span class="chip">6 tópicos</span><span class="chip">5 exercícios</span><span class="chip">ECS · Fargate · ECR · k3d · kubectl</span><span class="chip">AWS Academy Learner Lab</span><span class="chip chip-gh">GitHub Codespaces</span></div>
   </div>
-  <div><button class="btn" type="button" data-present><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="9" rx="1"/><path d="M5 14.5h6M8 11.5v3"/></svg>Apresentar aula</button></div>
 </div>
 <div class="aula-body">
 <nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
@@ -2966,7 +3089,7 @@ code ~/.aws/credentials      # cole o bloco [default] do Learner Lab e salve
 export AWS_REGION=us-east-1 AWS_DEFAULT_REGION=us-east-1
 aws sts get-caller-identity</code></pre></div>
       </div></li>
-      <li><div><p>Crie o repositório no ECR e publique a imagem da app Go (exercício 1.5):</p>
+      <li><div><p>Crie o repositório no ECR e publique a imagem da app Go (exercício 1.6):</p>
 <div class="code"><span class="lang">terminal</span><pre><code>ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 REGISTRY=$ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com
 REPO=$REGISTRY/app-go
@@ -3715,12 +3838,11 @@ for i in $(seq 50); do curl -s -H "Host: canary.localhost" localhost:8081 | grep
     <p class="lead">O que separa um cluster de laboratório de um ambiente produtivo: saúde dos Pods, recursos e autoescala, deploy sem downtime, troubleshooting de imagens distroless e o Kubernetes gerenciado da AWS.</p>
     <div class="meta"><span class="chip">5 tópicos</span><span class="chip">5 exercícios</span><span class="chip">k3d · HPA · eksctl</span><span class="chip chip-gh">GitHub Codespaces</span></div>
   </div>
-  <div><button class="btn" type="button" data-present><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="9" rx="1"/><path d="M5 14.5h6M8 11.5v3"/></svg>Apresentar aula</button></div>
 </div>
 <div class="aula-body">
 <nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
 <div class="topicos">
-<div class="warn" style="margin-bottom:28px"><b>Antes de começar</b><p>Os exercícios usam o cluster <code>labs</code> da Aula 03 e a aplicação Go do exercício 1.5. Se recriou o codespace, rode <code>k3d cluster create labs --agents 2 -p "8081:80@loadbalancer" --wait</code> e refaça o passo 1 do exercício 1.5.</p></div>
+<div class="warn" style="margin-bottom:28px"><b>Antes de começar</b><p>Os exercícios usam o cluster <code>labs</code> da Aula 03 e a aplicação Go do exercício 1.6. Se recriou o codespace, rode <code>k3d cluster create labs --agents 2 -p "8081:80@loadbalancer" --wait</code> e refaça o passo 1 do exercício 1.6.</p></div>
 <!-- 4.1 -->
 <article class="topico" id="a4-t1">
   <div class="topico-head"><span class="topico-num">4.1</span><h2>Health checks: probes</h2></div>
@@ -3909,7 +4031,7 @@ kubectl get hpa php-apache -w</code></pre></div>
   <div class="section-label">Prática</div>
   <div class="lab">
     <div class="lab-head"><span class="lab-tag">Exercício 4.3</span><h3>Rollout sem erro com a app Go</h3><span class="lab-time">~35 min</span></div>
-    <p class="lab-goal">Levar a imagem distroless do exercício 1.5 para o cluster, trocar de versão sob tráfego contínuo sem nenhum erro e drenar um nó respeitando o PDB.</p>
+    <p class="lab-goal">Levar a imagem distroless do exercício 1.6 para o cluster, trocar de versão sob tráfego contínuo sem nenhum erro e drenar um nó respeitando o PDB.</p>
     <ol class="steps">
       <li><div><p>Importe a imagem para o k3d (sem registry):</p>
 <div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/app-go &amp;&amp; docker build -t app-go:v1 .
@@ -4227,6 +4349,7 @@ docker system prune --all --volumes --force</code></pre></div>
   /* Abas */
   var tabs=[].slice.call(document.querySelectorAll('.tab'));
   var panels=[].slice.call(document.querySelectorAll('.panel'));
+  var presentBtn=document.getElementById('presentBtn');
   function show(id,scroll){
     if(!document.getElementById(id)) id='inicio';
     panels.forEach(function(p){p.hidden=p.dataset.panel!==id});
@@ -4234,6 +4357,7 @@ docker system prune --all --volumes --force</code></pre></div>
     store.set('ct-tab',id);
     if(location.hash!=='#'+id) history.replaceState(null,'','#'+id);
     if(scroll!==false) window.scrollTo(0,0);
+    presentBtn.hidden=id==='inicio';
   }
   tabs.forEach(function(t){t.addEventListener('click',function(){show(t.dataset.tab)})});
   document.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();show(b.dataset.go)})});
@@ -4252,7 +4376,9 @@ docker system prune --all --volumes --force</code></pre></div>
       a.addEventListener('click',function(e){e.preventDefault();tp.scrollIntoView({behavior:'smooth',block:'start'})});
       li.appendChild(a); ol.appendChild(li);
     });
-    var labs=panel.querySelectorAll('.lab');
+    var labs=[].slice.call(panel.querySelectorAll('.lab')).sort(function(a,b){
+      return parseFloat(a.querySelector('.lab-tag').textContent.replace(/[^0-9.]/g,''))-parseFloat(b.querySelector('.lab-tag').textContent.replace(/[^0-9.]/g,''));
+    });
     if(labs.length){
       var hb=document.createElement('b');hb.className='toc-exh';hb.textContent='Exercícios';
       var ul=document.createElement('ul');ul.className='toc-ex';
@@ -4329,7 +4455,8 @@ docker system prune --all --volumes --force</code></pre></div>
         d.push({cls:'practice',html:'<div class="hp">Hora de praticar!!!</div>'+
           '<div class="hp-grid"><div class="hp-k">Laboratório</div><div class="hp-v"><b>'+tag+'</b> · '+ttl+'</div>'+
           '<div class="hp-k">Objetivo</div><div class="hp-v hp-goal">'+goal+'</div></div>'+
-          '<div class="hp-meta">'+(tm?'<span>⏱ '+tm+'</span>':'')+'<span>'+nsteps+' passos</span><span>GitHub Codespaces</span></div>',t:tag+' · Hora de praticar',lab:l});
+          '<div class="hp-meta">'+(tm?'<span>⏱ '+tm+'</span>':'')+'<span>'+nsteps+' passos</span><span>GitHub Codespaces</span></div>'+
+          '<div class="hp-actions"><button type="button" class="btn" data-goto-lab><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg>Ir para o exercício</button></div>',t:tag+' · Hora de praticar',lab:l});
       });
     });
     return d;
@@ -4349,12 +4476,36 @@ docker system prune --all --volumes --force</code></pre></div>
     document.getElementById('presTitle').textContent=s.t;
     document.getElementById('presCount').textContent=(idx+1)+' / '+deck.length;
     document.getElementById('presBar').style.width=((idx+1)/deck.length*100)+'%';
+    var atEnd=idx===deck.length-1;
+    var nextBtn=document.getElementById('presNext');
+    nextBtn.textContent=atEnd?'Encerrar':'Próximo →';
+    nextBtn.classList.toggle('end',atEnd);
   }
   function open(panel){deck=buildDeck(panel);idx=0;lastFocus=document.activeElement;pres.hidden=false;document.body.style.overflow='hidden';render();document.getElementById('presNext').focus()}
   function close(){pres.hidden=true;document.body.style.overflow='';try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){} if(lastFocus)lastFocus.focus()}
   function go(n){idx=Math.max(0,Math.min(deck.length-1,idx+n));render()}
-  document.querySelectorAll('[data-present]').forEach(function(b){b.addEventListener('click',function(){open(b.closest('.panel'))})});
-  document.getElementById('presNext').addEventListener('click',function(){go(1)});
+  function resumeToLab(l){
+    var panel=l.closest('.panel'); if(!panel) return;
+    var d=buildDeck(panel),i=0;
+    d.forEach(function(s,ix){if(s.lab===l)i=ix});
+    deck=d;idx=i;lastFocus=document.activeElement;pres.hidden=false;document.body.style.overflow='hidden';render();document.getElementById('presNext').focus();
+  }
+  function flashScrollTo(el){el.scrollIntoView({behavior:'smooth',block:'start'});el.classList.add('flash');setTimeout(function(){el.classList.remove('flash')},1600)}
+  frame.addEventListener('click',function(e){
+    var b=e.target.closest('[data-goto-lab]'); if(!b) return;
+    var s=deck[idx]; if(!s||!s.lab) return;
+    close(); flashScrollTo(s.lab);
+  });
+  document.querySelectorAll('.lab').forEach(function(l){
+    var doneLabel=l.querySelector('.done'); if(!doneLabel) return;
+    var btn=document.createElement('button');
+    btn.type='button'; btn.className='btn lab-back';
+    btn.innerHTML='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 8H3M7 4L3 8l4 4"/></svg>Voltar ao slide';
+    btn.addEventListener('click',function(){resumeToLab(l)});
+    doneLabel.insertAdjacentElement('afterend',btn);
+  });
+  presentBtn.addEventListener('click',function(){open(document.querySelector('.panel[data-panel^="aula"]:not([hidden])'))});
+  document.getElementById('presNext').addEventListener('click',function(){idx===deck.length-1?close():go(1)});
   document.getElementById('presPrev').addEventListener('click',function(){go(-1)});
   document.getElementById('presClose').addEventListener('click',close);
   document.getElementById('presFs').addEventListener('click',function(){try{var p=document.fullscreenElement?document.exitFullscreen():pres.requestFullscreen();if(p&&p.catch)p.catch(function(){})}catch(e){}});
