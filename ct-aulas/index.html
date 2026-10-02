@@ -2459,7 +2459,7 @@ ip -brief addr</code></pre></div>
     <p class="hyp"><b>Hipótese</b> Com <code>--network none</code> o container fica <b>totalmente isolado</b>: só existe o loopback.</p>
     <ol class="steps" style="counter-reset:s 8">
       <li><div><p>Rode um container sem rede e tente sair:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network none alpine:3.22 ip -brief addr
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network none alpine:3.22 ip addr
 docker run --rm --network none alpine:3.22 ping -c2 -W2 8.8.8.8</code></pre></div>
       </div></li>
     </ol>
