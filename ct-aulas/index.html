@@ -2409,7 +2409,7 @@ docker network ls
 docker inspect -f '{{.NetworkSettings.IPAddress}}' a1 a2</code></pre></div>
       </div></li>
       <li><div><p>Teste a comunicação pelo IP e pelo nome:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 $(docker inspect -f '{{.NetworkSettings.IPAddress}}' a2)
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 $(docker inspect -f '{{.NetworkSettings.Networks.bridge.IPAddress}}' a2)
 docker exec a1 ping -c2 a2</code></pre></div>
       </div></li>
       <li><div><p>Teste a saída para a internet e o acesso a partir do host sem publicar porta:</p>
