@@ -819,7 +819,6 @@ td code{white-space:nowrap}
       <button class="tab" role="tab" data-tab="aula-1">Aula 01 <span class="prog"></span></button>
       <button class="tab" role="tab" data-tab="aula-2">Aula 02 <span class="prog"></span></button>
       <button class="tab" role="tab" data-tab="aula-3">Aula 03 <span class="prog"></span></button>
-      <button class="tab" role="tab" data-tab="aula-4">Aula 04 <span class="prog"></span></button>
     </nav>
     <button class="btn" id="presentBtn" type="button" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="9" rx="1"/><path d="M5 14.5h6M8 11.5v3"/></svg>Apresentar aula</button>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Alternar tema">Tema</button>
@@ -840,7 +839,6 @@ td code{white-space:nowrap}
     <button data-go="aula-1"><span class="n">AULA 01</span><h3>Tudo começa na imagem</h3><p>VM × container, OCI, runtimes, anatomia da imagem, Dockerfile, camadas, Hadolint, multi-stage, Trivy, tags e Docker Hub.</p></button>
     <button data-go="aula-2"><span class="n">AULA 02</span><h3>Containers, redes e volumes</h3><p>Arquitetura do Docker, comandos do dia a dia, networks, volumes, log drivers, Compose e Swarm.</p></button>
     <button data-go="aula-3"><span class="n">AULA 03</span><h3>Orquestração de containers</h3><p>Orquestradores, Amazon ECS com Fargate e ECR, arquitetura do Kubernetes, Deployments, Services e Ingress.</p></button>
-    <button data-go="aula-4"><span class="n">AULA 04</span><h3>Produção e EKS</h3><p>Probes, recursos, HPA, rollouts sem downtime, troubleshooting e Amazon EKS.</p></button>
   </div>
 
   <div class="section-label">Como praticar nesta disciplina</div>
@@ -4844,7 +4842,7 @@ EOF</code></pre></div>
   var panels=[].slice.call(document.querySelectorAll('.panel'));
   var presentBtn=document.getElementById('presentBtn');
   function show(id,scroll){
-    if(!document.getElementById(id)) id='inicio';
+    if(!document.getElementById(id)||!document.querySelector('.tab[data-tab="'+id+'"]')) id='inicio';
     panels.forEach(function(p){p.hidden=p.dataset.panel!==id});
     tabs.forEach(function(t){t.setAttribute('aria-selected',t.dataset.tab===id?'true':'false')});
     store.set('ct-tab',id);
