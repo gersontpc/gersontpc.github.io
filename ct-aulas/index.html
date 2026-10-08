@@ -117,6 +117,54 @@ main{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:32px 80px}
 .slides{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-bottom:26px}
 .slide{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px 28px;position:relative;min-width:0}
 .slide>h3{font-size:24px;font-weight:700;margin-bottom:14px;padding-right:70px}
+.cpd{border:1.5px dashed var(--accent);border-radius:10px;padding:30px 18px 18px;position:relative;min-width:0}
+.cpd-label{position:absolute;top:-10px;left:14px;background:var(--surface);padding:0 8px;font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.cpd-row{display:flex;align-items:flex-start;justify-content:center;gap:14px}
+.cpd-col{display:flex;flex-direction:column;align-items:stretch;flex:1;min-width:0}
+.cpd-svc{border:1.5px solid var(--ink);border-radius:8px;background:var(--surface-2);padding:10px 14px;text-align:center;min-width:0}
+.cpd-svc.hl{border-color:var(--accent);background:var(--accent-soft)}
+.cpd-svc.cand{border-color:var(--signal);background:var(--signal-soft)}
+.cpd-svc.down{opacity:.5;border-style:dashed;border-color:var(--muted);background:var(--surface-2)}
+.cpd-row{flex-wrap:wrap}
+.cpd-row>.cpd-svc,.cpd-row>.cpd-worker{flex:1}
+.cpd-anim{position:relative;min-height:190px}
+.cpd-frame{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;opacity:0;animation:cpdFade 16s infinite}
+.cpd-frame .cpd-row{margin-bottom:10px}
+.cpd-frame .cpd-ext{margin-top:2px}
+@keyframes cpdFade{0%{opacity:0}3%{opacity:1}22%{opacity:1}27%{opacity:0}100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.cpd-frame{animation:none!important;opacity:0}.cpd-frame:first-child{opacity:1}}
+.cpd-worker{display:flex;flex-direction:column;align-items:stretch;gap:6px;border:1.5px solid var(--ink);border-radius:8px;background:var(--surface-2);padding:10px;flex:1;min-width:0}
+.cpd-worker b{font:700 14px var(--f-mono);text-align:center}
+.cpd-worker small{display:block;color:var(--muted);font-size:11px;text-align:center}
+.cpd-ctr{border:1.5px solid var(--accent);border-radius:6px;background:var(--surface);padding:6px 8px;text-align:center;transition:border-color .3s,background .3s}
+.cpd-ctr b{display:block;font:700 12px var(--f-mono)}
+.cpd-ctr small{color:var(--muted);font-size:10px}
+.cpd-ctr.hit{border-color:var(--ok);background:var(--ok-soft)}
+.cpd-diagram{position:relative}
+.cpd-dot{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 5px var(--ok-soft);z-index:5;transition:top .5s ease,left .5s ease}
+.cpd-dot.raft{background:var(--signal);box-shadow:0 0 0 5px var(--signal-soft)}
+.cpd-dot[hidden]{display:none}
+.cpd-play-row{text-align:center;margin-top:14px}
+.cpd-play-row .btn[disabled]{opacity:.5;cursor:default}
+.cpd-svc b{display:block;font:700 14px var(--f-mono)}
+.cpd-svc small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.cpd-ar{flex:none;text-align:center;font:600 18px var(--f-mono);color:var(--muted);margin-top:14px}
+.cpd-ar small{display:block;font:500 10px var(--f-mono);color:var(--muted);margin-top:2px}
+.cpd-ar-v{text-align:center;font:600 13px var(--f-mono);color:var(--muted);line-height:1;margin:3px 0}
+.cpd-vol{border:1.5px dashed var(--signal);border-radius:6px;padding:5px 6px;text-align:center;font:500 11px var(--f-mono);color:var(--signal);background:var(--signal-soft)}
+.cpd-top{display:flex;align-items:flex-end;justify-content:center;gap:14px;margin-bottom:10px}
+.cpd-user{border:1.5px solid var(--accent);border-radius:8px;background:var(--accent-soft);padding:8px 12px;text-align:center}
+.cpd-user,.cpd-user small{font:700 13px var(--f-mono);color:var(--accent)}
+.cpd-user small{display:block;font-weight:500;font-size:11px;margin-top:2px}
+.cpd-ext{text-align:center;margin-top:16px;font:500 12px var(--f-mono);color:var(--muted)}
+.slide.divider{border-left:4px solid var(--signal);display:flex;flex-direction:column;justify-content:center;min-height:260px;padding-left:40px}
+.slide.divider .dv-eyebrow{font:600 11px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--signal);margin-bottom:14px}
+.slide.divider h3{font-family:var(--f-display);font-stretch:68%;font-weight:800;text-transform:uppercase;font-size:clamp(32px,4.8vw,52px);line-height:.95;color:var(--ink);margin-bottom:16px;padding-right:0}
+.slide.divider p{max-width:62ch;color:var(--muted);font-size:16px}
+.pres-frame .slide.divider{border-left-width:1.2cqw;padding-left:5cqw}
+.pres-frame .slide.divider .dv-eyebrow{font-size:1.15cqw;margin-bottom:1.4cqw}
+.pres-frame .slide.divider h3{font-size:7cqw}
+.pres-frame .slide.divider p{font-size:1.9cqw;max-width:70%}
 .slide .sn{position:absolute;top:22px;right:24px;font:500 11px var(--f-mono);color:var(--muted)}
 .slide p{margin:0 0 12px;max-width:72ch}
 .slide ul,.slide ol{margin:0 0 12px;padding-left:20px}
@@ -770,8 +818,8 @@ td code{white-space:nowrap}
       <button class="tab" role="tab" data-tab="inicio">Início</button>
       <button class="tab" role="tab" data-tab="aula-1">Aula 01 <span class="prog"></span></button>
       <button class="tab" role="tab" data-tab="aula-2">Aula 02 <span class="prog"></span></button>
-      <button class="tab" role="tab" data-tab="aula-3" hidden>Aula 03 <span class="prog"></span></button>
-      <button class="tab" role="tab" data-tab="aula-4" hidden>Aula 04 <span class="prog"></span></button>
+      <button class="tab" role="tab" data-tab="aula-3">Aula 03 <span class="prog"></span></button>
+      <button class="tab" role="tab" data-tab="aula-4">Aula 04 <span class="prog"></span></button>
     </nav>
     <button class="btn" id="presentBtn" type="button" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="9" rx="1"/><path d="M5 14.5h6M8 11.5v3"/></svg>Apresentar aula</button>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Alternar tema">Tema</button>
@@ -791,8 +839,8 @@ td code{white-space:nowrap}
   <div class="roadmap">
     <button data-go="aula-1"><span class="n">AULA 01</span><h3>Tudo começa na imagem</h3><p>VM × container, OCI, runtimes, anatomia da imagem, Dockerfile, camadas, Hadolint, multi-stage, Trivy, tags e Docker Hub.</p></button>
     <button data-go="aula-2"><span class="n">AULA 02</span><h3>Containers, redes e volumes</h3><p>Arquitetura do Docker, comandos do dia a dia, networks, volumes, log drivers, Compose e Swarm.</p></button>
-    <button data-go="aula-3" hidden><span class="n">AULA 03</span><h3>Orquestração de containers</h3><p>Orquestradores, Amazon ECS com Fargate e ECR, arquitetura do Kubernetes, Deployments, Services e Ingress.</p></button>
-    <button data-go="aula-4" hidden><span class="n">AULA 04</span><h3>Produção e EKS</h3><p>Probes, recursos, HPA, rollouts sem downtime, troubleshooting e Amazon EKS.</p></button>
+    <button data-go="aula-3"><span class="n">AULA 03</span><h3>Orquestração de containers</h3><p>Orquestradores, Amazon ECS com Fargate e ECR, arquitetura do Kubernetes, Deployments, Services e Ingress.</p></button>
+    <button data-go="aula-4"><span class="n">AULA 04</span><h3>Produção e EKS</h3><p>Probes, recursos, HPA, rollouts sem downtime, troubleshooting e Amazon EKS.</p></button>
   </div>
 
   <div class="section-label">Como praticar nesta disciplina</div>
@@ -1272,9 +1320,10 @@ docker run --rm hello-world</code></pre></div>
     </ol>
     <p class="section-label" style="margin-top:22px">Parte 2 · Sua imagem, o mesmo formato, gravado em disco</p>
     <ol class="steps" style="counter-reset:s 2">
-      <li><div><p>A imagem do exercício 1.1 ainda não foi para um registry, então <code>docker manifest inspect</code> não a alcança — ele só lê de registries. Para ver o formato Docker <b>local</b>, exporte-a com <code>docker save</code> e liste o conteúdo do tar:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker save "$IMAGE:1.0.0" -o /tmp/site.tar
-tar -tvf /tmp/site.tar</code></pre></div>
+      <li><div><p>A imagem do exercício 1.1 ainda não foi para um registry, então <code>docker manifest inspect</code> não a alcança — ele só lê de registries. Para ver o formato Docker <b>local</b>, exporte-a com <code>docker save</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker save "$IMAGE:1.0.0" -o /tmp/site.tar</code></pre></div>
+<p>Agora liste o conteúdo do tar:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>tar -tvf /tmp/site.tar</code></pre></div>
 <p>Aparecem um <code>manifest.json</code>, um <code>repositories</code> e um arquivo por camada — exatamente a linha "Em disco" da tabela para o formato Docker, sem <code>oci-layout</code> nem <code>index.json</code>.</p>
       </div></li>
       <li><div><p>Abra o <code>manifest.json</code> e confira que ele referencia o <code>Config</code> e a lista de <code>Layers</code> da sua imagem, descritos no mesmo vocabulário do formato Docker que você viu na Parte 1:</p>
@@ -1373,20 +1422,23 @@ tar -tvf /tmp/site.tar</code></pre></div>
     <p class="lab-goal">Validar o Docker no Codespaces, escrever um Dockerfile, construir a imagem e testá-la. A imagem criada aqui é a base dos próximos exercícios.</p>
     <p class="section-label" style="margin-top:6px">Parte 1 · Preparando o ambiente</p>
     <ol class="steps">
-      <li><div><p>Confira cliente e servidor Docker e rode o primeiro container:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker version
-docker run --rm hello-world</code></pre></div>
+      <li><div><p>Confira o cliente e o servidor Docker:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker version</code></pre></div>
+<p>Rode o primeiro container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm hello-world</code></pre></div>
       </div></li>
-      <li><div><p>Compare kernel e distribuição do host com os de um container Alpine (tópico 1.1 na prática):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>uname -r; grep PRETTY_NAME /etc/os-release
-docker run --rm alpine:3.22 sh -c 'uname -r; grep PRETTY_NAME /etc/os-release'</code></pre></div>
+      <li><div><p>Compare o kernel e a distribuição do host (tópico 1.1 na prática):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>uname -r; grep PRETTY_NAME /etc/os-release</code></pre></div>
+<p>Agora os mesmos dados, vistos de dentro de um container Alpine:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm alpine:3.22 sh -c 'uname -r; grep PRETTY_NAME /etc/os-release'</code></pre></div>
       </div></li>
     </ol>
     <p class="section-label" style="margin-top:22px">Parte 2 · Criando a imagem</p>
     <ol class="steps" style="counter-reset:s 2">
-      <li><div><p>Crie a página:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/site &amp;&amp; cd ~/labs/site
-cat &gt; index.html &lt;&lt;'EOF'
+      <li><div><p>Crie a pasta do laboratório e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/site &amp;&amp; cd ~/labs/site</code></pre></div>
+<p>Crie a página:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; index.html &lt;&lt;'EOF'
 &lt;!doctype html&gt;
 &lt;html lang="pt-BR"&gt;
 &lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;Container Technologies | Lab&lt;/title&gt;&lt;/head&gt;
@@ -1407,22 +1459,26 @@ COPY index.html /usr/share/nginx/html/index.html
 EXPOSE 80
 HEALTHCHECK --interval=10s --timeout=3s CMD wget -qO- http://localhost/ || exit 1
 CMD ["nginx", "-g", "daemon off;"]
-EOF
-cat Dockerfile</code></pre></div>
+EOF</code></pre></div>
+<p>Confira o arquivo gerado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat Dockerfile</code></pre></div>
       </div></li>
       <li><div><p>Crie o <code>.dockerignore</code> para tirar do contexto de build o que não deve ir para a imagem:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>cat &gt; .dockerignore &lt;&lt;'EOF'
 .git
 *.md
 .env
-EOF
-cat .dockerignore</code></pre></div>
+EOF</code></pre></div>
+<p>Confira o arquivo gerado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat .dockerignore</code></pre></div>
       </div></li>
-      <li><div><p>Construa a imagem usando seu usuário do Docker Hub no nome:</p>
+      <li><div><p>Defina o usuário do Docker Hub e o nome da imagem (variáveis usadas até o exercício 1.7):</p>
 <div class="code"><span class="lang">terminal</span><pre><code>export DOCKERHUB_USER="seu-usuario-dockerhub"
-export IMAGE="$DOCKERHUB_USER/container-technologies"
-docker build -t "$IMAGE:1.0.0" .
-docker image ls "$IMAGE"</code></pre></div>
+export IMAGE="$DOCKERHUB_USER/container-technologies"</code></pre></div>
+<p>Construa a imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -t "$IMAGE:1.0.0" .</code></pre></div>
+<p>Confira que ela aparece no cache local:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image ls "$IMAGE"</code></pre></div>
       </div></li>
       <li><div><p>Execute um container a partir da imagem criada. <code>-d</code> roda em segundo plano, <code>--name</code> dá um nome e <code>-p 8080:80</code> liga a porta 8080 do Codespaces à porta 80 do container:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name site -p 8080:80 "$IMAGE:1.0.0"</code></pre></div>
@@ -1434,8 +1490,9 @@ docker image ls "$IMAGE"</code></pre></div>
 <div class="code"><span class="lang">terminal</span><pre><code>curl localhost:8080</code></pre></div>
       </div></li>
       <li><div><p>Pare e remova o container em execução:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f site
-docker ps -a --filter name=site      # não deve listar nada</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f site</code></pre></div>
+<p>Confirme que ele sumiu da lista:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker ps -a --filter name=site</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul>
@@ -1577,52 +1634,67 @@ CMD [&quot;node&quot;,&quot;server.js&quot;]</pre></div>
     <p class="lab-goal">Abrir a imagem criada no exercício 1.1 para ver na prática a anatomia OCI (tópico 1.4) e o efeito das camadas e do cache no tamanho e no tempo de build.</p>
     <p class="section-label" style="margin-top:6px">Parte 1 · Anatomia da sua imagem</p>
     <ol class="steps">
-      <li><div><p>Configuração, labels e número de camadas, comparados com a base:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect "$IMAGE:1.0.0" --format 'Cmd={{json .Config.Cmd}} Entrypoint={{json .Config.Entrypoint}}'
-docker image inspect "$IMAGE:1.0.0" --format 'Labels={{json .Config.Labels}}'
-docker image inspect "$IMAGE:1.0.0" --format '{{len .RootFS.Layers}} camadas'
-docker image inspect nginx:stable-alpine --format '{{len .RootFS.Layers}} camadas na base'
-docker history "$IMAGE:1.0.0"</code></pre></div>
+      <li><div><p>O <code>Cmd</code> e o <code>Entrypoint</code> herdados da base:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect "$IMAGE:1.0.0" --format 'Cmd={{json .Config.Cmd}} Entrypoint={{json .Config.Entrypoint}}'</code></pre></div>
+<p>As labels OCI que você definiu no Dockerfile:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect "$IMAGE:1.0.0" --format 'Labels={{json .Config.Labels}}'</code></pre></div>
+<p>Quantas camadas a sua imagem tem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect "$IMAGE:1.0.0" --format '{{len .RootFS.Layers}} camadas'</code></pre></div>
+<p>E quantas a imagem base já trazia:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect nginx:stable-alpine --format '{{len .RootFS.Layers}} camadas na base'</code></pre></div>
+<p>Por fim, o histórico completo de instruções:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker history "$IMAGE:1.0.0"</code></pre></div>
       </div></li>
       <li><div><p>O documento que o registry devolve para a imagem base (index ou manifest list):</p>
 <div class="code"><span class="lang">terminal</span><pre><code>docker buildx imagetools inspect --raw nginx:stable-alpine | python3 -m json.tool | head -25</code></pre></div>
       </div></li>
-      <li><div><p>Exporte a sua imagem e explore o layout em disco:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/oci &amp;&amp; cd ~/labs/oci
-docker save "$IMAGE:1.0.0" -o site.tar
-tar -xf site.tar &amp;&amp; ls
-cat oci-layout; echo
-python3 -m json.tool index.json | head -20
-ls blobs/sha256 | head</code></pre></div>
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/oci &amp;&amp; cd ~/labs/oci</code></pre></div>
+<p>Exporte a sua imagem no formato OCI:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker save "$IMAGE:1.0.0" -o site.tar</code></pre></div>
+<p>Extraia o tar e liste o conteúdo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>tar -xf site.tar &amp;&amp; ls</code></pre></div>
+<p>Veja o <code>oci-layout</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat oci-layout; echo</code></pre></div>
+<p>E o início do <code>index.json</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>python3 -m json.tool index.json | head -20</code></pre></div>
+<p>Por fim, os blobs de conteúdo (camadas e config, endereçados por digest):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>ls blobs/sha256 | head</code></pre></div>
       </div></li>
     </ol>
     <p class="section-label" style="margin-top:22px">Parte 2 · Camadas e cache</p>
     <ol class="steps" style="counter-reset:s 3">
       <li><div><p>Veja qual backend de armazenamento o seu Docker usa:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker info --format 'Storage Driver: {{.Driver}}'
-docker info | grep -iA2 'storage driver'</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>docker info --format 'Storage Driver: {{.Driver}}'</code></pre></div>
+<p>Com mais contexto (snapshotter, se for containerd image store):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker info | grep -iA2 'storage driver'</code></pre></div>
       </div></li>
-      <li><div><p>Crie e apague um arquivo de 50 MB em instruções separadas:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/camadas &amp;&amp; cd ~/labs/camadas
-cat &gt; Dockerfile.ruim &lt;&lt;'EOF'
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/camadas &amp;&amp; cd ~/labs/camadas</code></pre></div>
+<p>Crie um Dockerfile que escreve e apaga um arquivo de 50 MB em instruções <code>RUN</code> separadas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile.ruim &lt;&lt;'EOF'
 FROM alpine:3.22
 RUN dd if=/dev/zero of=/lixo bs=1M count=50
 RUN rm /lixo
-EOF
-docker build -f Dockerfile.ruim -t camadas:ruim .
-docker history camadas:ruim | head -4</code></pre></div>
+EOF</code></pre></div>
+<p>Construa a imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -f Dockerfile.ruim -t camadas:ruim .</code></pre></div>
+<p>Veja o tamanho de cada camada no histórico:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker history camadas:ruim | head -4</code></pre></div>
       </div></li>
-      <li><div><p>Agora na mesma instrução e compare:</p>
+      <li><div><p>Agora o mesmo resultado, escrevendo e apagando o arquivo numa única instrução:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile.bom &lt;&lt;'EOF'
 FROM alpine:3.22
 RUN dd if=/dev/zero of=/lixo bs=1M count=50 &amp;&amp; rm /lixo
-EOF
-docker build -f Dockerfile.bom -t camadas:bom .
-docker image ls camadas</code></pre></div>
+EOF</code></pre></div>
+<p>Construa e compare o tamanho final das duas imagens:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -f Dockerfile.bom -t camadas:bom .</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image ls camadas</code></pre></div>
       </div></li>
-      <li><div><p>Altere só o HTML do site e reconstrua, observando quais etapas usam <code>CACHED</code>:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/site &amp;&amp; sed -i 's/1.0.0/1.0.1/' index.html
-docker build -t "$IMAGE:1.0.1" .</code></pre></div>
+      <li><div><p>Altere só o HTML do site:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/site &amp;&amp; sed -i 's/1.0.0/1.0.1/' index.html</code></pre></div>
+<p>Reconstrua e observe quais etapas usam <code>CACHED</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -t "$IMAGE:1.0.1" .</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul>
@@ -1663,14 +1735,17 @@ docker build -t "$IMAGE:1.0.1" .</code></pre></div>
     <div class="lab-head"><span class="lab-tag">Exercício 1.4</span><h3>Validando Dockerfiles com Hadolint</h3><span class="lab-time">~20 min</span></div>
     <p class="lab-goal">Validar o Dockerfile do exercício 1.1, depois corrigir um Dockerfile cheio de más práticas até o Hadolint aprovar.</p>
     <ol class="steps">
-      <li><div><p>Valide o Dockerfile que você já criou:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/site
-docker run --rm -i hadolint/hadolint &lt; Dockerfile &amp;&amp; echo "Dockerfile OK"</code></pre></div>
+      <li><div><p>Entre na pasta do Dockerfile criado no exercício 1.1:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/site</code></pre></div>
+<p>Valide-o com o Hadolint:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -i hadolint/hadolint &lt; Dockerfile &amp;&amp; echo "Dockerfile OK"</code></pre></div>
       </div></li>
-      <li><div><p>Analise um Dockerfile problemático:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/lint &amp;&amp; cd ~/labs/lint
-echo 'print("ola, containers")' &gt; app.py
-cat &gt; Dockerfile &lt;&lt;'EOF'
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/lint &amp;&amp; cd ~/labs/lint</code></pre></div>
+<p>Crie uma aplicação mínima:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>echo 'print("ola, containers")' &gt; app.py</code></pre></div>
+<p>Crie um Dockerfile cheio de más práticas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile &lt;&lt;'EOF'
 FROM ubuntu:latest
 MAINTAINER aluno@example.com
 RUN apt-get update
@@ -1678,10 +1753,11 @@ RUN apt-get install -y python3 curl
 ADD app.py /app/app.py
 WORKDIR /app
 CMD python3 app.py
-EOF
-docker run --rm -i hadolint/hadolint &lt; Dockerfile</code></pre></div>
+EOF</code></pre></div>
+<p>Analise-o com o Hadolint:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -i hadolint/hadolint &lt; Dockerfile</code></pre></div>
       </div></li>
-      <li><div><p>Corrija até não restar aviso, construa e rode:</p>
+      <li><div><p>Corrija até não restar aviso:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile &lt;&lt;'EOF'
 FROM python:3.13-alpine
 LABEL org.opencontainers.image.authors="aluno@example.com"
@@ -1690,9 +1766,11 @@ COPY app.py .
 RUN adduser -D -u 10001 app
 USER app
 CMD ["python3", "app.py"]
-EOF
-docker run --rm -i hadolint/hadolint &lt; Dockerfile &amp;&amp; echo "Dockerfile OK"
-docker build -t lint-ok . &amp;&amp; docker run --rm lint-ok</code></pre></div>
+EOF</code></pre></div>
+<p>Confira que o Hadolint aprova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -i hadolint/hadolint &lt; Dockerfile &amp;&amp; echo "Dockerfile OK"</code></pre></div>
+<p>Construa e rode:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -t lint-ok . &amp;&amp; docker run --rm lint-ok</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>O Dockerfile do site passa (ou só gera avisos informativos).</li><li>O Dockerfile problemático aponta, entre outras, <code>DL3007</code>, <code>DL4000</code>, <code>DL3008</code>, <code>DL3009</code>, <code>DL3015</code>, <code>DL3020</code>, <code>DL3025</code> e <code>DL3059</code>.</li><li>A versão corrigida imprime “Dockerfile OK” e o container mostra <code>ola, containers</code>.</li></ul></div>
@@ -1835,12 +1913,14 @@ docker build -t lint-ok . &amp;&amp; docker run --rm lint-ok</code></pre></div>
     <p class="lab-goal">Antes de otimizar, medir. Comparar tamanho, pacotes e vulnerabilidades de imagens base, avaliar a sua própria imagem, usar o Trivy como gate de pipeline e gerar o SBOM da imagem.</p>
     <ol class="steps">
       <li><div><p>Crie um alias para o Trivy (via container, com cache persistente):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>alias trivy='docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.cache/trivy:/root/.cache aquasec/trivy:latest'
-trivy --version</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>alias trivy='docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.cache/trivy:/root/.cache aquasec/trivy:latest'</code></pre></div>
+<p>Confira que funciona:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy --version</code></pre></div>
       </div></li>
-      <li><div><p>Baixe algumas imagens base e compare tamanhos:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>for i in ubuntu:24.04 debian:12 alpine:3.22 busybox:1.36 cgr.dev/chainguard/wolfi-base:latest; do docker pull -q $i; done
-docker image ls --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}' | grep -E 'ubuntu|debian|alpine|busybox|wolfi'</code></pre></div>
+      <li><div><p>Baixe algumas imagens base:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for i in ubuntu:24.04 debian:12 alpine:3.22 busybox:1.36 cgr.dev/chainguard/wolfi-base:latest; do docker pull -q $i; done</code></pre></div>
+<p>Compare os tamanhos:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image ls --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}' | grep -E 'ubuntu|debian|alpine|busybox|wolfi'</code></pre></div>
       </div></li>
       <li><div><p>Conte pacotes e vulnerabilidades de cada uma:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>for i in ubuntu:24.04 debian:12 alpine:3.22 cgr.dev/chainguard/wolfi-base:latest; do
@@ -1849,14 +1929,17 @@ docker image ls --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}' | grep -E '
   trivy image --quiet --scanners vuln $i | grep -E '^Total'
 done</code></pre></div>
       </div></li>
-      <li><div><p>Avalie a sua imagem e use o exit code como gate:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>trivy image --severity HIGH,CRITICAL "$IMAGE:1.0.1"
-docker pull -q python:3.4-alpine
-trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet python:3.4-alpine &gt; /dev/null; echo "python:3.4-alpine → exit $?"</code></pre></div>
+      <li><div><p>Avalie a sua imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy image --severity HIGH,CRITICAL "$IMAGE:1.0.1"</code></pre></div>
+<p>Baixe uma imagem antiga e cheia de CVEs conhecidas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker pull -q python:3.4-alpine</code></pre></div>
+<p>Use o exit code do Trivy como gate de pipeline:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet python:3.4-alpine &gt; /dev/null; echo "python:3.4-alpine → exit $?"</code></pre></div>
       </div></li>
-      <li><div><p>Gere o SBOM da sua imagem e consulte o inventário:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>trivy image --quiet --format cyclonedx "$IMAGE:1.0.1" &gt; ~/labs/sbom-site.json
-python3 -c "import json; d=json.load(open('$HOME/labs/sbom-site.json')); c=d['components']; print(len(c),'componentes'); [print(x['name'],x.get('version','')) for x in c if x['name'] in ('openssl','libssl3','musl','busybox','nginx','zlib')]"</code></pre></div>
+      <li><div><p>Gere o SBOM da sua imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy image --quiet --format cyclonedx "$IMAGE:1.0.1" &gt; ~/labs/sbom-site.json</code></pre></div>
+<p>Consulte o inventário de componentes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>python3 -c "import json; d=json.load(open('$HOME/labs/sbom-site.json')); c=d['components']; print(len(c),'componentes'); [print(x['name'],x.get('version','')) for x in c if x['name'] in ('openssl','libssl3','musl','busybox','nginx','zlib')]"</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul>
@@ -1912,10 +1995,12 @@ python3 -c "import json; d=json.load(open('$HOME/labs/sbom-site.json')); c=d['co
     <div class="lab-head"><span class="lab-tag">Exercício 1.6</span><h3>Resolvendo: da imagem grande à distroless</h3><span class="lab-time">~35 min</span></div>
     <p class="lab-goal">Construir a mesma aplicação Go em estágio único e em multi-stage com distroless, e provar a diferença com os números e com o Trivy. Guarde esta pasta: a aplicação volta na Aula 04.</p>
     <ol class="steps">
-      <li><div><p>Crie a aplicação (responde em <code>/</code> e <code>/healthz</code> e trata SIGTERM):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/app-go &amp;&amp; cd ~/labs/app-go
-printf 'module example.com/app-go\n\ngo 1.25\n' &gt; go.mod
-cat &gt; main.go &lt;&lt;'EOF'
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/app-go &amp;&amp; cd ~/labs/app-go</code></pre></div>
+<p>Crie o <code>go.mod</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>printf 'module example.com/app-go\n\ngo 1.25\n' &gt; go.mod</code></pre></div>
+<p>Crie a aplicação (responde em <code>/</code> e <code>/healthz</code> e trata SIGTERM):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; main.go &lt;&lt;'EOF'
 package main
 
 import (
@@ -1959,7 +2044,7 @@ func main() {
 }
 EOF</code></pre></div>
       </div></li>
-      <li><div><p>Versão em estágio único:</p>
+      <li><div><p>Crie a versão em estágio único:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile.single &lt;&lt;'EOF'
 FROM golang:1.25
 WORKDIR /src
@@ -1967,10 +2052,11 @@ COPY . .
 RUN go build -o /usr/local/bin/app .
 EXPOSE 8080
 CMD ["app"]
-EOF
-docker build -f Dockerfile.single -t app-go:single .</code></pre></div>
+EOF</code></pre></div>
+<p>Construa-a:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -f Dockerfile.single -t app-go:single .</code></pre></div>
       </div></li>
-      <li><div><p>Versão multi-stage com distroless:</p>
+      <li><div><p>Crie a versão multi-stage com distroless:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile &lt;&lt;'EOF'
 FROM golang:1.25-alpine AS build
 WORKDIR /src
@@ -1984,20 +2070,27 @@ COPY --from=build /out/app /app
 USER nonroot:nonroot
 EXPOSE 8080
 ENTRYPOINT ["/app"]
-EOF
-docker build -t app-go:v1 .
-docker image ls app-go</code></pre></div>
+EOF</code></pre></div>
+<p>Construa-a:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -t app-go:v1 .</code></pre></div>
+<p>Compare o tamanho das duas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image ls app-go</code></pre></div>
       </div></li>
-      <li><div><p>Teste a imagem final e tente abrir um shell:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name go1 -p 8081:8080 app-go:v1
-curl -s localhost:8081; curl -s localhost:8081/healthz
-docker exec -it go1 sh                                  # deve falhar
-docker image inspect app-go:v1 -f 'User={{.Config.User}}'
-docker stop go1 &amp;&amp; docker logs go1 | tail -2 &amp;&amp; docker rm go1</code></pre></div>
+      <li><div><p>Rode a imagem final:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name go1 -p 8081:8080 app-go:v1</code></pre></div>
+<p>Teste os dois endpoints:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8081; curl -s localhost:8081/healthz</code></pre></div>
+<p>Tente abrir um shell (deve falhar: não há shell na imagem):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec -it go1 sh</code></pre></div>
+<p>Confira que roda como usuário não-root:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect app-go:v1 -f 'User={{.Config.User}}'</code></pre></div>
+<p>Pare, veja o log de encerramento e remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stop go1 &amp;&amp; docker logs go1 | tail -2 &amp;&amp; docker rm go1</code></pre></div>
       </div></li>
-      <li><div><p>Prove com o Trivy (alias do exercício 1.5):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>for i in app-go:single app-go:v1; do echo "== $i"; trivy image --quiet --scanners vuln $i | grep -E '^Total' | head -3; done
-trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet app-go:v1 &gt; /dev/null; echo "app-go:v1 → exit $?"</code></pre></div>
+      <li><div><p>Prove com o Trivy (alias do exercício 1.5) a diferença de vulnerabilidades entre as duas imagens:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for i in app-go:single app-go:v1; do echo "== $i"; trivy image --quiet --scanners vuln $i | grep -E '^Total' | head -3; done</code></pre></div>
+<p>Use a distroless como gate de pipeline:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet app-go:v1 &gt; /dev/null; echo "app-go:v1 → exit $?"</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul>
@@ -2058,37 +2151,48 @@ trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet app-go:v1 &gt; /dev/n
     <p class="lab-goal">Fechar o ciclo da imagem: publicar com uma estratégia de tags, conferir os digests, executar a partir do registry e gerar uma versão para <code>amd64</code> e <code>arm64</code> (o índice OCI do tópico 1.2).</p>
     <p class="section-label" style="margin-top:6px">Parte 1 · Tags e push</p>
     <ol class="steps">
-      <li><div><p>No Docker Hub, crie um <b>Personal access token</b> (Account settings → Personal access tokens) e o repositório <code>container-technologies</code>. Faça login:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/site
-docker login -u "$DOCKERHUB_USER"      # cole o token quando pedir a senha</code></pre></div>
+      <li><div><p>Entre na pasta da imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/site</code></pre></div>
+<p>No Docker Hub, crie um <b>Personal access token</b> (Account settings → Personal access tokens) e o repositório <code>container-technologies</code>. Depois faça login:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker login -u "$DOCKERHUB_USER"      # cole o token quando pedir a senha</code></pre></div>
       </div></li>
-      <li><div><p>Aplique as tags de versão, série, commit e a tag recomendada (versão + SHA curto) à mesma imagem e publique:</p>
+      <li><div><p>Defina a versão e o SHA curto do commit:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>VERSION=1.0.1
-SHA=$(git rev-parse --short HEAD 2&gt;/dev/null || echo local)
-docker tag "$IMAGE:$VERSION" "$IMAGE:1.0"
+SHA=$(git rev-parse --short HEAD 2&gt;/dev/null || echo local)</code></pre></div>
+<p>Aplique as tags de série, commit e a tag recomendada (versão + SHA) à mesma imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker tag "$IMAGE:$VERSION" "$IMAGE:1.0"
 docker tag "$IMAGE:$VERSION" "$IMAGE:sha-$SHA"
-docker tag "$IMAGE:$VERSION" "$IMAGE:v$VERSION-$SHA"      # recomendado: vMAJOR.MINOR.PATCH-sha
-docker push --all-tags "$IMAGE"</code></pre></div>
+docker tag "$IMAGE:$VERSION" "$IMAGE:v$VERSION-$SHA"      # recomendado: vMAJOR.MINOR.PATCH-sha</code></pre></div>
+<p>Publique todas as tags:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker push --all-tags "$IMAGE"</code></pre></div>
       </div></li>
-      <li><div><p>Confirme que as tags apontam para o mesmo digest e rode a partir do registry:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>for t in 1.0.1 1.0 sha-$SHA v1.0.1-$SHA; do echo -n "$t → "; docker buildx imagetools inspect "$IMAGE:$t" --format '{{json .Manifest.Digest}}'; done
-docker image rm $(docker image ls "$IMAGE" -q) --force
-docker run -d --name site -p 8080:80 "$IMAGE:1.0.1" &amp;&amp; sleep 2
-curl -s localhost:8080 | grep Versão; docker rm -f site</code></pre></div>
+      <li><div><p>Confirme que as tags apontam para o mesmo digest:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for t in 1.0.1 1.0 sha-$SHA v1.0.1-$SHA; do echo -n "$t → "; docker buildx imagetools inspect "$IMAGE:$t" --format '{{json .Manifest.Digest}}'; done</code></pre></div>
+<p>Remova as imagens locais para forçar o <code>pull</code> do registry:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image rm $(docker image ls "$IMAGE" -q) --force</code></pre></div>
+<p>Rode a partir do registry:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name site -p 8080:80 "$IMAGE:1.0.1" &amp;&amp; sleep 2</code></pre></div>
+<p>Confira a resposta e limpe:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8080 | grep Versão; docker rm -f site</code></pre></div>
       </div></li>
     </ol>
     <p class="section-label" style="margin-top:22px">Parte 2 · Uma imagem, várias plataformas</p>
     <ol class="steps" style="counter-reset:s 3">
-      <li><div><p>Habilite a emulação com QEMU e rode uma imagem <code>arm64</code> num host <code>amd64</code>:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>uname -m
-docker run --privileged --rm tonistiigi/binfmt --install arm64
-docker run --rm --platform linux/arm64 alpine:3.22 uname -m</code></pre></div>
+      <li><div><p>Confira a arquitetura do host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>uname -m</code></pre></div>
+<p>Habilite a emulação com QEMU:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --privileged --rm tonistiigi/binfmt --install arm64</code></pre></div>
+<p>Rode uma imagem <code>arm64</code> no mesmo host <code>amd64</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --platform linux/arm64 alpine:3.22 uname -m</code></pre></div>
       </div></li>
-      <li><div><p>Construa e publique a versão <code>1.1.0</code> para as duas arquiteturas:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>sed -i 's/1.0.1/1.1.0/' index.html
-docker buildx create --name multi --use
-docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE:1.1.0" --push .
-docker buildx imagetools inspect "$IMAGE:1.1.0"</code></pre></div>
+      <li><div><p>Altere a versão exibida pela página:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sed -i 's/1.0.1/1.1.0/' index.html</code></pre></div>
+<p>Crie um builder multi-plataforma:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker buildx create --name multi --use</code></pre></div>
+<p>Construa e publique a versão <code>1.1.0</code> para as duas arquiteturas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE:1.1.0" --push .</code></pre></div>
+<p>Confira o índice gerado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker buildx imagetools inspect "$IMAGE:1.1.0"</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul>
@@ -2234,17 +2338,20 @@ docker buildx imagetools inspect "$IMAGE:1.1.0"</code></pre></div>
     <div class="lab-head"><span class="lab-tag">Exercício 2.1</span><h3>Conversando com o daemon</h3><span class="lab-time">~15 min</span></div>
     <p class="lab-goal">Comprovar que o CLI é apenas um cliente da REST API e enxergar a cadeia dockerd → containerd → shim → processo.</p>
     <ol class="steps">
-      <li><div><p>Informações do daemon e uso de disco por tipo de objeto:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker info --format 'Server {{.ServerVersion}} | Storage {{.Driver}} | Cgroup v{{.CgroupVersion}} | Logging {{.LoggingDriver}}'
-docker system df</code></pre></div>
+      <li><div><p>Informações do daemon:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker info --format 'Server {{.ServerVersion}} | Storage {{.Driver}} | Cgroup v{{.CgroupVersion}} | Logging {{.LoggingDriver}}'</code></pre></div>
+<p>Uso de disco por tipo de objeto:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker system df</code></pre></div>
       </div></li>
       <li><div><p>Chame a REST API diretamente pelo socket, sem o CLI:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>curl -s --unix-socket /var/run/docker.sock http://localhost/version | python3 -m json.tool | head -12
-curl -s --unix-socket /var/run/docker.sock http://localhost/images/json | python3 -m json.tool | grep -m5 RepoTags -A1</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s --unix-socket /var/run/docker.sock http://localhost/version | python3 -m json.tool | head -12</code></pre></div>
+<p>Agora a lista de imagens:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s --unix-socket /var/run/docker.sock http://localhost/images/json | python3 -m json.tool | grep -m5 RepoTags -A1</code></pre></div>
       </div></li>
-      <li><div><p>Acompanhe os eventos que o daemon emite enquanto um container nasce e morre:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>timeout 8 docker events --format '{{.Type}} {{.Action}} {{.Actor.Attributes.name}}' &amp;
-sleep 1; docker run --rm --name evento alpine:3.22 echo "olá"; wait</code></pre></div>
+      <li><div><p>Acompanhe os eventos que o daemon emite enquanto um container nasce e morre. Primeiro, dispare o escutador de eventos em segundo plano:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>timeout 8 docker events --format '{{.Type}} {{.Action}} {{.Actor.Attributes.name}}' &amp;</code></pre></div>
+<p>Depois, num mesmo terminal, dispare o evento e aguarde o escutador terminar:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 1; docker run --rm --name evento alpine:3.22 echo "olá"; wait</code></pre></div>
       </div></li>
       <li><div><p>Suba um container de teste que fica rodando em segundo plano:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name arq alpine:3.22 sleep 3600</code></pre></div>
@@ -2326,34 +2433,51 @@ sleep 1; docker run --rm --name evento alpine:3.22 echo "olá"; wait</code></pre
     <div class="lab-head"><span class="lab-tag">Exercício 2.2</span><h3>Operando containers do início ao fim</h3><span class="lab-time">~30 min</span></div>
     <p class="lab-goal">Executar a imagem publicada na Aula 01, operar o container com a CLI, aplicar limites de recursos e observar o tratamento de sinais.</p>
     <ol class="steps">
-      <li><div><p>Rode a sua imagem do Docker Hub (ou <code>nginx:stable-alpine</code>) e opere o container:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>export IMAGE="seu-usuario-dockerhub/container-technologies:1.0.1"
-docker run -d --name web -p 8080:80 --restart unless-stopped "$IMAGE"
-docker ps
-curl -s localhost:8080 | head -5
-docker logs web --tail 5
-docker exec -it web sh -c 'hostname; ps'
-docker inspect web --format 'IP={{.NetworkSettings.IPAddress}} Restart={{.HostConfig.RestartPolicy.Name}}'
-docker stop web &amp;&amp; docker ps -a --filter name=web
-docker start web &amp;&amp; docker rm -f web</code></pre></div>
+      <li><div><p>Defina a imagem (sua do Docker Hub, ou <code>nginx:stable-alpine</code>):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>export IMAGE="seu-usuario-dockerhub/container-technologies:1.0.1"</code></pre></div>
+<p>Rode o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name web -p 8080:80 --restart unless-stopped "$IMAGE"</code></pre></div>
+<p>Confira que está rodando:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker ps</code></pre></div>
+<p>Acesse a aplicação:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8080 | head -5</code></pre></div>
+<p>Veja os logs:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker logs web --tail 5</code></pre></div>
+<p>Entre no container e rode um comando:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec -it web sh -c 'hostname; ps'</code></pre></div>
+<p>Inspecione o IP e a política de reinício:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker inspect web --format 'IP={{.NetworkSettings.IPAddress}} Restart={{.HostConfig.RestartPolicy.Name}}'</code></pre></div>
+<p>Pare e confira o estado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stop web &amp;&amp; docker ps -a --filter name=web</code></pre></div>
+<p>Reinicie e remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker start web &amp;&amp; docker rm -f web</code></pre></div>
       </div></li>
-      <li><div><p>Aplique limites e confira os cgroups:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name limitado --memory 128m --cpus 0.5 nginx:stable-alpine
-docker exec limitado cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/cpu.max
-docker stats --no-stream limitado
-docker rm -f limitado</code></pre></div>
+      <li><div><p>Rode um container com limites de recursos:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name limitado --memory 128m --cpus 0.5 nginx:stable-alpine</code></pre></div>
+<p>Confira os cgroups aplicados:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec limitado cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/cpu.max</code></pre></div>
+<p>Compare com o uso em tempo real:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stats --no-stream limitado</code></pre></div>
+<p>Remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f limitado</code></pre></div>
       </div></li>
-      <li><div><p>Force um OOM kill:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run --name oom --memory 32m alpine:3.22 sh -c 'x=a; while true; do x=$x$x; done'
-docker inspect oom --format 'OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}}'
-docker rm oom</code></pre></div>
+      <li><div><p>Force um OOM kill — um processo que dobra de tamanho até estourar 32 MB:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --name oom --memory 32m alpine:3.22 sh -c 'x=a; while true; do x=$x$x; done'</code></pre></div>
+<p>Confira a causa da morte:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker inspect oom --format 'OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}}'</code></pre></div>
+<p>Remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm oom</code></pre></div>
       </div></li>
-      <li><div><p>Compare um processo que ignora SIGTERM com um que trata:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name sem-trap alpine:3.22 sh -c 'while true; do sleep 1; done'
-time docker stop sem-trap
-docker run -d --name com-trap alpine:3.22 sh -c 'trap "echo SIGTERM recebido; exit 0" TERM; while true; do sleep 1; done'
-time docker stop com-trap
-docker logs com-trap; docker rm sem-trap com-trap</code></pre></div>
+      <li><div><p>Rode um processo que ignora SIGTERM:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name sem-trap alpine:3.22 sh -c 'while true; do sleep 1; done'</code></pre></div>
+<p>Pare e cronometre:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>time docker stop sem-trap</code></pre></div>
+<p>Agora um processo que trata o sinal:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name com-trap alpine:3.22 sh -c 'trap "echo SIGTERM recebido; exit 0" TERM; while true; do sleep 1; done'</code></pre></div>
+<p>Pare e cronometre de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>time docker stop com-trap</code></pre></div>
+<p>Confira o log de encerramento e limpe:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker logs com-trap; docker rm sem-trap com-trap</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>A página da sua imagem responde na porta 8080 e a política de reinício aparece como <code>unless-stopped</code>.</li><li><code>memory.max</code> = <code>134217728</code>, <code>cpu.max</code> = <code>50000 100000</code> e o <code>docker stats</code> mostra limite de 128 MiB.</li><li>O container <code>oom</code> termina com <code>OOMKilled=true ExitCode=137</code>.</li><li><code>sem-trap</code> leva cerca de 10 s para parar (SIGKILL); <code>com-trap</code> para em cerca de 1 s.</li></ul></div>
@@ -2402,73 +2526,90 @@ docker logs com-trap; docker rm sem-trap com-trap</code></pre></div>
     <p class="section-label" style="margin-top:6px">Parte 1 · bridge (padrão)</p>
     <p class="hyp"><b>Hipótese</b> Containers na bridge padrão se falam pelo IP, mas <b>não pelo nome</b>, e só são acessados do host com <code>-p</code>.</p>
     <ol class="steps">
-      <li><div><p>Suba dois containers sem informar rede. Eles caem na bridge padrão (<code>docker0</code>):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name a1 alpine:3.22 sleep 3600
-docker run -d --name a2 alpine:3.22 sleep 3600
-docker network ls
-docker inspect -f '{{.NetworkSettings.IPAddress}}' a1 a2</code></pre></div>
+      <li><div><p>Suba o primeiro container, sem informar rede (cai na bridge padrão <code>docker0</code>):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name a1 alpine:3.22 sleep 3600</code></pre></div>
+<p>Suba o segundo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name a2 alpine:3.22 sleep 3600</code></pre></div>
+<p>Confira as redes existentes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker network ls</code></pre></div>
+<p>Veja o IP de cada um:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker inspect -f '{{.NetworkSettings.IPAddress}}' a1 a2</code></pre></div>
       </div></li>
-      <li><div><p>Teste a comunicação pelo IP e pelo nome:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 $(docker inspect -f '{{.NetworkSettings.Networks.bridge.IPAddress}}' a2)
-docker exec a1 ping -c2 a2</code></pre></div>
+      <li><div><p>Teste a comunicação pelo IP:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 $(docker inspect -f '{{.NetworkSettings.Networks.bridge.IPAddress}}' a2)</code></pre></div>
+<p>Agora pelo nome:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 a2</code></pre></div>
       </div></li>
-      <li><div><p>Teste a saída para a internet e o acesso a partir do host sem publicar porta:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 8.8.8.8
-docker run -d --name w1 nginx:stable-alpine
-curl -s --max-time 3 localhost:80 || echo "sem acesso pelo host"
-docker rm -f w1
-docker run -d --name w1 -p 8080:80 nginx:stable-alpine
-sleep 1; curl -sI localhost:8080 | head -1</code></pre></div>
+      <li><div><p>Teste a saída para a internet:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 8.8.8.8</code></pre></div>
+<p>Suba um nginx sem publicar porta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name w1 nginx:stable-alpine</code></pre></div>
+<p>Tente acessar pelo host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s --max-time 3 localhost:80 || echo "sem acesso pelo host"</code></pre></div>
+<p>Remova e suba de novo, agora publicando a porta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f w1</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name w1 -p 8080:80 nginx:stable-alpine</code></pre></div>
+<p>Acesse de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 1; curl -sI localhost:8080 | head -1</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><p>Ping pelo IP e para 8.8.8.8 respondem; pelo nome dá <code>ping: bad address 'a2'</code>. O nginx só responde no host depois do <code>-p 8080:80</code> (<code>HTTP/1.1 200 OK</code>).</p></div>
     <p class="section-label" style="margin-top:22px">Parte 2 · bridge personalizada</p>
     <p class="hyp"><b>Hipótese</b> Numa rede criada pelo usuário, o Docker oferece <b>DNS interno</b> e <b>isola</b> os containers de outras redes.</p>
     <ol class="steps" style="counter-reset:s 3">
-      <li><div><p>Crie uma rede e suba dois containers nela:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker network create lab-net
-docker run -d --name b1 --network lab-net alpine:3.22 sleep 3600
-docker run -d --name b2 --network lab-net alpine:3.22 sleep 3600</code></pre></div>
+      <li><div><p>Crie a rede:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker network create lab-net</code></pre></div>
+<p>Suba dois containers nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name b1 --network lab-net alpine:3.22 sleep 3600</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name b2 --network lab-net alpine:3.22 sleep 3600</code></pre></div>
       </div></li>
-      <li><div><p>Teste a resolução de nomes e veja quem responde o DNS:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker exec b1 ping -c2 b2
-docker exec b1 nslookup b2
-docker exec b1 cat /etc/resolv.conf</code></pre></div>
+      <li><div><p>Teste a resolução de nomes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec b1 ping -c2 b2</code></pre></div>
+<p>Veja quem responde o DNS:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec b1 nslookup b2</code></pre></div>
+<p>E para onde ele aponta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec b1 cat /etc/resolv.conf</code></pre></div>
       </div></li>
-      <li><div><p>Teste o isolamento entre redes e depois conecte <code>a1</code> à <code>lab-net</code>:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 -W2 $(docker inspect -f '{{(index .NetworkSettings.Networks "lab-net").IPAddress}}' b1) || echo "isolado"
-docker network connect lab-net a1
-docker exec a1 ping -c2 b1</code></pre></div>
+      <li><div><p>Teste o isolamento entre redes: <code>a1</code> (bridge padrão) tentando alcançar <code>b1</code> (<code>lab-net</code>):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 -W2 $(docker inspect -f '{{(index .NetworkSettings.Networks "lab-net").IPAddress}}' b1) || echo "isolado"</code></pre></div>
+<p>Conecte <code>a1</code> também à <code>lab-net</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker network connect lab-net a1</code></pre></div>
+<p>Teste de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 b1</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><p>Ping pelo nome funciona e o <code>resolv.conf</code> aponta para <code>nameserver 127.0.0.11</code> (DNS embutido do Docker). <code>a1</code> não alcança <code>b1</code> até ser conectado à <code>lab-net</code>; depois, resolve até pelo nome.</p></div>
     <p class="section-label" style="margin-top:22px">Parte 3 · host</p>
     <p class="hyp"><b>Hipótese</b> Com <code>--network host</code> o container usa a pilha de rede do host: <b>sem isolamento e sem NAT</b>.</p>
     <ol class="steps" style="counter-reset:s 6">
-      <li><div><p>Rode um nginx na rede do host, <b>sem</b> <code>-p</code>, e acesse direto:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name h1 --network host nginx:stable-alpine
-sleep 1; curl -sI localhost:80 | head -1</code></pre></div>
+      <li><div><p>Rode um nginx na rede do host, <b>sem</b> <code>-p</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name h1 --network host nginx:stable-alpine</code></pre></div>
+<p>Acesse direto:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 1; curl -sI localhost:80 | head -1</code></pre></div>
       </div></li>
-      <li><div><p>Compare as interfaces que o container enxerga com as do host:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network host alpine:3.22 ip -brief addr
-ip -brief addr</code></pre></div>
+      <li><div><p>Veja as interfaces que o container enxerga:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network host alpine:3.22 ip -brief addr</code></pre></div>
+<p>Compare com as do host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>ip -brief addr</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><p>O <code>curl</code> na porta 80 responde sem nenhum <code>-p</code>, e o container lista as mesmas interfaces do codespace (<code>eth0</code>, <code>docker0</code>, <code>veth…</code>).</p></div>
     <p class="section-label" style="margin-top:22px">Parte 4 · none</p>
     <p class="hyp"><b>Hipótese</b> Com <code>--network none</code> o container fica <b>totalmente isolado</b>: só existe o loopback.</p>
     <ol class="steps" style="counter-reset:s 8">
-      <li><div><p>Rode um container sem rede e tente sair:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network none alpine:3.22 ip addr
-docker run --rm --network none alpine:3.22 ping -c2 -W2 8.8.8.8</code></pre></div>
+      <li><div><p>Rode um container sem rede:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network none alpine:3.22 ip addr</code></pre></div>
+<p>Tente sair para a internet:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network none alpine:3.22 ping -c2 -W2 8.8.8.8</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><p>Só aparece a interface <code>lo</code>, e o ping falha com <code>Network unreachable</code>.</p></div>
     <p class="section-label" style="margin-top:22px">Limpeza</p>
     <ol class="steps" style="counter-reset:s 9">
-      <li><div><p>Remova os containers e a rede:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f a1 a2 b1 b2 w1 h1
-docker network rm lab-net</code></pre></div>
+      <li><div><p>Remova os containers:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f a1 a2 b1 b2 w1 h1</code></pre></div>
+<p>E a rede:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker network rm lab-net</code></pre></div>
       </div></li>
     </ol>
     <div class="tip"><b>Overlay</b><p>O driver <code>overlay</code> liga containers em hosts diferentes e depende do Swarm. Ele aparece no tópico 2.7 (Docker Swarm).</p></div>
@@ -2510,62 +2651,77 @@ docker network rm lab-net</code></pre></div>
     <p class="section-label" style="margin-top:6px">Parte 1 · sem montagem (camada de escrita)</p>
     <p class="hyp"><b>Hipótese</b> A camada de escrita pertence ao container: os dados <b>sobrevivem a stop/restart</b>, mas <b>somem quando o container é removido</b>.</p>
     <ol class="steps">
-      <li><div><p>Grave um arquivo dentro do container, pare, suba de novo e depois recrie:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name c1 alpine:3.22 sleep 3600
-docker exec c1 sh -c 'echo "dado importante" &gt; /tmp/arquivo.txt'
-docker restart c1 &amp;&amp; docker exec c1 cat /tmp/arquivo.txt
-docker rm -f c1
-docker run -d --name c1 alpine:3.22 sleep 3600
-docker exec c1 cat /tmp/arquivo.txt; docker rm -f c1</code></pre></div>
+      <li><div><p>Suba o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name c1 alpine:3.22 sleep 3600</code></pre></div>
+<p>Grave um arquivo dentro dele:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec c1 sh -c 'echo "dado importante" &gt; /tmp/arquivo.txt'</code></pre></div>
+<p>Reinicie e confira que o arquivo continua lá:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker restart c1 &amp;&amp; docker exec c1 cat /tmp/arquivo.txt</code></pre></div>
+<p>Remova o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f c1</code></pre></div>
+<p>Suba um novo, com o mesmo nome:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name c1 alpine:3.22 sleep 3600</code></pre></div>
+<p>Procure o arquivo, que não deveria estar mais lá:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec c1 cat /tmp/arquivo.txt; docker rm -f c1</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><p>Depois do <code>restart</code> o arquivo continua lá; no container recriado, <code>cat</code> falha com <code>No such file or directory</code>.</p></div>
     <p class="section-label" style="margin-top:22px">Parte 2 · volume nomeado</p>
     <p class="hyp"><b>Hipótese</b> Um volume vive <b>fora do ciclo de vida do container</b> e é gerenciado pelo Docker: pode ser usado por vários containers.</p>
     <ol class="steps" style="counter-reset:s 1">
-      <li><div><p>Crie um volume e grave nele com um container descartável:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker volume create dados
-docker run --rm -v dados:/data alpine:3.22 sh -c 'echo "gravado em $(date)" &gt;&gt; /data/log.txt'</code></pre></div>
+      <li><div><p>Crie um volume:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume create dados</code></pre></div>
+<p>Grave nele com um container descartável:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -v dados:/data alpine:3.22 sh -c 'echo "gravado em $(date)" &gt;&gt; /data/log.txt'</code></pre></div>
       </div></li>
       <li><div><p>Leia com <b>outro</b> container e grave de novo:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -v dados:/data alpine:3.22 sh -c 'echo "gravado em $(date)" &gt;&gt; /data/log.txt; cat /data/log.txt'</code></pre></div>
       </div></li>
-      <li><div><p>Veja onde o Docker guarda o volume:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker volume ls
-docker volume inspect dados --format '{{.Mountpoint}}'</code></pre></div>
+      <li><div><p>Liste os volumes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume ls</code></pre></div>
+<p>Veja onde este fica no host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume inspect dados --format '{{.Mountpoint}}'</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><p><code>log.txt</code> mostra duas linhas, gravadas por containers diferentes que já foram removidos. O volume fica em <code>/var/lib/docker/volumes/dados/_data</code>.</p></div>
     <p class="section-label" style="margin-top:22px">Parte 3 · bind mount</p>
     <p class="hyp"><b>Hipótese</b> Bind mount liga uma pasta do host ao container: <b>o que muda de um lado aparece do outro</b>, e os arquivos são do host.</p>
     <ol class="steps" style="counter-reset:s 4">
-      <li><div><p>Crie uma pasta no host e sirva-a com o nginx, somente leitura (<code>:ro</code>):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/bind &amp;&amp; echo '&lt;h1&gt;v1 via bind mount&lt;/h1&gt;' &gt; ~/labs/bind/index.html
-docker run -d --name bind -p 8082:80 -v ~/labs/bind:/usr/share/nginx/html:ro nginx:stable-alpine
-sleep 1; curl -s localhost:8082</code></pre></div>
+      <li><div><p>Crie uma pasta no host com uma página:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/bind &amp;&amp; echo '&lt;h1&gt;v1 via bind mount&lt;/h1&gt;' &gt; ~/labs/bind/index.html</code></pre></div>
+<p>Sirva-a com o nginx, somente leitura (<code>:ro</code>):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name bind -p 8082:80 -v ~/labs/bind:/usr/share/nginx/html:ro nginx:stable-alpine</code></pre></div>
+<p>Acesse:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 1; curl -s localhost:8082</code></pre></div>
       </div></li>
-      <li><div><p>Edite o arquivo <b>no host</b> e acesse de novo, sem reiniciar nada:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>echo '&lt;h1&gt;v2 editado no host&lt;/h1&gt;' &gt; ~/labs/bind/index.html
-curl -s localhost:8082</code></pre></div>
+      <li><div><p>Edite o arquivo <b>no host</b>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>echo '&lt;h1&gt;v2 editado no host&lt;/h1&gt;' &gt; ~/labs/bind/index.html</code></pre></div>
+<p>Acesse de novo, sem reiniciar nada:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8082</code></pre></div>
       </div></li>
-      <li><div><p>Tente escrever pelo container e remova-o; o arquivo continua no host:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker exec bind sh -c 'echo teste &gt; /usr/share/nginx/html/x.html'
-docker rm -f bind
-ls ~/labs/bind</code></pre></div>
+      <li><div><p>Tente escrever pelo container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec bind sh -c 'echo teste &gt; /usr/share/nginx/html/x.html'</code></pre></div>
+<p>Remova o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f bind</code></pre></div>
+<p>Confira que o arquivo continua no host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>ls ~/labs/bind</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><p>O segundo <code>curl</code> já mostra “v2 editado no host”. A escrita pelo container falha com <code>Read-only file system</code>, e <code>index.html</code> continua no host depois do <code>rm</code>.</p></div>
     <p class="section-label" style="margin-top:22px">Parte 4 · tmpfs</p>
     <p class="hyp"><b>Hipótese</b> tmpfs vive <b>na memória</b> do host: é rápido, mas <b>não persiste nem a um restart</b>.</p>
     <ol class="steps" style="counter-reset:s 7">
-      <li><div><p>Monte um tmpfs, grave nele e confira onde ele está:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name tmp --tmpfs /cache:size=16m alpine:3.22 sleep 3600
-docker exec tmp sh -c 'echo "temporario" &gt; /cache/a.txt; df -h /cache; cat /cache/a.txt'</code></pre></div>
+      <li><div><p>Monte um tmpfs:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name tmp --tmpfs /cache:size=16m alpine:3.22 sleep 3600</code></pre></div>
+<p>Grave nele e confira onde ele está:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec tmp sh -c 'echo "temporario" &gt; /cache/a.txt; df -h /cache; cat /cache/a.txt'</code></pre></div>
       </div></li>
-      <li><div><p>Reinicie o container e procure o arquivo:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker restart tmp
-docker exec tmp ls /cache
-docker rm -f tmp</code></pre></div>
+      <li><div><p>Reinicie o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker restart tmp</code></pre></div>
+<p>Procure o arquivo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec tmp ls /cache</code></pre></div>
+<p>Remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f tmp</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><p><code>df</code> mostra <code>/cache</code> como <code>tmpfs</code> de 16 MB; depois do <code>restart</code>, a pasta está vazia.</p></div>
@@ -2581,8 +2737,9 @@ docker rm -f tmp</code></pre></div>
     </table></div>
     <ol class="steps" style="counter-reset:s 9">
       <li><div><p>Remova o volume criado:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker volume rm dados
-docker volume ls</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume rm dados</code></pre></div>
+<p>Confira que sumiu:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume ls</code></pre></div>
       </div></li>
     </ol>
     <label class="done"><input type="checkbox" id="ex-2-4"> Exercício 2.4 concluído</label>
@@ -2643,8 +2800,22 @@ docker volume ls</code></pre></div>
       </div>
       <p class="note">O <code>json-file</code> sem <code>max-size</code> cresce sem limite e pode encher o disco do host. No Kubernetes, o kubelet grava os logs em <code>/var/log/pods</code> e um DaemonSet (Fluent Bit, por exemplo) envia para CloudWatch, OpenSearch ou Loki.</p>
     </div>
+    <div class="slide">
+      <h3>De comandos soltos a um arquivo</h3>
+      <p>Repare no padrão dos últimos quatro tópicos: cada peça da aplicação foi um comando <code>docker</code> separado, com flags para decorar e repetir toda vez que o ambiente precisa subir de novo.</p>
+      <div class="flow">
+        <div class="node"><b>docker run</b><span>Tópico 2.2 · subir e operar o container</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>docker network</b><span>Tópico 2.3 · conectar os containers entre si</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>docker volume</b><span>Tópico 2.4 · persistir os dados</span></div>
+        <div class="arrow">→</div>
+        <div class="node hl"><b>--log-driver</b><span>Tópico 2.5 · para onde vão os logs</span></div>
+      </div>
+      <p class="note">A seguir, Docker Compose: as mesmas peças — serviço, rede, volume, log — declaradas <b>uma única vez</b>, num arquivo versionado com o código. Um <code>docker compose up</code> sobe tudo, sempre do mesmo jeito, para qualquer pessoa do time.</p>
+    </div>
   </div>
-  <div class="tip"><b>Sem exercício prático</b><p>Tópico conceitual. Os comandos de leitura de logs já foram usados no exercício 2.2 e voltam no Compose (2.6).</p></div>
+  <div class="tip"><b>Sem exercício prático</b><p>Tópico conceitual. Os comandos de leitura de logs já foram usados no exercício 2.2 e a prática com o Compose vem no tópico 2.6.</p></div>
 </article>
 
 
@@ -2653,6 +2824,67 @@ docker volume ls</code></pre></div>
   <div class="topico-head"><span class="topico-num">2.6</span><h2>Docker Compose</h2></div>
   <div class="section-label">Conceito</div>
   <div class="slides">
+    <div class="slide divider">
+      <h3>Docker Compose</h3>
+      <p><b>O que é:</b> a ferramenta do próprio Docker para definir e rodar aplicações com vários containers a partir de <b>um único arquivo</b> (<code>compose.yaml</code>), com os serviços, as redes e os volumes da aplicação inteira.<br><b>Problema que resolve:</b> até aqui, cada container do WordPress (app + banco) foi subido na mão, repetindo rede, volume e ordem de inicialização toda vez. O Compose troca essa sequência de comandos decorados por uma definição declarativa, versionada com o código.</p>
+    </div>
+    <div class="slide">
+      <h3>Para que usar o Docker Compose?</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Ambiente de desenvolvimento</h4><p>App, banco, cache e outras dependências sobem juntos com um comando — sem instalar nada localmente.</p></div>
+        <div class="card-mini"><h4>Testes automatizados</h4><p>O ambiente inteiro é criado e destruído em poucos comandos, isolado a cada execução do CI.</p></div>
+        <div class="card-mini"><h4>Deploy em host único</h4><p>Mesma definição também serve para rodar em produção num único host Docker.</p></div>
+      </div>
+      <p class="note">Fonte: <a href="https://docs.docker.com/compose/intro/features-uses/" target="_blank" rel="noopener">Docker docs · Compose: features and uses</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Um compose.yaml de exemplo</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+        <div class="code"><span class="lang">yaml</span><pre><code>services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - html-data:/usr/share/nginx/html
+    networks:
+      - app-net
+
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=senha
+    expose:
+      - "5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - app-net
+
+volumes:
+  html-data:
+  db-data:
+
+networks:
+  app-net:
+    driver: bridge</code></pre></div>
+        <div>
+          <div class="cpd-top">
+            <div class="cpd-col"><div class="cpd-user">Usuário<small>navegador</small></div><div class="cpd-ar-v">↓<small>host:8080</small></div></div>
+            <div class="cpd-ar" style="visibility:hidden">⇄</div>
+            <div class="cpd-col"></div>
+          </div>
+          <div class="cpd">
+            <span class="cpd-label">network: app-net (bridge)</span>
+            <div class="cpd-row">
+              <div class="cpd-col"><div class="cpd-svc"><b>web</b><small>nginx:alpine</small></div><div class="cpd-ar-v">↓</div><div class="cpd-vol">html-data</div></div>
+              <div class="cpd-ar">⇄<small>db:5432<br>(expose)</small></div>
+              <div class="cpd-col"><div class="cpd-svc"><b>db</b><small>postgres:16</small></div><div class="cpd-ar-v">↓</div><div class="cpd-vol">db-data</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="slide">
       <h3>A aplicação descrita em um arquivo</h3>
       <p>Docker Compose define serviços, redes e volumes de forma declarativa em <code>compose.yaml</code>. Um comando sobe o ambiente inteiro, igual para todo o time.</p>
@@ -2664,7 +2896,7 @@ docker volume ls</code></pre></div>
       <p class="note">O campo <code>version:</code> é obsoleto na Compose Specification e gera aviso. Use <code>docker compose</code> (v2, plugin) em vez de <code>docker-compose</code> (v1, descontinuado).</p>
     </div>
     <div class="slide">
-      <h3>Comandos do dia a dia</h3>
+      <h3>Comandos mais utilizados no dia a dia</h3>
       <div class="tbl"><table>
         <tbody>
           <tr><td><code>docker compose up -d</code></td><td>Cria e sobe tudo em segundo plano</td></tr>
@@ -2702,12 +2934,13 @@ docker volume ls</code></pre></div>
   </div>
   <div class="section-label">Prática</div>
   <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 2.5</span><h3>WordPress + MariaDB com Compose (Lab-02)</h3><span class="lab-time">~30 min</span></div>
+    <div class="lab-head"><span class="lab-tag">Exercício 2.5</span><h3>WordPress + MariaDB com Compose</h3><span class="lab-time">~30 min</span></div>
     <p class="lab-goal">Provisionar um WordPress com banco de dados, volumes e rede próprios, e comprovar a persistência após destruir os containers. Base: <a href="https://github.com/gersontpc/containers/tree/main/Lab-02" target="_blank" rel="noopener">containers/Lab-02</a>.</p>
     <ol class="steps">
-      <li><div><p>Crie o <code>compose.yaml</code>:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/wordpress &amp;&amp; cd ~/labs/wordpress
-cat &gt; compose.yaml &lt;&lt;'EOF'
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/wordpress &amp;&amp; cd ~/labs/wordpress</code></pre></div>
+<p>Crie o <code>compose.yaml</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; compose.yaml &lt;&lt;'EOF'
 services:
   db:
     image: mariadb:11.4
@@ -2750,19 +2983,24 @@ volumes:
 
 networks:
   backend:
-EOF
-docker compose config --quiet &amp;&amp; echo "YAML válido"</code></pre></div>
+EOF</code></pre></div>
+<p>Valide o YAML:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose config --quiet &amp;&amp; echo "YAML válido"</code></pre></div>
       </div></li>
-      <li><div><p>Suba e acompanhe a ordem de inicialização:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker compose up -d
-docker compose ps
-docker compose logs db --tail 5</code></pre></div>
+      <li><div><p>Suba os serviços:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose up -d</code></pre></div>
+<p>Acompanhe a ordem de inicialização:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose ps</code></pre></div>
+<p>Veja o log do banco:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose logs db --tail 5</code></pre></div>
       </div></li>
       <li><div><p>Abra a porta 8080 pela aba <b>Ports</b>, conclua a instalação do WordPress e publique um post de teste.</p></div></li>
-      <li><div><p>Destrua os containers (mantendo os volumes) e suba de novo:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker compose down
-docker volume ls | grep wordpress
-docker compose up -d</code></pre></div>
+      <li><div><p>Destrua os containers, mantendo os volumes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose down</code></pre></div>
+<p>Confira que os volumes continuam lá:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume ls | grep wordpress</code></pre></div>
+<p>Suba de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose up -d</code></pre></div>
       </div></li>
       <li><div><p>Ao terminar, remova tudo, inclusive volumes:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>docker compose down -v</code></pre></div>
@@ -2776,11 +3014,15 @@ docker compose up -d</code></pre></div>
 
 <!-- 2.7 -->
 <article class="topico" id="a2-t7">
-  <div class="topico-head"><span class="topico-num">2.7</span><h2>Por que orquestrar e Docker Swarm</h2></div>
+  <div class="topico-head"><span class="topico-num">2.7</span><h2>Docker Swarm</h2></div>
   <div class="section-label">Conceito</div>
   <div class="slides">
+    <div class="slide divider">
+      <h3>Docker Swarm</h3>
+      <p><b>O que é:</b> o orquestrador nativo do Docker — transforma vários hosts Docker (um cluster) em um único recurso, usando o <b>mesmo formato</b> do Compose (<code>docker stack deploy -c compose.yaml</code>).<br><b>Problema que resolve:</b> o Compose sobe uma aplicação muito bem, mas só <b>num host só</b>. Se esse host cai, ou se a demanda cresce além da capacidade de uma máquina, não há para onde crescer nem quem reponha o que caiu. O Swarm distribui os serviços por vários nós e os mantém no ar sozinho.</p>
+    </div>
     <div class="slide">
-      <h3>O que um orquestrador faz</h3>
+      <h3>Por que orquestrar containers?</h3>
       <div class="flow">
         <div class="node hl"><b>Estado desejado</b><span>“3 réplicas de web:v2”</span></div>
         <div class="arrow">→</div>
@@ -2797,13 +3039,128 @@ docker compose up -d</code></pre></div>
       </ul>
     </div>
     <div class="slide">
-      <h3>Arquitetura do Docker Swarm</h3>
+      <h3>Conceito: arquitetura do Docker Swarm</h3>
       <div class="cols">
         <div class="card-mini"><h4>Managers</h4><p>Guardam o estado do cluster e reconciliam o desejado com o real. Replicados via <b>Raft</b>: precisam de quórum (N/2 + 1). 3 managers toleram 1 falha; 5 toleram 2.</p></div>
         <div class="card-mini"><h4>Workers</h4><p>Executam as <b>tasks</b> (containers) de cada <b>service</b>.</p></div>
         <div class="card-mini"><h4>Rede</h4><p><code>2377/tcp</code> gerência · <code>7946/tcp+udp</code> descoberta · <code>4789/udp</code> overlay (VXLAN). Routing mesh publica a porta em todos os nós.</p></div>
       </div>
-      <p class="note">Nativo no Docker, simples e com o mesmo formato do Compose (<code>docker stack deploy</code>). O mercado, porém, padronizou no Kubernetes. Portainer oferece uma interface gráfica para Swarm.</p>
+      <p class="note">Portainer oferece uma interface gráfica para operar um cluster Swarm.</p>
+    </div>
+    <div class="slide">
+      <h3>Docker Swarm ainda é utilizado hoje?</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Onde ele ainda aparece</h4><ul><li>Times pequenos que já usam Docker e não querem a complexidade operacional do Kubernetes</li><li>Clusters simples, poucos nós, sem exigência de recursos avançados (CRDs, operators, autoscaling fino)</li><li>Ferramentas como Portainer mantêm suporte de primeira classe a Swarm</li></ul></div>
+        <div class="card-mini"><h4>Por que o mercado foi para o Kubernetes</h4><ul><li>Ecossistema CNCF: Helm, operators, service mesh, observabilidade — tudo pensado para K8s primeiro</li><li>Toda grande nuvem oferece Kubernetes gerenciado (EKS, GKE, AKS); Swarm gerenciado praticamente não existe</li><li>Mais vagas, mais comunidade, mais integrações de terceiros</li></ul></div>
+      </div>
+      <p class="note">Resposta curta: sim, ainda é usado, mas é nicho. Para quem já domina Docker, continua sendo o caminho mais simples até o dia em que o cluster exigir o que só o Kubernetes oferece — e é exatamente aí que a Aula 03 entra.</p>
+    </div>
+    <div class="slide">
+      <h3>Diagrama de baixo nível</h3>
+      <div class="cpd-diagram" data-swarm-flow>
+        <div class="cpd-top">
+          <div class="cpd-col"><div class="cpd-user" data-node="client">Cliente<small>requisição HTTP</small></div></div>
+        </div>
+        <div class="cpd-top" style="margin:2px 0 2px">
+          <div class="cpd-col"><div class="cpd-ar-v">↓<small>qualquer nó, porta 8080</small></div></div>
+        </div>
+        <div class="cpd-top">
+          <div class="cpd-col"><div class="cpd-user" data-node="mesh" style="border-color:var(--signal);color:var(--signal)">Routing mesh<small>balanceia entre os nós</small></div></div>
+        </div>
+        <div class="cpd-top" style="margin:2px 0 10px">
+          <div class="cpd-col"><div class="cpd-ar-v">↓<small>8080 → 80 (porta do container)</small></div></div>
+        </div>
+        <div class="cpd">
+          <span class="cpd-label">cluster Swarm · overlay network VXLAN (4789/udp)</span>
+          <div class="cpd-row">
+            <div class="cpd-svc hl" data-node="m0"><b>manager 1</b><small class="st">raft: líder</small></div>
+            <div class="cpd-svc" data-node="m1"><b>manager 2</b><small class="st">raft: seguidor</small></div>
+            <div class="cpd-svc" data-node="m2"><b>manager 3</b><small class="st">raft: seguidor</small></div>
+          </div>
+          <div class="cpd-ar-v" style="margin:12px 0 6px">↕<small>2377/tcp · gerência · 7946/tcp+udp · descoberta</small></div>
+          <div class="cpd-row">
+            <div class="cpd-worker"><b>worker 1</b><div class="cpd-ctr" data-node="w0"><b>web.1</b><small>nginx:alpine</small></div></div>
+            <div class="cpd-worker"><b>worker 2</b><div class="cpd-ctr" data-node="w1"><b>web.2</b><small>nginx:alpine</small></div></div>
+            <div class="cpd-worker"><b>worker 3</b><div class="cpd-ctr" data-node="w2"><b>web.3</b><small>nginx:alpine</small></div></div>
+          </div>
+          <div class="cpd-ext">Quórum (N/2)+1: com 3 managers, o cluster tolera a perda de 1 sem parar de decidir</div>
+        </div>
+        <div class="cpd-dot" data-swarm-dot hidden></div>
+        <div class="cpd-dot raft" data-raft-dot hidden></div>
+      </div>
+      <div class="cpd-play-row">
+        <button type="button" class="btn" data-swarm-play><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.3v11.4c0 .6.6 1 1.1.7l9-5.7a.8.8 0 0 0 0-1.4l-9-5.7c-.5-.3-1.1.1-1.1.7Z"/></svg>Reproduzir requisição</button>
+        <button type="button" class="btn ghost" data-raft-play><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.3v11.4c0 .6.6 1 1.1.7l9-5.7a.8.8 0 0 0 0-1.4l-9-5.7c-.5-.3-1.1.1-1.1.7Z"/></svg>Reproduzir eleição Raft</button>
+      </div>
+      <p class="note">"Reproduzir requisição": a bolinha verde entra pelo Cliente, passa pela routing mesh e cai num container diferente a cada clique. "Reproduzir eleição Raft": simula o <b>líder caindo</b> (cinza, tracejado) — sem heartbeat, outro manager vira <b>candidato</b> (laranja) e pede voto ao único <b>eleitor</b> que resta; com o próprio voto do candidato, já são 2 de 3 (maioria), e ele assume como novo <b>líder</b> (verde). O nó caído volta como seguidor ao final, pronto para a próxima queda.</p>
+    </div>
+    <div class="slide">
+      <h3>Raft: por que esse algoritmo aparece tanto</h3>
+      <p>O diagrama anterior resolve um problema que não é só do Swarm: como vários processos, espalhados em máquinas diferentes, concordam sobre um único valor — "quem é o líder", "qual é o estado atual" — mesmo quando um deles cai a qualquer momento. Esse problema se chama <b>consenso distribuído</b>, e o Raft é hoje a solução mais usada para ele.</p>
+      <div class="cols">
+        <div class="card-mini"><h4>Para que serve</h4><p>Mantém um <b>log replicado</b> idêntico entre várias réplicas, com um líder só por vez. É a peça que sustenta bancos de dados distribuídos, service discovery e o control plane de orquestradores.</p></div>
+        <div class="card-mini"><h4>Por que importa</h4><p>Publicado em 2014 (Diego Ongaro e John Ousterhout, Stanford) como alternativa ao <b>Paxos</b> — correto, porém notoriamente difícil de entender e implementar. O Raft virou a escolha padrão de qualquer sistema distribuído novo.</p></div>
+        <div class="card-mini"><h4>Quem usa Raft</h4><ul><li><b>Docker Swarm</b> — eleição dos managers (este tópico)</li><li><b>Kubernetes</b> — dentro do <code>etcd</code>, seu banco de estado (Aula 03)</li><li><b>HashiCorp</b> — Consul, Nomad e Vault</li><li><b>Bancos distribuídos</b> — CockroachDB, TiKV/TiDB, YugabyteDB</li><li><b>Filas e streaming</b> — RabbitMQ (quorum queues), Kafka (modo KRaft, substituindo o ZooKeeper)</li></ul></div>
+      </div>
+      <p class="note">Mesmo algoritmo, sempre o mesmo motivo: eleger um líder e replicar um log com segurança. O Raft do Swarm e o Raft dentro do <code>etcd</code> do Kubernetes resolvem exatamente o mesmo problema.</p>
+    </div>
+    <div class="slide">
+      <h3>Como o Raft decide quem manda</h3>
+      <p>Os três managers do diagrama anterior rodam o mesmo algoritmo de consenso entre si: só <b>um</b> é líder por vez, e nenhuma mudança vira estado oficial do cluster sem passar pela maioria.</p>
+      <div class="cpd">
+        <span class="cpd-label">Raft · consenso entre os managers</span>
+        <div class="cpd-row">
+          <div class="cpd-svc hl"><b>manager 1</b><small>líder</small></div>
+          <div class="cpd-svc"><b>manager 2</b><small>seguidor</small></div>
+          <div class="cpd-svc"><b>manager 3</b><small>seguidor</small></div>
+        </div>
+        <div class="cpd-ext">↕ heartbeat constante do líder · se ele some, um seguidor vira candidato e pede voto aos outros</div>
+      </div>
+      <div class="cols">
+        <div class="card-mini"><h4>1. Eleição</h4><p>Sem heartbeat do líder, um seguidor vira candidato e pede voto aos demais. Quem conseguir maioria (2 de 3) vence e assume como líder.</p></div>
+        <div class="card-mini"><h4>2. Replicação do log</h4><p>Toda mudança (criar service, escalar, atualizar) é uma entrada de log que só o líder propõe e envia aos seguidores.</p></div>
+        <div class="card-mini"><h4>3. Commit por quórum</h4><p>A entrada só vira estado oficial do cluster quando a <b>maioria</b> confirma tê-la gravado — não é preciso esperar todo mundo.</p></div>
+      </div>
+      <p class="note">Por isso o número de managers deve ser ímpar: com 3, o cluster tolera perder 1 sem parar de decidir (quórum 2/3); com 5, tolera perder 2 (quórum 3/5). Um número par não ganha tolerância extra e ainda arrisca empate na votação.</p>
+    </div>
+    <div class="slide">
+      <h3>O ciclo do Raft, em loop</h3>
+      <p>As mesmas três fases do slide anterior, animadas em sequência — eleição, liderança e replicação se repetindo continuamente.</p>
+      <div class="cpd cpd-anim">
+        <div class="cpd-frame">
+          <div class="cpd-row">
+            <div class="cpd-svc"><b>manager 1</b><small>seguidor</small></div>
+            <div class="cpd-svc"><b>manager 2</b><small>seguidor</small></div>
+            <div class="cpd-svc"><b>manager 3</b><small>seguidor</small></div>
+          </div>
+          <div class="cpd-ext">1 · Estado inicial: todos os managers são seguidores (followers)</div>
+        </div>
+        <div class="cpd-frame" style="animation-delay:4s">
+          <div class="cpd-row">
+            <div class="cpd-svc cand"><b>manager 1</b><small>candidato</small></div>
+            <div class="cpd-svc"><b>manager 2</b><small>seguidor</small></div>
+            <div class="cpd-svc"><b>manager 3</b><small>seguidor</small></div>
+          </div>
+          <div class="cpd-ext">2 · Sem heartbeat do líder, manager 1 vira candidato e pede voto aos outros</div>
+        </div>
+        <div class="cpd-frame" style="animation-delay:8s">
+          <div class="cpd-row">
+            <div class="cpd-svc hl"><b>manager 1</b><small>líder</small></div>
+            <div class="cpd-svc"><b>manager 2</b><small>seguidor</small></div>
+            <div class="cpd-svc"><b>manager 3</b><small>seguidor</small></div>
+          </div>
+          <div class="cpd-ext">3 · Com maioria dos votos (2 de 3), manager 1 vira líder e envia heartbeats</div>
+        </div>
+        <div class="cpd-frame" style="animation-delay:12s">
+          <div class="cpd-row">
+            <div class="cpd-svc hl"><b>manager 1</b><small>líder → replica</small></div>
+            <div class="cpd-svc"><b>manager 2</b><small>grava log</small></div>
+            <div class="cpd-svc"><b>manager 3</b><small>grava log</small></div>
+          </div>
+          <div class="cpd-ext">4 · O líder propõe a mudança; vira commit quando a maioria confirma</div>
+        </div>
+      </div>
+      <p class="note">Baseado na visualização interativa de <a href="https://thesecretlivesofdata.com/raft/" target="_blank" rel="noopener">The Secret Lives of Data · Raft</a> — vale abrir e brincar com a eleição e as falhas de nó. Especificação completa em <a href="https://raft.github.io/" target="_blank" rel="noopener">raft.github.io</a>.</p>
     </div>
   </div>
   <div class="section-label">Prática</div>
@@ -2811,25 +3168,33 @@ docker compose up -d</code></pre></div>
     <div class="lab-head"><span class="lab-tag">Exercício 2.6</span><h3>Swarm de um nó: auto-reparo e rolling update</h3><span class="lab-time">~25 min</span></div>
     <p class="lab-goal">Ver na prática o loop de reconciliação que o Compose não oferece: réplica que cai volta sozinha.</p>
     <ol class="steps">
-      <li><div><p>Inicie o Swarm e crie um service com 3 réplicas:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker swarm init || docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
-docker node ls
-docker service create --name web --replicas 3 -p 8083:80 nginx:1.27-alpine
-docker service ps web</code></pre></div>
+      <li><div><p>Inicie o Swarm:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker swarm init || docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')</code></pre></div>
+<p>Confira o nó:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker node ls</code></pre></div>
+<p>Crie um service com 3 réplicas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service create --name web --replicas 3 -p 8083:80 nginx:1.27-alpine</code></pre></div>
+<p>Veja as tasks:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service ps web</code></pre></div>
       </div></li>
-      <li><div><p>Mate um container e veja o Swarm repor:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f $(docker ps -q --filter name=web. | head -1)
-sleep 5; docker service ps web</code></pre></div>
+      <li><div><p>Mate um dos containers:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f $(docker ps -q --filter name=web. | head -1)</code></pre></div>
+<p>Veja o Swarm repor:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 5; docker service ps web</code></pre></div>
       </div></li>
-      <li><div><p>Escale e faça um rolling update, uma réplica por vez:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>docker service scale web=5
-docker service update --image nginx:1.28-alpine --update-parallelism 1 --update-delay 5s web
-docker service ps web --filter desired-state=running
-docker service rollback web</code></pre></div>
+      <li><div><p>Escale para 5 réplicas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service scale web=5</code></pre></div>
+<p>Faça um rolling update, uma réplica por vez:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service update --image nginx:1.28-alpine --update-parallelism 1 --update-delay 5s web</code></pre></div>
+<p>Acompanhe o estado das tasks:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service ps web --filter desired-state=running</code></pre></div>
+<p>Volte para a versão anterior:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service rollback web</code></pre></div>
       </div></li>
-      <li><div><p>Faça o deploy de uma stack a partir de um arquivo Compose:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/swarm &amp;&amp; cd ~/labs/swarm
-cat &gt; stack.yaml &lt;&lt;'EOF'
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/swarm &amp;&amp; cd ~/labs/swarm</code></pre></div>
+<p>Crie o arquivo da stack:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; stack.yaml &lt;&lt;'EOF'
 services:
   whoami:
     image: traefik/whoami
@@ -2838,10 +3203,13 @@ services:
       replicas: 3
       update_config: { parallelism: 1, delay: 5s }
       restart_policy: { condition: any }
-EOF
-docker stack deploy -c stack.yaml demo
-docker stack services demo
-for i in $(seq 6); do curl -s localhost:8084 | grep Hostname; done</code></pre></div>
+EOF</code></pre></div>
+<p>Faça o deploy da stack:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stack deploy -c stack.yaml demo</code></pre></div>
+<p>Confira os serviços:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stack services demo</code></pre></div>
+<p>Chame o serviço várias vezes e veja o routing mesh alternar entre as réplicas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for i in $(seq 6); do curl -s localhost:8084 | grep Hostname; done</code></pre></div>
       </div></li>
       <li><div><p>Limpe e saia do Swarm (o Kubernetes vem na Aula 03):</p>
 <div class="code"><span class="lang">terminal</span><pre><code>docker stack rm demo; docker service rm web; docker swarm leave --force</code></pre></div>
@@ -3083,25 +3451,34 @@ image: app:v2
     <p class="lab-goal">Publicar a app Go no Amazon ECR e rodá-la como um service do ECS com Fargate, usando a conta do AWS Academy Learner Lab.</p>
     <div class="warn"><b>AWS Academy Learner Lab</b><p>Inicie o lab (<b>Start Lab</b>) antes de começar. As permissões de IAM são limitadas: o exercício usa a role pronta <code>LabRole</code>. Trabalhe em <code>us-east-1</code> e faça a limpeza do exercício 3.2 no fim da aula.</p></div>
     <ol class="steps">
-      <li><div><p>Em <b>AWS Details → AWS CLI: Show</b>, copie as credenciais para o Codespaces e valide:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/.aws
-code ~/.aws/credentials      # cole o bloco [default] do Learner Lab e salve
-export AWS_REGION=us-east-1 AWS_DEFAULT_REGION=us-east-1
-aws sts get-caller-identity</code></pre></div>
+      <li><div><p>Crie a pasta de configuração da AWS:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/.aws</code></pre></div>
+<p>Em <b>AWS Details → AWS CLI: Show</b>, copie o bloco <code>[default]</code> do Learner Lab e cole no arquivo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>code ~/.aws/credentials</code></pre></div>
+<p>Defina a região:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>export AWS_REGION=us-east-1 AWS_DEFAULT_REGION=us-east-1</code></pre></div>
+<p>Valide as credenciais:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws sts get-caller-identity</code></pre></div>
       </div></li>
-      <li><div><p>Crie o repositório no ECR e publique a imagem da app Go (exercício 1.6):</p>
+      <li><div><p>Monte o nome do repositório e da imagem:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 REGISTRY=$ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com
-REPO=$REGISTRY/app-go
-aws ecr create-repository --repository-name app-go
-aws ecr get-login-password | docker login --username AWS --password-stdin $REGISTRY
-cd ~/labs/app-go &amp;&amp; docker build -t $REPO:v1 . &amp;&amp; docker push $REPO:v1</code></pre></div>
+REPO=$REGISTRY/app-go</code></pre></div>
+<p>Crie o repositório no ECR:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecr create-repository --repository-name app-go</code></pre></div>
+<p>Autentique o Docker no ECR:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecr get-login-password | docker login --username AWS --password-stdin $REGISTRY</code></pre></div>
+<p>Construa e publique a imagem da app Go (exercício 1.6):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/app-go &amp;&amp; docker build -t $REPO:v1 . &amp;&amp; docker push $REPO:v1</code></pre></div>
       </div></li>
-      <li><div><p>Crie o grupo de logs e a task definition, usando a <code>LabRole</code>:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>ROLE=$(aws iam get-role --role-name LabRole --query Role.Arn --output text)
-aws logs create-log-group --log-group-name /ecs/app-go
-mkdir -p ~/labs/ecs &amp;&amp; cd ~/labs/ecs
-cat &gt; taskdef.json &lt;&lt;EOF
+      <li><div><p>Descubra o ARN da <code>LabRole</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>ROLE=$(aws iam get-role --role-name LabRole --query Role.Arn --output text)</code></pre></div>
+<p>Crie o grupo de logs:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws logs create-log-group --log-group-name /ecs/app-go</code></pre></div>
+<p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/ecs &amp;&amp; cd ~/labs/ecs</code></pre></div>
+<p>Crie a task definition:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; taskdef.json &lt;&lt;EOF
 {
   "family": "app-go",
   "networkMode": "awsvpc",
@@ -3126,29 +3503,36 @@ cat &gt; taskdef.json &lt;&lt;EOF
     }
   }]
 }
-EOF
-aws ecs register-task-definition --cli-input-json file://taskdef.json --query taskDefinition.taskDefinitionArn</code></pre></div>
+EOF</code></pre></div>
+<p>Registre a task definition:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs register-task-definition --cli-input-json file://taskdef.json --query taskDefinition.taskDefinitionArn</code></pre></div>
       </div></li>
-      <li><div><p>Prepare a rede: VPC padrão, duas subnets e um security group liberando a porta 8080:</p>
+      <li><div><p>Descubra a VPC padrão, duas subnets e crie um security group:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>VPC=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text)
 SUBNETS=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$VPC --query 'Subnets[0:2].SubnetId' --output text | tr '\t' ',')
-SG=$(aws ec2 create-security-group --group-name app-go-sg --description "app-go" --vpc-id $VPC --query GroupId --output text)
-aws ec2 authorize-security-group-ingress --group-id $SG --protocol tcp --port 8080 --cidr 0.0.0.0/0
-echo "VPC=$VPC SUBNETS=$SUBNETS SG=$SG"</code></pre></div>
+SG=$(aws ec2 create-security-group --group-name app-go-sg --description "app-go" --vpc-id $VPC --query GroupId --output text)</code></pre></div>
+<p>Libere a porta 8080 no security group:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ec2 authorize-security-group-ingress --group-id $SG --protocol tcp --port 8080 --cidr 0.0.0.0/0</code></pre></div>
+<p>Confira os valores:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>echo "VPC=$VPC SUBNETS=$SUBNETS SG=$SG"</code></pre></div>
       </div></li>
-      <li><div><p>Crie o cluster e o service com 2 tasks, e aguarde estabilizar:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>aws ecs create-cluster --cluster-name ecs-labs
-aws ecs create-service --cluster ecs-labs --service-name app-go \
+      <li><div><p>Crie o cluster:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs create-cluster --cluster-name ecs-labs</code></pre></div>
+<p>Crie o service com 2 tasks:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs create-service --cluster ecs-labs --service-name app-go \
   --task-definition app-go --desired-count 2 --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SG],assignPublicIp=ENABLED}"
-aws ecs wait services-stable --cluster ecs-labs --services app-go
-aws ecs describe-services --cluster ecs-labs --services app-go --query 'services[0].{desejado:desiredCount,rodando:runningCount}'</code></pre></div>
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SG],assignPublicIp=ENABLED}"</code></pre></div>
+<p>Aguarde estabilizar:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs wait services-stable --cluster ecs-labs --services app-go</code></pre></div>
+<p>Confira o estado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs describe-services --cluster ecs-labs --services app-go --query 'services[0].{desejado:desiredCount,rodando:runningCount}'</code></pre></div>
       </div></li>
-      <li><div><p>Descubra o IP público de uma task e acesse a aplicação:</p>
+      <li><div><p>Descubra o IP público de uma task:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>TASK=$(aws ecs list-tasks --cluster ecs-labs --service-name app-go --query 'taskArns[0]' --output text)
 ENI=$(aws ecs describe-tasks --cluster ecs-labs --tasks $TASK --query "tasks[0].attachments[0].details[?name=='networkInterfaceId'].value" --output text)
-IP=$(aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'NetworkInterfaces[0].Association.PublicIp' --output text)
-curl http://$IP:8080; curl http://$IP:8080/healthz</code></pre></div>
+IP=$(aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'NetworkInterfaces[0].Association.PublicIp' --output text)</code></pre></div>
+<p>Acesse a aplicação:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl http://$IP:8080; curl http://$IP:8080/healthz</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul>
@@ -3181,42 +3565,61 @@ curl http://$IP:8080; curl http://$IP:8080/healthz</code></pre></div>
     <div class="lab-head"><span class="lab-tag">Exercício 3.2</span><h3>Auto-reparo, escala, nova versão e limpeza no ECS</h3><span class="lab-time">~30 min</span></div>
     <p class="lab-goal">Ver o service do ECS reconciliar o estado desejado, escalar, publicar a v2 com rolling update, ler os logs e remover tudo da conta.</p>
     <ol class="steps">
-      <li><div><p>Pare uma task “na mão” e acompanhe o service repor:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>aws ecs stop-task --cluster ecs-labs --task $(aws ecs list-tasks --cluster ecs-labs --service-name app-go --query 'taskArns[0]' --output text) --reason "teste de auto-reparo" &gt; /dev/null
-sleep 30
-aws ecs describe-services --cluster ecs-labs --services app-go --query 'services[0].events[0:4].message'</code></pre></div>
+      <li><div><p>Pare uma task "na mão":</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs stop-task --cluster ecs-labs --task $(aws ecs list-tasks --cluster ecs-labs --service-name app-go --query 'taskArns[0]' --output text) --reason "teste de auto-reparo" &gt; /dev/null</code></pre></div>
+<p>Aguarde um pouco:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 30</code></pre></div>
+<p>Acompanhe o service repor:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs describe-services --cluster ecs-labs --services app-go --query 'services[0].events[0:4].message'</code></pre></div>
       </div></li>
       <li><div><p>Escale para 3 tasks:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>aws ecs update-service --cluster ecs-labs --service app-go --desired-count 3 &gt; /dev/null
-aws ecs wait services-stable --cluster ecs-labs --services app-go
-aws ecs describe-services --cluster ecs-labs --services app-go --query 'services[0].runningCount'</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs update-service --cluster ecs-labs --service app-go --desired-count 3 &gt; /dev/null</code></pre></div>
+<p>Aguarde estabilizar:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs wait services-stable --cluster ecs-labs --services app-go</code></pre></div>
+<p>Confira:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs describe-services --cluster ecs-labs --services app-go --query 'services[0].runningCount'</code></pre></div>
       </div></li>
-      <li><div><p>Publique a v2: nova revisão da task definition e rolling update:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/ecs
-sed 's/"value": "v1"/"value": "v2"/' taskdef.json &gt; taskdef-v2.json
-aws ecs register-task-definition --cli-input-json file://taskdef-v2.json --query taskDefinition.revision
-aws ecs update-service --cluster ecs-labs --service app-go --task-definition app-go \
-  --deployment-configuration "deploymentCircuitBreaker={enable=true,rollback=true}" &gt; /dev/null
-aws ecs wait services-stable --cluster ecs-labs --services app-go
-aws ecs describe-services --cluster ecs-labs --services app-go --query 'services[0].taskDefinition'</code></pre></div>
+      <li><div><p>Entre na pasta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/ecs</code></pre></div>
+<p>Gere uma task definition com a versão v2:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sed 's/"value": "v1"/"value": "v2"/' taskdef.json &gt; taskdef-v2.json</code></pre></div>
+<p>Registre a nova revisão:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs register-task-definition --cli-input-json file://taskdef-v2.json --query taskDefinition.revision</code></pre></div>
+<p>Atualize o service para usá-la, com circuit breaker ligado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs update-service --cluster ecs-labs --service app-go --task-definition app-go \
+  --deployment-configuration "deploymentCircuitBreaker={enable=true,rollback=true}" &gt; /dev/null</code></pre></div>
+<p>Aguarde estabilizar:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs wait services-stable --cluster ecs-labs --services app-go</code></pre></div>
+<p>Confira a task definition em uso:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs describe-services --cluster ecs-labs --services app-go --query 'services[0].taskDefinition'</code></pre></div>
       </div></li>
-      <li><div><p>Confira a nova versão e os logs no CloudWatch:</p>
+      <li><div><p>Descubra o IP de uma task:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>TASK=$(aws ecs list-tasks --cluster ecs-labs --service-name app-go --query 'taskArns[0]' --output text)
 ENI=$(aws ecs describe-tasks --cluster ecs-labs --tasks $TASK --query "tasks[0].attachments[0].details[?name=='networkInterfaceId'].value" --output text)
-IP=$(aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'NetworkInterfaces[0].Association.PublicIp' --output text)
-curl http://$IP:8080
-aws logs tail /ecs/app-go --since 15m | tail -8</code></pre></div>
+IP=$(aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'NetworkInterfaces[0].Association.PublicIp' --output text)</code></pre></div>
+<p>Confira a nova versão:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl http://$IP:8080</code></pre></div>
+<p>Veja os logs no CloudWatch:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws logs tail /ecs/app-go --since 15m | tail -8</code></pre></div>
       </div></li>
-      <li><div><p>Limpe tudo (os recursos consomem os créditos do Learner Lab mesmo com a sessão encerrada):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>aws ecs update-service --cluster ecs-labs --service app-go --desired-count 0 &gt; /dev/null
-aws ecs delete-service --cluster ecs-labs --service app-go --force &gt; /dev/null
-aws ecs wait services-inactive --cluster ecs-labs --services app-go
-aws ecs delete-cluster --cluster ecs-labs &gt; /dev/null
-for r in $(aws ecs list-task-definitions --family-prefix app-go --query 'taskDefinitionArns[]' --output text); do aws ecs deregister-task-definition --task-definition $r &gt; /dev/null; done
-aws ec2 delete-security-group --group-id $SG
-aws ecr delete-repository --repository-name app-go --force &gt; /dev/null
-aws logs delete-log-group --log-group-name /ecs/app-go
-echo "limpeza concluída"</code></pre></div>
+      <li><div><p>Limpe tudo (os recursos consomem os créditos do Learner Lab mesmo com a sessão encerrada). Zere o service:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs update-service --cluster ecs-labs --service app-go --desired-count 0 &gt; /dev/null</code></pre></div>
+<p>Remova o service:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs delete-service --cluster ecs-labs --service app-go --force &gt; /dev/null</code></pre></div>
+<p>Aguarde a remoção:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs wait services-inactive --cluster ecs-labs --services app-go</code></pre></div>
+<p>Remova o cluster:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecs delete-cluster --cluster ecs-labs &gt; /dev/null</code></pre></div>
+<p>Remova todas as revisões da task definition:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for r in $(aws ecs list-task-definitions --family-prefix app-go --query 'taskDefinitionArns[]' --output text); do aws ecs deregister-task-definition --task-definition $r &gt; /dev/null; done</code></pre></div>
+<p>Remova o security group:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ec2 delete-security-group --group-id $SG</code></pre></div>
+<p>Remova o repositório do ECR:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ecr delete-repository --repository-name app-go --force &gt; /dev/null</code></pre></div>
+<p>Remova o grupo de logs:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws logs delete-log-group --log-group-name /ecs/app-go</code></pre></div>
+<p>Confirme:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>echo "limpeza concluída"</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul>
@@ -3322,30 +3725,38 @@ echo "limpeza concluída"</code></pre></div>
     <div class="lab-head"><span class="lab-tag">Exercício 3.3</span><h3>Criando e explorando um cluster com k3d</h3><span class="lab-time">~20 min</span></div>
     <p class="lab-goal">Subir um cluster com 1 servidor e 2 agentes dentro do Codespaces e identificar cada componente.</p>
     <ol class="steps">
-      <li><div><p>Instale o k3d e confira se o <code>kubectl</code> está disponível (a imagem padrão do Codespaces já traz o kubectl; se não trouxer, o segundo bloco instala):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-k3d version
-kubectl version --client</code></pre></div>
-<div class="code"><span class="lang">terminal</span><pre><code><span class="c-cm"># somente se o kubectl não existir</span>
-curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-sudo install -m 0755 kubectl /usr/local/bin/kubectl &amp;&amp; rm kubectl</code></pre></div>
+      <li><div><p>Instale o k3d:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash</code></pre></div>
+<p>Confira a versão:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>k3d version</code></pre></div>
+<p>Confira se o <code>kubectl</code> está disponível (a imagem padrão do Codespaces já traz):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl version --client</code></pre></div>
+<p>Só se o <code>kubectl</code> não existir, baixe-o:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"</code></pre></div>
+<p>E instale-o:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sudo install -m 0755 kubectl /usr/local/bin/kubectl &amp;&amp; rm kubectl</code></pre></div>
       </div></li>
       <li><div><p>Crie o cluster (a porta 8081 do codespace vai para o load balancer do cluster):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>k3d cluster create labs --agents 2 -p "8081:80@loadbalancer" --wait
-kubectl get nodes -o wide</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>k3d cluster create labs --agents 2 -p "8081:80@loadbalancer" --wait</code></pre></div>
+<p>Confira os nós:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get nodes -o wide</code></pre></div>
       </div></li>
       <li><div><p>Veja que cada nó é um container Docker:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}'</code></pre></div>
       </div></li>
-      <li><div><p>Explore os componentes e a API:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl cluster-info
-kubectl get pods -n kube-system -o wide
-kubectl api-resources | head -25
-kubectl explain deployment.spec.strategy</code></pre></div>
+      <li><div><p>Veja um resumo do cluster:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl cluster-info</code></pre></div>
+<p>Os Pods do sistema:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get pods -n kube-system -o wide</code></pre></div>
+<p>Os tipos de recurso disponíveis na API:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl api-resources | head -25</code></pre></div>
+<p>E a documentação embutida de um campo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl explain deployment.spec.strategy</code></pre></div>
       </div></li>
       <li><div><p>Veja o runtime por trás do kubelet (containerd, não Docker):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"  "}{.status.nodeInfo.containerRuntimeVersion}{"\n"}{end}'
-docker exec k3d-labs-agent-0 crictl ps</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"  "}{.status.nodeInfo.containerRuntimeVersion}{"\n"}{end}'</code></pre></div>
+<p>E as mesmas informações vistas de dentro do nó, pela CLI do containerd:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec k3d-labs-agent-0 crictl ps</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>3 nós <code>Ready</code>: <code>k3d-labs-server-0</code> (control-plane) e <code>k3d-labs-agent-0/1</code>.</li><li>Em <code>kube-system</code>: <code>coredns</code>, <code>traefik</code>, <code>metrics-server</code>, <code>local-path-provisioner</code>, <code>svclb-traefik</code>.</li><li>Runtime <code>containerd://…</code>. No k3s, API server, scheduler e controllers rodam num único binário, por isso não aparecem como Pods.</li></ul></div>
@@ -3512,11 +3923,14 @@ docker exec k3d-labs-agent-0 crictl ps</code></pre></div>
     <div class="lab-head"><span class="lab-tag">Exercício 3.4</span><h3>Deploy, auto-reparo, escala e rollback</h3><span class="lab-time">~30 min</span></div>
     <p class="lab-goal">Operar o ciclo de vida completo de um Deployment. Base: <a href="https://github.com/gersontpc/containers/tree/main/Lab-04/01-cluster-local" target="_blank" rel="noopener">containers/Lab-04/01-cluster-local</a>.</p>
     <ol class="steps">
-      <li><div><p>Crie um namespace e o manifesto:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/k8s &amp;&amp; cd ~/labs/k8s
-kubectl create namespace app
-kubectl config set-context --current --namespace=app
-cat &gt; deployment.yaml &lt;&lt;'EOF'
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/k8s &amp;&amp; cd ~/labs/k8s</code></pre></div>
+<p>Crie um namespace:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl create namespace app</code></pre></div>
+<p>Defina-o como padrão neste contexto:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl config set-context --current --namespace=app</code></pre></div>
+<p>Crie o manifesto do Deployment:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; deployment.yaml &lt;&lt;'EOF'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -3539,32 +3953,45 @@ spec:
           image: nginx:1.27-alpine
           ports:
             - containerPort: 80
-EOF
-kubectl apply -f deployment.yaml
-kubectl get deploy,rs,pods -o wide</code></pre></div>
+EOF</code></pre></div>
+<p>Aplique:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f deployment.yaml</code></pre></div>
+<p>Confira o que foi criado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get deploy,rs,pods -o wide</code></pre></div>
       </div></li>
-      <li><div><p>Apague um Pod e observe o ReplicaSet recriá-lo (Ctrl+C para sair do watch):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl delete $(kubectl get pod -l app=web -o name | head -1)
-kubectl get pods -l app=web -w</code></pre></div>
+      <li><div><p>Apague um Pod:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl delete $(kubectl get pod -l app=web -o name | head -1)</code></pre></div>
+<p>Observe o ReplicaSet recriá-lo (Ctrl+C para sair do watch):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get pods -l app=web -w</code></pre></div>
       </div></li>
-      <li><div><p>Escale e atualize a versão:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl scale deployment web --replicas=5
-kubectl set image deployment/web nginx=nginx:1.28-alpine
-kubectl annotate deployment web kubernetes.io/change-cause="nginx 1.28" --overwrite
-kubectl rollout status deployment/web
-kubectl rollout history deployment/web
-kubectl get rs</code></pre></div>
+      <li><div><p>Escale para 5 réplicas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl scale deployment web --replicas=5</code></pre></div>
+<p>Atualize a versão da imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl set image deployment/web nginx=nginx:1.28-alpine</code></pre></div>
+<p>Anote o motivo da mudança:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl annotate deployment web kubernetes.io/change-cause="nginx 1.28" --overwrite</code></pre></div>
+<p>Acompanhe o rollout:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl rollout status deployment/web</code></pre></div>
+<p>Veja o histórico de revisões:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl rollout history deployment/web</code></pre></div>
+<p>E os ReplicaSets, antigo e novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get rs</code></pre></div>
       </div></li>
-      <li><div><p>Simule um deploy quebrado e faça rollback:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl set image deployment/web nginx=nginx:9.99-nao-existe
-kubectl get pods -l app=web          # ImagePullBackOff nos novos, antigos seguem rodando
-kubectl describe pod $(kubectl get pod -l app=web --field-selector=status.phase=Pending -o name | head -1) | tail -5
-kubectl rollout undo deployment/web
-kubectl rollout status deployment/web</code></pre></div>
+      <li><div><p>Aponte para uma imagem que não existe:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl set image deployment/web nginx=nginx:9.99-nao-existe</code></pre></div>
+<p>Veja os novos Pods presos em <code>ImagePullBackOff</code>, enquanto os antigos seguem rodando:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get pods -l app=web</code></pre></div>
+<p>Confira o motivo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl describe pod $(kubectl get pod -l app=web --field-selector=status.phase=Pending -o name | head -1) | tail -5</code></pre></div>
+<p>Volte para a versão anterior:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl rollout undo deployment/web</code></pre></div>
+<p>Confirme que estabilizou:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl rollout status deployment/web</code></pre></div>
       </div></li>
-      <li><div><p>Logs e shell num Pod:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl logs deploy/web --tail 5
-kubectl exec -it deploy/web -- sh -c 'hostname; nginx -v'</code></pre></div>
+      <li><div><p>Veja os logs:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl logs deploy/web --tail 5</code></pre></div>
+<p>Abra um shell num Pod:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl exec -it deploy/web -- sh -c 'hostname; nginx -v'</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>O Pod apagado é substituído em segundos por outro com nome novo.</li><li><code>kubectl get rs</code> mostra dois ReplicaSets: o antigo com 0 réplicas, o novo com 5.</li><li>Com a imagem inexistente, o rollout trava sem derrubar a aplicação (as réplicas antigas continuam atendendo). O <code>undo</code> volta para <code>nginx:1.28-alpine</code>.</li></ul></div>
@@ -3671,9 +4098,10 @@ spec:
     <div class="lab-head"><span class="lab-tag">Exercício 3.5</span><h3>Expondo a aplicação: ClusterIP, Ingress e Gateway API</h3><span class="lab-time">~45 min</span></div>
     <p class="lab-goal">Criar Services para dois Deployments, testar o DNS interno, publicar ambos por um Ingress e depois pela Gateway API com HTTPRoute, incluindo um canary por peso. Tudo com o Traefik do k3s.</p>
     <ol class="steps">
-      <li><div><p>Service ClusterIP para o <code>web</code> e um segundo app (<code>whoami</code>):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/k8s
-cat &gt; service.yaml &lt;&lt;'EOF'
+      <li><div><p>Entre na pasta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/k8s</code></pre></div>
+<p>Crie o Service ClusterIP para o <code>web</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; service.yaml &lt;&lt;'EOF'
 apiVersion: v1
 kind: Service
 metadata:
@@ -3685,19 +4113,24 @@ spec:
   ports:
     - port: 80
       targetPort: 80
-EOF
-kubectl apply -f service.yaml
-kubectl create deployment whoami --image=traefik/whoami --replicas=3
-kubectl expose deployment whoami --port=80
-kubectl get svc,endpointslices</code></pre></div>
+EOF</code></pre></div>
+<p>Aplique:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f service.yaml</code></pre></div>
+<p>Crie um segundo app:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl create deployment whoami --image=traefik/whoami --replicas=3</code></pre></div>
+<p>Exponha-o:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl expose deployment whoami --port=80</code></pre></div>
+<p>Confira os Services e os EndpointSlices:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get svc,endpointslices</code></pre></div>
       </div></li>
       <li><div><p>Teste pelo DNS interno a partir de um Pod temporário:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>kubectl run tmp --rm -it --restart=Never --image=curlimages/curl:8.10.1 -- \
   sh -c 'curl -sI http://web.app.svc.cluster.local | head -1; for i in 1 2 3 4; do curl -s http://whoami | grep Hostname; done'</code></pre></div>
       </div></li>
-      <li><div><p>Acesso rápido do seu terminal com port-forward:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl port-forward svc/web 8082:80 &gt;/dev/null &amp;
-sleep 2; curl -sI localhost:8082 | head -1; kill %1</code></pre></div>
+      <li><div><p>Inicie um port-forward em segundo plano:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl port-forward svc/web 8082:80 &gt;/dev/null &amp;</code></pre></div>
+<p>Acesse pelo terminal e encerre o port-forward:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 2; curl -sI localhost:8082 | head -1; kill %1</code></pre></div>
       </div></li>
       <li><div><p>Crie um Ingress com duas rotas:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>cat &gt; ingress.yaml &lt;&lt;'EOF'
@@ -3724,11 +4157,15 @@ spec:
                 name: web
                 port:
                   number: 80
-EOF
-kubectl apply -f ingress.yaml
-kubectl get ingress
-curl -s localhost:8081/ | grep -o '&lt;title&gt;.*&lt;/title&gt;'
-curl -s localhost:8081/whoami | grep Hostname</code></pre></div>
+EOF</code></pre></div>
+<p>Aplique:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f ingress.yaml</code></pre></div>
+<p>Confira:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get ingress</code></pre></div>
+<p>Teste a rota raiz:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8081/ | grep -o '&lt;title&gt;.*&lt;/title&gt;'</code></pre></div>
+<p>E a rota <code>/whoami</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8081/whoami | grep Hostname</code></pre></div>
       </div></li>
       <li><div><p>Abra a porta 8081 na aba <b>Ports</b> e acesse <code>/</code> e <code>/whoami</code> pelo navegador.</p></div></li>
     </ol>
@@ -3754,12 +4191,15 @@ spec:
             from: All
 EOF</code></pre></div>
       </div></li>
-      <li><div><p>Garanta que os CRDs da Gateway API existem e aguarde o Traefik ser reconfigurado:</p>
+      <li><div><p>Garanta que os CRDs da Gateway API existem:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>kubectl get crd gateways.gateway.networking.k8s.io 2&gt;/dev/null || \
-  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.0/standard-install.yaml
-until kubectl get gateway -n kube-system traefik-gateway &gt;/dev/null 2&gt;&amp;1; do echo "aguardando o Traefik..."; sleep 5; done
-kubectl get gatewayclass
-kubectl get gateway -n kube-system</code></pre></div>
+  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.0/standard-install.yaml</code></pre></div>
+<p>Aguarde o Traefik ser reconfigurado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>until kubectl get gateway -n kube-system traefik-gateway &gt;/dev/null 2&gt;&amp;1; do echo "aguardando o Traefik..."; sleep 5; done</code></pre></div>
+<p>Confira a GatewayClass:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get gatewayclass</code></pre></div>
+<p>E o Gateway:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get gateway -n kube-system</code></pre></div>
       </div></li>
       <li><div><p>Crie um HTTPRoute com duas regras, ligado ao Gateway do Traefik:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>cat &gt; httproute.yaml &lt;&lt;'EOF'
@@ -3781,16 +4221,22 @@ spec:
         - path: { type: PathPrefix, value: / }
       backendRefs:
         - { name: web, port: 80 }
-EOF
-kubectl apply -f httproute.yaml
-kubectl get httproute app -o jsonpath='{.status.parents[0].conditions[*].type}{"\n"}'
-curl -s -H "Host: gw.localhost" localhost:8081/ | grep -o '&lt;title&gt;.*&lt;/title&gt;'
-curl -s -H "Host: gw.localhost" localhost:8081/whoami | grep Hostname</code></pre></div>
+EOF</code></pre></div>
+<p>Aplique:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f httproute.yaml</code></pre></div>
+<p>Confira as condições:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get httproute app -o jsonpath='{.status.parents[0].conditions[*].type}{"\n"}'</code></pre></div>
+<p>Teste a rota raiz pelo host da Gateway:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s -H "Host: gw.localhost" localhost:8081/ | grep -o '&lt;title&gt;.*&lt;/title&gt;'</code></pre></div>
+<p>E a rota <code>/whoami</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s -H "Host: gw.localhost" localhost:8081/whoami | grep Hostname</code></pre></div>
       </div></li>
-      <li><div><p>Faça um canary: suba uma “v2” e divida o tráfego 80/20 por peso:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl create deployment whoami-v2 --image=traefik/whoami --replicas=2
-kubectl expose deployment whoami-v2 --port=80
-cat &gt; canary.yaml &lt;&lt;'EOF'
+      <li><div><p>Suba uma "v2" do whoami:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl create deployment whoami-v2 --image=traefik/whoami --replicas=2</code></pre></div>
+<p>Exponha-a:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl expose deployment whoami-v2 --port=80</code></pre></div>
+<p>Crie um HTTPRoute que divide o tráfego 80/20 por peso:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; canary.yaml &lt;&lt;'EOF'
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -3804,14 +4250,17 @@ spec:
     - backendRefs:
         - { name: whoami, port: 80, weight: 80 }
         - { name: whoami-v2, port: 80, weight: 20 }
-EOF
-kubectl apply -f canary.yaml
-for i in $(seq 50); do curl -s -H "Host: canary.localhost" localhost:8081 | grep Hostname; done \
+EOF</code></pre></div>
+<p>Aplique:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f canary.yaml</code></pre></div>
+<p>Dispare 50 chamadas e conte quantas cada versão respondeu:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for i in $(seq 50); do curl -s -H "Host: canary.localhost" localhost:8081 | grep Hostname; done \
   | sed -E 's/Hostname: (whoami(-v2)?)-.*/\1/' | sort | uniq -c</code></pre></div>
       </div></li>
-      <li><div><p>Mude para 50/50 editando só os pesos e compare:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>sed -i 's/weight: 80/weight: 50/; s/weight: 20/weight: 50/' canary.yaml &amp;&amp; kubectl apply -f canary.yaml
-for i in $(seq 50); do curl -s -H "Host: canary.localhost" localhost:8081 | grep Hostname; done \
+      <li><div><p>Mude para 50/50, editando só os pesos e reaplicando:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sed -i 's/weight: 80/weight: 50/; s/weight: 20/weight: 50/' canary.yaml &amp;&amp; kubectl apply -f canary.yaml</code></pre></div>
+<p>Dispare as 50 chamadas de novo e compare:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for i in $(seq 50); do curl -s -H "Host: canary.localhost" localhost:8081 | grep Hostname; done \
   | sed -E 's/Hostname: (whoami(-v2)?)-.*/\1/' | sort | uniq -c</code></pre></div>
       </div></li>
     </ol>
@@ -3875,9 +4324,10 @@ for i in $(seq 50); do curl -s -H "Host: canary.localhost" localhost:8081 | grep
     <div class="lab-head"><span class="lab-tag">Exercício 4.1</span><h3>Readiness e liveness em ação</h3><span class="lab-time">~25 min</span></div>
     <p class="lab-goal">Ver um Pod rodando mas fora do tráfego (readiness) e um Pod sendo reiniciado pelo kubelet (liveness).</p>
     <ol class="steps">
-      <li><div><p>Aplique um Deployment cuja readiness depende do arquivo <code>/ready.html</code>:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/prod &amp;&amp; cd ~/labs/prod
-cat &gt; probes.yaml &lt;&lt;'EOF'
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/prod &amp;&amp; cd ~/labs/prod</code></pre></div>
+<p>Crie um Deployment cuja readiness depende do arquivo <code>/ready.html</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; probes.yaml &lt;&lt;'EOF'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -3916,21 +4366,29 @@ spec:
     app: probes
   ports:
     - port: 80
-EOF
-kubectl apply -f probes.yaml
-kubectl get pods -l app=probes
-kubectl get endpointslices -l kubernetes.io/service-name=probes -o wide</code></pre></div>
+EOF</code></pre></div>
+<p>Aplique:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f probes.yaml</code></pre></div>
+<p>Confira os Pods:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get pods -l app=probes</code></pre></div>
+<p>E os endpoints do Service:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get endpointslices -l kubernetes.io/service-name=probes -o wide</code></pre></div>
       </div></li>
-      <li><div><p>Deixe apenas um Pod pronto:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>P1=$(kubectl get pod -l app=probes -o name | head -1)
-kubectl exec $P1 -- sh -c 'echo ok &gt; /usr/share/nginx/html/ready.html'
-sleep 4; kubectl get pods -l app=probes
-kubectl get endpointslices -l kubernetes.io/service-name=probes -o wide</code></pre></div>
+      <li><div><p>Guarde o nome do primeiro Pod:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>P1=$(kubectl get pod -l app=probes -o name | head -1)</code></pre></div>
+<p>Crie o arquivo que a readiness espera:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl exec $P1 -- sh -c 'echo ok &gt; /usr/share/nginx/html/ready.html'</code></pre></div>
+<p>Aguarde e confira que esse Pod ficou pronto:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 4; kubectl get pods -l app=probes</code></pre></div>
+<p>E que ele virou o único endpoint:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get endpointslices -l kubernetes.io/service-name=probes -o wide</code></pre></div>
       </div></li>
-      <li><div><p>Quebre a liveness desse Pod e acompanhe o restart:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl exec $P1 -- rm /usr/share/nginx/html/index.html
-kubectl get pods -l app=probes -w      # aguarde RESTARTS = 1 e Ctrl+C
-kubectl describe $P1 | grep -A8 Events</code></pre></div>
+      <li><div><p>Quebre a liveness desse Pod:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl exec $P1 -- rm /usr/share/nginx/html/index.html</code></pre></div>
+<p>Acompanhe o restart (aguarde RESTARTS = 1 e Ctrl+C):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get pods -l app=probes -w</code></pre></div>
+<p>Veja o evento no histórico do Pod:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl describe $P1 | grep -A8 Events</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>Os 3 Pods ficam <code>Running</code> mas <code>0/1</code> READY, e o Service não tem endpoints prontos.</li><li>Depois do <code>ready.html</code>, um Pod vira <code>1/1</code> e é o único endpoint.</li><li>Sem o <code>index.html</code>, o nginx responde 403, a liveness falha 3 vezes e o container reinicia. Ao voltar, ele está <code>0/1</code> de novo: o <code>ready.html</code> ficou na camada de escrita antiga.</li></ul></div>
@@ -3971,22 +4429,27 @@ kubectl describe $P1 | grep -A8 Events</code></pre></div>
     <div class="lab-head"><span class="lab-tag">Exercício 4.2</span><h3>HPA sob carga</h3><span class="lab-time">~25 min</span></div>
     <p class="lab-goal">Escalar horizontalmente uma aplicação a partir do uso de CPU. O k3s já traz o metrics-server.</p>
     <ol class="steps">
-      <li><div><p>Suba o exemplo oficial <code>php-apache</code> (requests de 200m de CPU) e confira as métricas:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f https://k8s.io/examples/application/php-apache.yaml
-kubectl get pod -l run=php-apache -o jsonpath='{.items[0].status.qosClass}{"\n"}'
-kubectl top nodes; kubectl top pods</code></pre></div>
+      <li><div><p>Suba o exemplo oficial <code>php-apache</code> (requests de 200m de CPU):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f https://k8s.io/examples/application/php-apache.yaml</code></pre></div>
+<p>Confira a QoS class:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get pod -l run=php-apache -o jsonpath='{.items[0].status.qosClass}{"\n"}'</code></pre></div>
+<p>E as métricas de uso:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl top nodes; kubectl top pods</code></pre></div>
       </div></li>
       <li><div><p>Crie o HPA com alvo de 50% de CPU:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=8
-kubectl get hpa</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=8</code></pre></div>
+<p>Confira:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get hpa</code></pre></div>
       </div></li>
-      <li><div><p>Gere carga e acompanhe (Ctrl+C para sair do watch):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl run load --image=busybox:1.36 --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
-kubectl get hpa php-apache -w</code></pre></div>
+      <li><div><p>Gere carga:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl run load --image=busybox:1.36 --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"</code></pre></div>
+<p>Acompanhe o HPA escalar (Ctrl+C para sair do watch):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get hpa php-apache -w</code></pre></div>
       </div></li>
-      <li><div><p>Remova a carga e observe a redução (leva cerca de 5 minutos por causa da janela de estabilização):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl delete pod load
-kubectl get hpa php-apache -w</code></pre></div>
+      <li><div><p>Remova a carga:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl delete pod load</code></pre></div>
+<p>Observe a redução (leva cerca de 5 minutos por causa da janela de estabilização):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get hpa php-apache -w</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>QoS <code>Burstable</code> (requests menores que limits).</li><li>Com carga, o uso passa de 50% e o HPA sobe as réplicas (tipicamente 5 a 7).</li><li>Sem carga, as réplicas voltam gradualmente para 1.</li></ul></div>
@@ -4033,13 +4496,15 @@ kubectl get hpa php-apache -w</code></pre></div>
     <div class="lab-head"><span class="lab-tag">Exercício 4.3</span><h3>Rollout sem erro com a app Go</h3><span class="lab-time">~35 min</span></div>
     <p class="lab-goal">Levar a imagem distroless do exercício 1.6 para o cluster, trocar de versão sob tráfego contínuo sem nenhum erro e drenar um nó respeitando o PDB.</p>
     <ol class="steps">
-      <li><div><p>Importe a imagem para o k3d (sem registry):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/app-go &amp;&amp; docker build -t app-go:v1 .
-k3d image import app-go:v1 -c labs</code></pre></div>
+      <li><div><p>Construa a imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/app-go &amp;&amp; docker build -t app-go:v1 .</code></pre></div>
+<p>Importe-a para o k3d (sem registry):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>k3d image import app-go:v1 -c labs</code></pre></div>
       </div></li>
-      <li><div><p>Crie Deployment, Service, Ingress e PDB:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/prod
-cat &gt; app-go.yaml &lt;&lt;'EOF'
+      <li><div><p>Entre na pasta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/prod</code></pre></div>
+<p>Crie o Deployment, Service, Ingress e PDB:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; app-go.yaml &lt;&lt;'EOF'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -4115,23 +4580,33 @@ spec:
   minAvailable: 3
   selector:
     matchLabels: { app: app-go }
-EOF
-kubectl apply -f app-go.yaml
-kubectl rollout status deployment/app-go
-kubectl get pods -l app=app-go -o wide
-curl -s localhost:8081/app</code></pre></div>
+EOF</code></pre></div>
+<p>Aplique:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f app-go.yaml</code></pre></div>
+<p>Aguarde o rollout:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl rollout status deployment/app-go</code></pre></div>
+<p>Confira a distribuição dos Pods:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get pods -l app=app-go -o wide</code></pre></div>
+<p>Acesse pela Ingress:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8081/app</code></pre></div>
       </div></li>
-      <li><div><p>Dispare tráfego contínuo em segundo plano e troque a versão no meio:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>(for i in $(seq 200); do curl -s -o /dev/null -w "%{http_code}\n" localhost:8081/app; sleep 0.15; done | sort | uniq -c &gt; /tmp/rollout.txt) &amp;
-sleep 3; kubectl set env deployment/app-go APP_VERSION=v2
-kubectl rollout status deployment/app-go
-wait; cat /tmp/rollout.txt
-curl -s localhost:8081/app</code></pre></div>
+      <li><div><p>Dispare tráfego contínuo em segundo plano:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>(for i in $(seq 200); do curl -s -o /dev/null -w "%{http_code}\n" localhost:8081/app; sleep 0.15; done | sort | uniq -c &gt; /tmp/rollout.txt) &amp;</code></pre></div>
+<p>Troque a versão no meio:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 3; kubectl set env deployment/app-go APP_VERSION=v2</code></pre></div>
+<p>Aguarde o rollout:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl rollout status deployment/app-go</code></pre></div>
+<p>Espere o tráfego de fundo terminar e veja o resultado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>wait; cat /tmp/rollout.txt</code></pre></div>
+<p>Confira a versão atual:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8081/app</code></pre></div>
       </div></li>
-      <li><div><p>Drene um nó e veja o PDB controlando o ritmo:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl drain k3d-labs-agent-0 --ignore-daemonsets --delete-emptydir-data
-kubectl get pods -l app=app-go -o wide
-kubectl uncordon k3d-labs-agent-0</code></pre></div>
+      <li><div><p>Drene um nó:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl drain k3d-labs-agent-0 --ignore-daemonsets --delete-emptydir-data</code></pre></div>
+<p>Veja o PDB controlando o ritmo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get pods -l app=app-go -o wide</code></pre></div>
+<p>Devolva o nó ao cluster:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl uncordon k3d-labs-agent-0</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>Pods distribuídos entre os 3 nós.</li><li><code>/tmp/rollout.txt</code> mostra só <code>200</code> (ex.: <code>200 200</code>): nenhuma requisição falhou durante a troca de versão.</li><li>A resposta passa a mostrar <code>versao=v2</code>.</li><li>O drain despeja os Pods do nó sem nunca ficar com menos de 3 disponíveis.</li></ul></div>
@@ -4183,23 +4658,30 @@ kubectl uncordon k3d-labs-agent-0</code></pre></div>
       <li><div><p>Tente o caminho tradicional:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>kubectl exec -it deploy/app-go -- sh</code></pre></div>
       </div></li>
-      <li><div><p>Anexe um ephemeral container ao Pod:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>POD=$(kubectl get pod -l app=app-go -o name | head -1)
-kubectl debug -it $POD --image=busybox:1.36 --target=app -- sh
-<span class="c-cm"># dentro do container de debug:</span>
-ps aux
-wget -qO- localhost:8080/healthz
-exit</code></pre></div>
+      <li><div><p>Guarde o nome do Pod:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>POD=$(kubectl get pod -l app=app-go -o name | head -1)</code></pre></div>
+<p>Anexe um ephemeral container a ele:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl debug -it $POD --image=busybox:1.36 --target=app -- sh</code></pre></div>
+<p>Já dentro do container de debug, liste os processos (note que o <code>/app</code> é o container alvo, no mesmo namespace de PID):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>ps aux</code></pre></div>
+<p>Teste o healthz da aplicação:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>wget -qO- localhost:8080/healthz</code></pre></div>
+<p>Saia do debug:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>exit</code></pre></div>
       </div></li>
       <li><div><p>Veja o registro do ephemeral container no Pod:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>kubectl get $POD -o jsonpath='{.spec.ephemeralContainers[*].name}{"\n"}'</code></pre></div>
       </div></li>
-      <li><div><p>Diagnostique um CrashLoopBackOff:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl run quebrado --image=busybox:1.36 --restart=Always -- sh -c 'echo "conectando em $DB_HOST..."; exit 1'
-sleep 20; kubectl get pod quebrado
-kubectl logs quebrado --previous
-kubectl describe pod quebrado | grep -E 'Reason|Exit Code|Back-off'
-kubectl delete pod quebrado</code></pre></div>
+      <li><div><p>Suba um Pod que sempre falha, simulando uma dependência ausente:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl run quebrado --image=busybox:1.36 --restart=Always -- sh -c 'echo "conectando em $DB_HOST..."; exit 1'</code></pre></div>
+<p>Aguarde e confira o estado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 20; kubectl get pod quebrado</code></pre></div>
+<p>Veja o log da tentativa anterior:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl logs quebrado --previous</code></pre></div>
+<p>Confira o motivo no describe:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl describe pod quebrado | grep -E 'Reason|Exit Code|Back-off'</code></pre></div>
+<p>Remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl delete pod quebrado</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>O <code>exec</code> falha com <code>executable file not found in $PATH</code>.</li><li>No debug, o <code>ps</code> mostra o processo <code>/app</code> (do container alvo) e o <code>wget</code> retorna <code>ok</code>.</li><li>O Pod <code>quebrado</code> fica em <code>CrashLoopBackOff</code>, e o log anterior mostra <code>conectando em ...</code> com a variável vazia.</li></ul></div>
@@ -4261,21 +4743,24 @@ kubectl delete pod quebrado</code></pre></div>
     <p class="lab-goal">Provisionar um cluster EKS declarado em YAML, publicar a app Go com um Service LoadBalancer e destruir tudo ao final. Roteiro detalhado em <a href="https://github.com/gersontpc/containers/tree/main/Lab-04/02-cluster-eks" target="_blank" rel="noopener">containers/Lab-04/02-cluster-eks</a>.</p>
     <div class="warn"><b>Custo</b><p>Requer conta AWS. O EKS cobra por hora de control plane, além das instâncias EC2 e do load balancer. Execute o passo de limpeza no mesmo dia.</p></div>
     <ol class="steps">
-      <li><div><p>Configure as credenciais (de preferência como Codespaces secrets <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code> e <code>AWS_DEFAULT_REGION</code>) e valide:</p>
-<div class="code"><span class="lang">terminal</span><pre><code><span class="c-cm"># AWS CLI e eksctl (se ainda não estiverem instalados)</span>
-curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip &amp;&amp; unzip -q awscliv2.zip &amp;&amp; sudo ./aws/install &amp;&amp; rm -rf aws awscliv2.zip
-curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" | tar -xz -C /tmp &amp;&amp; sudo mv /tmp/eksctl /usr/local/bin
-
-aws sts get-caller-identity
-eksctl version</code></pre></div>
+      <li><div><p>Se ainda não tiver, instale a AWS CLI:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip &amp;&amp; unzip -q awscliv2.zip &amp;&amp; sudo ./aws/install &amp;&amp; rm -rf aws awscliv2.zip</code></pre></div>
+<p>E o eksctl:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" | tar -xz -C /tmp &amp;&amp; sudo mv /tmp/eksctl /usr/local/bin</code></pre></div>
+<p>Configure as credenciais (de preferência como Codespaces secrets <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code> e <code>AWS_DEFAULT_REGION</code>) e valide:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws sts get-caller-identity</code></pre></div>
+<p>Confira o eksctl:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl version</code></pre></div>
       </div></li>
-      <li><div><p>Publique a imagem Go no Docker Hub para o EKS conseguir baixá-la:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/app-go
-docker tag app-go:v1 "$DOCKERHUB_USER/app-go:v1" &amp;&amp; docker push "$DOCKERHUB_USER/app-go:v1"</code></pre></div>
+      <li><div><p>Entre na pasta da app Go:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/app-go</code></pre></div>
+<p>Publique a imagem no Docker Hub para o EKS conseguir baixá-la:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker tag app-go:v1 "$DOCKERHUB_USER/app-go:v1" &amp;&amp; docker push "$DOCKERHUB_USER/app-go:v1"</code></pre></div>
       </div></li>
-      <li><div><p>Declare e crie o cluster (15 a 20 minutos):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/eks &amp;&amp; cd ~/labs/eks
-cat &gt; cluster.yaml &lt;&lt;'EOF'
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/eks &amp;&amp; cd ~/labs/eks</code></pre></div>
+<p>Declare o cluster:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; cluster.yaml &lt;&lt;'EOF'
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 metadata:
@@ -4294,20 +4779,27 @@ addons:
   - name: coredns
   - name: kube-proxy
   - name: eks-pod-identity-agent
-EOF
-eksctl create cluster -f cluster.yaml
-kubectl get nodes -L role,topology.kubernetes.io/zone</code></pre></div>
+EOF</code></pre></div>
+<p>Crie o cluster (15 a 20 minutos):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl create cluster -f cluster.yaml</code></pre></div>
+<p>Confira os nós:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get nodes -L role,topology.kubernetes.io/zone</code></pre></div>
       </div></li>
-      <li><div><p>Reaproveite o manifesto da 4.3 trocando a imagem e exponha com LoadBalancer:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>sed -e "s#image: app-go:v1#image: $DOCKERHUB_USER/app-go:v1#" ~/labs/prod/app-go.yaml &gt; app-go.yaml
-kubectl apply -f app-go.yaml
-kubectl expose deployment app-go --name app-go-lb --type LoadBalancer --port 80 --target-port 8080
-kubectl get svc app-go-lb -w      # aguarde o EXTERNAL-IP (hostname do ELB) e Ctrl+C
-curl -s http://$(kubectl get svc app-go-lb -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')</code></pre></div>
+      <li><div><p>Reaproveite o manifesto da 4.3, trocando a imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sed -e "s#image: app-go:v1#image: $DOCKERHUB_USER/app-go:v1#" ~/labs/prod/app-go.yaml &gt; app-go.yaml</code></pre></div>
+<p>Aplique:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f app-go.yaml</code></pre></div>
+<p>Exponha com um Service LoadBalancer:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl expose deployment app-go --name app-go-lb --type LoadBalancer --port 80 --target-port 8080</code></pre></div>
+<p>Aguarde o EXTERNAL-IP (hostname do ELB) e Ctrl+C:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get svc app-go-lb -w</code></pre></div>
+<p>Acesse pelo ELB:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s http://$(kubectl get svc app-go-lb -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')</code></pre></div>
       </div></li>
-      <li><div><p>Destrua tudo:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>kubectl delete svc app-go-lb
-eksctl delete cluster -f cluster.yaml --wait</code></pre></div>
+      <li><div><p>Remova o Service (e o ELB junto):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl delete svc app-go-lb</code></pre></div>
+<p>Destrua o cluster:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl delete cluster -f cluster.yaml --wait</code></pre></div>
       </div></li>
     </ol>
     <div class="expect"><b>Resultado esperado</b><ul><li>2 nós <code>Ready</code> em zonas de disponibilidade diferentes, com o label <code>role=app</code>.</li><li>Os mesmos manifestos do k3d funcionam no EKS (o Ingress com Traefik fica sem controller e pode ser ignorado).</li><li>O <code>curl</code> no hostname do ELB responde <code>versao=v1</code>; ao final não resta nenhum recurso na conta.</li></ul></div>
@@ -4318,9 +4810,10 @@ eksctl delete cluster -f cluster.yaml --wait</code></pre></div>
 
 <div class="slide" style="margin-top:8px">
   <h3>Encerramento do laboratório</h3>
-  <p>Remova o cluster local e pare o codespace para não consumir sua cota:</p>
-<div class="code"><span class="lang">terminal</span><pre><code>k3d cluster delete labs
-docker system prune --all --volumes --force</code></pre></div>
+  <p>Remova o cluster local:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>k3d cluster delete labs</code></pre></div>
+  <p>Limpe o Docker e pare o codespace para não consumir sua cota:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker system prune --all --volumes --force</code></pre></div>
 </div>
 
 </div></div>
@@ -4505,6 +4998,68 @@ docker system prune --all --volumes --force</code></pre></div>
     doneLabel.insertAdjacentElement('afterend',btn);
   });
   presentBtn.addEventListener('click',function(){open(document.querySelector('.panel[data-panel^="aula"]:not([hidden])'))});
+
+  /* Diagrama animado: Swarm routing mesh */
+  var swarmNext=0;
+  function swarmCenter(el,wrap){var r=el.getBoundingClientRect(),wr=wrap.getBoundingClientRect();return{x:r.left-wr.left+r.width/2,y:r.top-wr.top+r.height/2}}
+  function swarmWait(ms){return new Promise(function(res){setTimeout(res,ms)})}
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('[data-swarm-play]'); if(!btn||btn.disabled) return;
+    var scope=btn.closest('.slide')||document; var wrap=scope.querySelector('[data-swarm-flow]'); if(!wrap) return;
+    var dot=wrap.querySelector('[data-swarm-dot]');
+    var client=wrap.querySelector('[data-node="client"]'), mesh=wrap.querySelector('[data-node="mesh"]');
+    var workers=['w0','w1','w2'].map(function(n){return wrap.querySelector('[data-node="'+n+'"]')});
+    function place(pt){dot.style.left=pt.x+'px';dot.style.top=pt.y+'px'}
+    btn.disabled=true;
+    var target=workers[swarmNext]; swarmNext=(swarmNext+1)%workers.length;
+    dot.style.transition='none'; dot.hidden=false; place(swarmCenter(client,wrap));
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        dot.style.transition='top .55s ease,left .55s ease';
+        place(swarmCenter(mesh,wrap));
+      });
+    });
+    swarmWait(600).then(function(){place(swarmCenter(target,wrap));return swarmWait(600)})
+      .then(function(){target.classList.add('hit');return swarmWait(500)})
+      .then(function(){target.classList.remove('hit');dot.hidden=true;btn.disabled=false});
+  });
+
+  /* Diagrama animado: eleição Raft disparada pela queda do líder */
+  var raftLeader=0;
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('[data-raft-play]'); if(!btn||btn.disabled) return;
+    var scope=btn.closest('.slide')||document; var wrap=scope.querySelector('[data-swarm-flow]'); if(!wrap) return;
+    var dot=wrap.querySelector('[data-raft-dot]');
+    var mgrs=['m0','m1','m2'].map(function(n){return wrap.querySelector('[data-node="'+n+'"]')});
+    function place(pt){dot.style.left=pt.x+'px';dot.style.top=pt.y+'px'}
+    function setState(i,cls,label){mgrs[i].className='cpd-svc'+(cls?' '+cls:'');mgrs[i].querySelector('.st').textContent='raft: '+label}
+    btn.disabled=true;
+    var down=raftLeader, cand=(raftLeader+1)%3, elector=[0,1,2].filter(function(i){return i!==down&&i!==cand})[0];
+    setState(down,'down','caiu ✗ (sem heartbeat)');
+    swarmWait(700).then(function(){
+      setState(cand,'cand','candidato (timeout)');
+      dot.style.transition='none'; dot.hidden=false; place(swarmCenter(mgrs[cand],wrap));
+      return swarmWait(250);
+    }).then(function(){
+      requestAnimationFrame(function(){dot.style.transition='top .5s ease,left .5s ease';place(swarmCenter(mgrs[elector],wrap))});
+      return swarmWait(550);
+    }).then(function(){
+      mgrs[elector].querySelector('.st').textContent='raft: voto ✓';
+      return swarmWait(350);
+    }).then(function(){
+      dot.style.transition='top .5s ease,left .5s ease'; place(swarmCenter(mgrs[cand],wrap));
+      return swarmWait(550);
+    }).then(function(){
+      dot.hidden=true;
+      raftLeader=cand;
+      setState(cand,'hl','líder (maioria: 2 de 3)');
+      setState(elector,'','seguidor');
+      return swarmWait(900);
+    }).then(function(){
+      setState(down,'','seguidor (voltou)');
+      btn.disabled=false;
+    });
+  });
   document.getElementById('presNext').addEventListener('click',function(){idx===deck.length-1?close():go(1)});
   document.getElementById('presPrev').addEventListener('click',function(){go(-1)});
   document.getElementById('presClose').addEventListener('click',close);
