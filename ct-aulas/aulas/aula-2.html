@@ -1,0 +1,1009 @@
+<!-- Aula 02: fragmento carregado por ../index.html (assets/ct.js). Não é uma página completa: edite aqui o conteúdo da aula. -->
+<section class="panel" id="aula-2" data-panel="aula-2" hidden>
+<div class="aula-head">
+  <div>
+    <div class="eyebrow">Aula 02 · Run</div>
+    <h1>Containers, redes, volumes e Compose</h1>
+    <p class="lead">Da imagem ao container em execução, na ordem do Docker: imagem → container → network → volume, com logs, Docker Compose e uma introdução ao Docker Swarm.</p>
+    <div class="meta"><span class="chip">7 tópicos</span><span class="chip">6 exercícios</span><span class="chip">docker run · network · volume · Compose · Swarm</span><span class="chip chip-gh">GitHub Codespaces</span></div>
+  </div>
+</div>
+<div class="aula-body">
+<nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
+<div class="topicos">
+
+<!-- 2.1 -->
+<article class="topico" id="a2-t1">
+  <div class="topico-head"><span class="topico-num">2.1</span><h2>Arquitetura do Docker</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>O que o Docker gerencia</h3>
+      <div class="dm">
+        <div class="dm-left">
+          <div class="L app">docker CLI <small>cliente</small></div>
+          <div class="kd-ar">↓ <small>REST API · /var/run/docker.sock</small></div>
+          <div class="L hyp dm-daemon">Docker daemon <small>dockerd</small></div>
+          <div class="dm-side">
+            <div class="L lib">Logs <small>docker logs · log drivers</small></div>
+            <div class="L lib">Estatísticas <small>docker stats · events</small></div>
+            <div class="L lib">Integrações <small>Compose, Swarm, SDKs, IDEs</small></div>
+          </div>
+        </div>
+        <div class="dm-ar" aria-hidden="true">→</div>
+        <div class="dm-objs">
+          <div class="dm-t">Objetos que o daemon gerencia</div>
+          <div class="dm-grid">
+            <div class="dm-o"><span class="dm-n">1</span><b>Imagem</b><span>pull, build e armazenamento local</span><code>docker image ls</code></div>
+            <div class="dm-o"><span class="dm-n">2</span><b>Container</b><span>criar, iniciar, parar e remover</span><code>docker ps</code></div>
+            <div class="dm-o"><span class="dm-n">3</span><b>Network</b><span>comunicação entre containers e com o host</span><code>docker network ls</code></div>
+            <div class="dm-o"><span class="dm-n">4</span><b>Volume</b><span>dados que sobrevivem ao container</span><code>docker volume ls</code></div>
+          </div>
+        </div>
+      </div>
+      <p class="note">Esta aula segue a ordem do desenho: <b>imagem → container → network → volume</b>, e fecha com logs, Compose e Swarm.</p>
+    </div>
+    <div class="slide">
+      <h3>O daemon do Docker (dockerd)</h3>
+      <p>Processo principal do Docker. Atua como um servidor que escuta comandos da CLI ou de APIs e executa operações como:</p>
+      <div class="tbl"><table><tbody>
+        <tr><td><b>Gerenciar containers</b></td><td>Criar, iniciar, parar e excluir</td></tr>
+        <tr><td><b>Gerenciar imagens</b></td><td>Pull, build e armazenamento</td></tr>
+        <tr><td><b>Gerenciar redes</b></td><td>Criar e configurar redes para a comunicação entre containers</td></tr>
+        <tr><td><b>Gerenciar volumes</b></td><td>Criar e manter volumes para persistência de dados</td></tr>
+        <tr><td><b>Orquestração</b></td><td>Modo Swarm nativo e integração com outras ferramentas</td></tr>
+      </tbody></table></div>
+      <p class="note">O daemon roda em background e precisa estar ativo para os comandos do Docker funcionarem.</p>
+    </div>
+    <div class="slide">
+      <h3>Do comando ao processo</h3>
+      <div class="flow">
+        <div class="node"><b>docker CLI</b><span>cliente</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>REST API</b><span>/var/run/docker.sock</span></div>
+        <div class="arrow">→</div>
+        <div class="node hl"><b>dockerd</b><span>build, redes, volumes, logs</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>containerd</b><span>imagens, ciclo de vida</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>runc</b><span>cria namespaces e cgroups</span></div>
+      </div>
+      <ul>
+        <li>O CLI é só um cliente HTTP. Qualquer ferramenta (Portainer, SDKs, VS Code) usa a mesma API.</li>
+        <li>O <code>containerd-shim</code> mantém cada container vivo mesmo se o dockerd reiniciar.</li>
+        <li>No Kubernetes, o kubelet fala direto com o containerd via <b>CRI</b>, sem dockerd. A imagem é a mesma porque é OCI.</li>
+      </ul>
+    </div>
+    <div class="slide">
+      <h3>Ecossistema e licenciamento</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Docker Engine + CLI</h4><p>Open source e gratuitos. É o que usamos no Codespaces.</p></div>
+        <div class="card-mini"><h4>Docker Desktop</h4><p>Pago para uso comercial em empresas com mais de 250 funcionários ou mais de US$ 10 milhões de receita anual.</p></div>
+        <div class="card-mini"><h4>Alternativas</h4><p>Podman / Podman Desktop (daemonless, rootless), nerdctl + containerd, Rancher Desktop, Colima.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.1</span><h3>Conversando com o daemon</h3><span class="lab-time">~15 min</span></div>
+    <p class="lab-goal">Comprovar que o CLI é apenas um cliente da REST API e enxergar a cadeia dockerd → containerd → shim → processo.</p>
+    <ol class="steps">
+      <li><div><p>Informações do daemon:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker info --format 'Server {{.ServerVersion}} | Storage {{.Driver}} | Cgroup v{{.CgroupVersion}} | Logging {{.LoggingDriver}}'</code></pre></div>
+<p>Uso de disco por tipo de objeto:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker system df</code></pre></div>
+      </div></li>
+      <li><div><p>Chame a REST API diretamente pelo socket, sem o CLI:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s --unix-socket /var/run/docker.sock http://localhost/version | python3 -m json.tool | head -12</code></pre></div>
+<p>Agora a lista de imagens:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s --unix-socket /var/run/docker.sock http://localhost/images/json | python3 -m json.tool | grep -m5 RepoTags -A1</code></pre></div>
+      </div></li>
+      <li><div><p>Acompanhe os eventos que o daemon emite enquanto um container nasce e morre. Primeiro, dispare o escutador de eventos em segundo plano:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>timeout 8 docker events --format '{{.Type}} {{.Action}} {{.Actor.Attributes.name}}' &amp;</code></pre></div>
+<p>Depois, num mesmo terminal, dispare o evento e aguarde o escutador terminar:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 1; docker run --rm --name evento alpine:3.22 echo "olá"; wait</code></pre></div>
+      </div></li>
+      <li><div><p>Suba um container de teste que fica rodando em segundo plano:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name arq alpine:3.22 sleep 3600</code></pre></div>
+      </div></li>
+      <li><div><p>Veja a cadeia de processos no host onde o Docker roda. O comando abre um container que enxerga os processos do host (<code>--pid=host</code>) e mostra a árvore com o <code>ps</code> do Linux, então funciona igual no Codespaces, no Linux e no Docker Desktop (Mac/Windows):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --pid=host alpine:3.22 sh -c "apk add -q procps &amp;&amp; ps -e -o pid,ppid,args --forest" | grep -E 'dockerd|containerd|shim|sleep 3600' | grep -v grep</code></pre></div>
+<div class="tip"><b>Por que não direto no terminal do Mac?</b><p>O <code>ps</code> do macOS não tem a opção <code>--forest</code> e, no Docker Desktop, o dockerd roda dentro de uma VM Linux, invisível para o macOS. No Codespaces (Linux) também dá para rodar direto: <code>ps -ef --forest | grep -E 'dockerd|containerd|shim|sleep 3600' | grep -v grep</code>.</p></div>
+      </div></li>
+      <li><div><p>Remova o container de teste:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f arq</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li><code>Logging json-file</code>: o driver de log padrão (visto no tópico 2.5).</li><li>A API responde JSON com a mesma versão do <code>docker version</code>.</li><li>Os eventos mostram <code>container create</code>, <code>start</code>, <code>die</code> e <code>destroy</code>.</li><li>O <code>ps --forest</code> mostra <code>containerd-shim-runc-v2</code> como pai do <code>sleep</code>.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>O <code>docker</code> é só um cliente da REST API do daemon: dá para falar com o socket direto.</li>
+      <li>Por baixo, a cadeia é dockerd → containerd → shim → processo do container.</li>
+      <li>Os eventos (<code>create</code>, <code>start</code>, <code>die</code>, <code>destroy</code>) mostram o ciclo de vida que as ferramentas de monitoramento consomem.</li>
+    </ul></div>
+    <label class="done"><input type="checkbox" id="ex-2-1"> Exercício 2.1 concluído</label>
+  </div>
+</article>
+
+<!-- 2.2 -->
+<article class="topico" id="a2-t2">
+  <div class="topico-head"><span class="topico-num">2.2</span><h2>Containers: executar e operar</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>docker run: flags essenciais</h3>
+      <p class="rx-syn"><code>docker run [OPÇÕES] IMAGEM[:TAG|@DIGEST] [COMANDO] [ARGS...]</code></p>
+      <div class="cols rx-cols">
+        <div class="rx-box"><div class="rx-h">Flags mais usadas</div><div class="tbl"><table><tbody><tr><td><code>-d</code></td><td>Segundo plano (detached)</td></tr><tr><td><code>-it</code></td><td>Terminal interativo</td></tr><tr><td><code>--rm</code></td><td>Remove ao terminar</td></tr><tr><td><code>--name web</code></td><td>Nome fixo</td></tr><tr><td><code>-p 8080:80</code></td><td>Porta host:container</td></tr><tr><td><code>-e K=v · --env-file</code></td><td>Variáveis de ambiente</td></tr><tr><td><code>-v dados:/data</code></td><td>Volume ou bind mount</td></tr><tr><td><code>--network rede</code></td><td>Rede do container</td></tr><tr><td><code>--restart unless-stopped</code></td><td>Política de reinício</td></tr><tr><td><code>--memory 256m --cpus 0.5</code></td><td>Limites (cgroups)</td></tr><tr><td><code>-w /app · -u 1000</code></td><td>Diretório e usuário</td></tr><tr><td><code>--entrypoint sh</code></td><td>Troca o entrypoint</td></tr><tr><td><code>--platform linux/arm64</code></td><td>Arquitetura da imagem</td></tr><tr><td><code>--init</code></td><td>PID 1 que repassa sinais</td></tr></tbody></table></div></div>
+        <div class="rx-box"><div class="rx-h">Combinações do dia a dia</div><div class="rx"><span>Servidor web em segundo plano</span><pre>docker run -d --name web -p 8080:80 nginx:stable-alpine</pre></div><div class="rx"><span>Shell descartável para testar</span><pre>docker run --rm -it alpine:3.22 sh</pre></div><div class="rx"><span>Banco com variáveis e volume</span><pre>docker run -d --name db -e POSTGRES_PASSWORD=senha \
+  -v pgdata:/var/lib/postgresql/data postgres:17</pre></div><div class="rx"><span>Código local montado no container</span><pre>docker run --rm -it -v &quot;$PWD&quot;:/app -w /app python:3.13-slim bash</pre></div><div class="rx"><span>Serviço resiliente e limitado</span><pre>docker run -d --restart unless-stopped --memory 256m --cpus 0.5 minha/api:1.0.0</pre></div><div class="rx"><span>Comando único e sair</span><pre>docker run --rm alpine:3.22 cat /etc/os-release</pre></div></div>
+      </div>
+      <p class="note">Referência completa: <a href="https://docs.docker.com/reference/cli/docker/container/run/" target="_blank" rel="noopener">docs.docker.com · docker container run</a>. No terminal: <code>docker run --help</code>.</p>
+    </div>
+    <div class="slide">
+      <h3>Comandos do dia a dia</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Observar</h4><ul><li><code>docker ps -a</code></li><li><code>docker logs -f web</code></li><li><code>docker inspect web</code></li><li><code>docker stats</code> / <code>docker top web</code></li></ul></div>
+        <div class="card-mini"><h4>Interagir</h4><ul><li><code>docker exec -it web sh</code></li><li><code>docker cp web:/etc/x .</code></li><li><code>docker attach web</code></li></ul></div>
+        <div class="card-mini"><h4>Ciclo de vida</h4><ul><li><code>docker stop</code> / <code>start</code> / <code>restart</code></li><li><code>docker pause</code> / <code>unpause</code></li><li><code>docker rm -f</code>, <code>docker container prune</code></li></ul></div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>Isolamento: namespaces e cgroups</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Namespaces: o que o processo enxerga</h4><ul><li><code>pid</code>: a aplicação é o PID 1</li><li><code>net</code>: IP, interfaces e portas próprias</li><li><code>mnt</code>: sistema de arquivos da imagem</li><li><code>uts</code>, <code>ipc</code>, <code>user</code>, <code>cgroup</code></li></ul></div>
+        <div class="card-mini"><h4>cgroups: quanto o processo pode usar</h4><ul><li><code>--memory</code> vira <code>memory.max</code>. Estourou: <b>OOM kill</b>, exit code 137</li><li><code>--cpus 0.5</code> vira <code>cpu.max</code>. CPU não mata: sofre throttling</li><li>Mesma base dos <code>requests/limits</code> do Kubernetes</li></ul></div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>Sinais do Linux</h3>
+      <p>Sinais são o mecanismo que o kernel usa para notificar processos sobre eventos.</p>
+      <div class="tbl"><table><tbody style="font-variant-numeric:tabular-nums">
+        <tr><td><b>SIGTERM</b> (15)</td><td>Pede que o processo termine de forma graciosa</td></tr>
+        <tr><td><b>SIGKILL</b> (9)</td><td>Força a terminação imediata; não pode ser ignorado</td></tr>
+        <tr><td><b>SIGINT</b> (2)</td><td>Interrompe o processo (Ctrl+C)</td></tr>
+        <tr><td><b>SIGQUIT</b> (3)</td><td>Como o SIGINT, mas gera dump de memória</td></tr>
+        <tr><td><b>SIGHUP</b> (1)</td><td>Hangup; usado para recarregar configuração</td></tr>
+        <tr><td><b>SIGSTOP</b> (19)</td><td>Suspende a execução (<code>docker pause</code> usa o freezer do cgroup para o mesmo efeito)</td></tr>
+        <tr><td><b>SIGCONT</b> (18)</td><td>Retoma um processo suspenso</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="slide">
+      <h3>Ciclo de vida e sinais</h3>
+      <div class="flow">
+        <div class="node"><b>created</b></div><div class="arrow">→</div>
+        <div class="node hl"><b>running</b></div><div class="arrow">→</div>
+        <div class="node"><b>paused</b></div><div class="arrow">→</div>
+        <div class="node"><b>exited</b></div><div class="arrow">→</div>
+        <div class="node"><b>removed</b></div>
+      </div>
+      <ul>
+        <li><code>docker stop</code> envia <b>SIGTERM</b> ao PID 1 e, após 10 s, <b>SIGKILL</b>.</li>
+        <li>A aplicação precisa tratar SIGTERM para desligar de forma graciosa.</li>
+        <li>Na forma shell do <code>CMD</code>, o PID 1 é o <code>sh</code>, que não repassa o sinal. Use a forma exec ou <code>--init</code>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.2</span><h3>Operando containers do início ao fim</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Executar a imagem publicada na Aula 01, operar o container com a CLI, aplicar limites de recursos e observar o tratamento de sinais.</p>
+    <ol class="steps">
+      <li><div><p>Defina a imagem (sua do Docker Hub, ou <code>nginx:stable-alpine</code>):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>export IMAGE="seu-usuario-dockerhub/container-technologies:1.0.1"</code></pre></div>
+<p>Rode o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name web -p 8080:80 --restart unless-stopped "$IMAGE"</code></pre></div>
+<p>Confira que está rodando:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker ps</code></pre></div>
+<p>Acesse a aplicação:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8080 | head -5</code></pre></div>
+<p>Veja os logs:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker logs web --tail 5</code></pre></div>
+<p>Entre no container e rode um comando:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec -it web sh -c 'hostname; ps'</code></pre></div>
+<p>Inspecione o IP e a política de reinício:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker inspect web --format 'IP={{.NetworkSettings.IPAddress}} Restart={{.HostConfig.RestartPolicy.Name}}'</code></pre></div>
+<p>Pare e confira o estado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stop web &amp;&amp; docker ps -a --filter name=web</code></pre></div>
+<p>Reinicie e remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker start web &amp;&amp; docker rm -f web</code></pre></div>
+      </div></li>
+      <li><div><p>Rode um container com limites de recursos:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name limitado --memory 128m --cpus 0.5 nginx:stable-alpine</code></pre></div>
+<p>Confira os cgroups aplicados:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec limitado cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/cpu.max</code></pre></div>
+<p>Compare com o uso em tempo real:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stats --no-stream limitado</code></pre></div>
+<p>Remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f limitado</code></pre></div>
+      </div></li>
+      <li><div><p>Force um OOM kill — um processo que dobra de tamanho até estourar 32 MB:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --name oom --memory 32m alpine:3.22 sh -c 'x=a; while true; do x=$x$x; done'</code></pre></div>
+<p>Confira a causa da morte:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker inspect oom --format 'OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}}'</code></pre></div>
+<p>Remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm oom</code></pre></div>
+      </div></li>
+      <li><div><p>Rode um processo que ignora SIGTERM:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name sem-trap alpine:3.22 sh -c 'while true; do sleep 1; done'</code></pre></div>
+<p>Pare e cronometre:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>time docker stop sem-trap</code></pre></div>
+<p>Agora um processo que trata o sinal:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name com-trap alpine:3.22 sh -c 'trap "echo SIGTERM recebido; exit 0" TERM; while true; do sleep 1; done'</code></pre></div>
+<p>Pare e cronometre de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>time docker stop com-trap</code></pre></div>
+<p>Confira o log de encerramento e limpe:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker logs com-trap; docker rm sem-trap com-trap</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>A página da sua imagem responde na porta 8080 e a política de reinício aparece como <code>unless-stopped</code>.</li><li><code>memory.max</code> = <code>134217728</code>, <code>cpu.max</code> = <code>50000 100000</code> e o <code>docker stats</code> mostra limite de 128 MiB.</li><li>O container <code>oom</code> termina com <code>OOMKilled=true ExitCode=137</code>.</li><li><code>sem-trap</code> leva cerca de 10 s para parar (SIGKILL); <code>com-trap</code> para em cerca de 1 s.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>Limites de recursos viram cgroups no kernel: <code>memory.max</code> e <code>cpu.max</code>.</li>
+      <li>Passou do limite de memória, o kernel mata o processo: <code>OOMKilled</code>, código de saída 137.</li>
+      <li>O <code>docker stop</code> manda <code>SIGTERM</code> e, depois do tempo de espera, <code>SIGKILL</code>: a aplicação precisa tratar o sinal para parar rápido e limpo.</li>
+      <li>A política de reinício decide o que acontece quando o container cai.</li>
+    </ul></div>
+    <div class="challenge"><b>Desafio</b><p>Repita o <code>sem-trap</code> com <code>docker run --init</code>. O que muda e por quê?</p></div>
+    <label class="done"><input type="checkbox" id="ex-2-2"> Exercício 2.2 concluído</label>
+  </div>
+</article>
+
+
+<!-- 2.3 -->
+<article class="topico" id="a2-t3">
+  <div class="topico-head"><span class="topico-num">2.3</span><h2>Redes de containers</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Drivers de rede</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Driver</th><th>Comportamento</th><th>Quando usar</th></tr></thead>
+        <tbody>
+          <tr><td><code>bridge</code> (padrão)</td><td>Rede privada no host (<code>docker0</code>), NAT para fora. Sem resolução por nome</td><td>Containers avulsos</td></tr>
+          <tr><td>bridge personalizada</td><td>Isolada por projeto, <b>DNS interno</b> (127.0.0.11) resolve nomes de containers</td><td>Padrão para aplicações (o Compose cria uma)</td></tr>
+          <tr><td><code>host</code></td><td>Usa a pilha de rede do host. Sem isolamento, sem <code>-p</code></td><td>Performance extrema, agentes de monitoramento</td></tr>
+          <tr><td><code>none</code></td><td>Só loopback</td><td>Jobs isolados, processamento offline</td></tr>
+          <tr><td><code>overlay</code></td><td>Rede virtual (VXLAN) entre vários hosts</td><td>Docker Swarm</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="slide">
+      <h3>Publicar porta × expor na rede</h3>
+      <div class="flow">
+        <div class="node"><b>Cliente</b><span>navegador / curl</span></div>
+        <div class="arrow">→</div>
+        <div class="node hl"><b>host:8080</b><span>-p 8080:80 (iptables DNAT)</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>web:80</b><span>rede lab-net</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>db:3306</b><span>só acessível dentro da rede</span></div>
+      </div>
+      <p>Só publique o que precisa ser acessado de fora. Entre containers da mesma rede, a comunicação é direta pelo nome do serviço, sem <code>-p</code>.</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.3</span><h3>Testando cada driver de rede</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Validar na prática uma hipótese por driver: <code>bridge</code> padrão, <code>bridge</code> personalizada, <code>host</code> e <code>none</code>. Em cada parte, rode os comandos e confira se o resultado confirma a hipótese.</p>
+    <p class="section-label" style="margin-top:6px">Parte 1 · bridge (padrão)</p>
+    <p class="hyp"><b>Hipótese</b> Containers na bridge padrão se falam pelo IP, mas <b>não pelo nome</b>, e só são acessados do host com <code>-p</code>.</p>
+    <ol class="steps">
+      <li><div><p>Suba o primeiro container, sem informar rede (cai na bridge padrão <code>docker0</code>):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name a1 alpine:3.22 sleep 3600</code></pre></div>
+<p>Suba o segundo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name a2 alpine:3.22 sleep 3600</code></pre></div>
+<p>Confira as redes existentes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker network ls</code></pre></div>
+<p>Veja o IP de cada um:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker inspect -f '{{.NetworkSettings.IPAddress}}' a1 a2</code></pre></div>
+      </div></li>
+      <li><div><p>Teste a comunicação pelo IP:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 $(docker inspect -f '{{.NetworkSettings.Networks.bridge.IPAddress}}' a2)</code></pre></div>
+<p>Agora pelo nome:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 a2</code></pre></div>
+      </div></li>
+      <li><div><p>Teste a saída para a internet:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 8.8.8.8</code></pre></div>
+<p>Suba um nginx sem publicar porta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name w1 nginx:stable-alpine</code></pre></div>
+<p>Tente acessar pelo host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s --max-time 3 localhost:80 || echo "sem acesso pelo host"</code></pre></div>
+<p>Remova e suba de novo, agora publicando a porta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f w1</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name w1 -p 8080:80 nginx:stable-alpine</code></pre></div>
+<p>Acesse de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 1; curl -sI localhost:8080 | head -1</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><p>Ping pelo IP e para 8.8.8.8 respondem; pelo nome dá <code>ping: bad address 'a2'</code>. O nginx só responde no host depois do <code>-p 8080:80</code> (<code>HTTP/1.1 200 OK</code>).</p></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>A bridge padrão dá IP e saída para a internet, mas não resolve nomes entre containers.</li>
+      <li>A bridge personalizada resolve por nome e isola de outras redes: é a escolha natural para aplicações com vários containers.</li>
+      <li><code>host</code> usa a rede do host direto, sem <code>-p</code>; <code>none</code> deixa o container sem rede.</li>
+      <li>Na bridge, só com a porta publicada a aplicação é acessível de fora.</li>
+    </ul></div>
+    <p class="section-label" style="margin-top:22px">Parte 2 · bridge personalizada</p>
+    <p class="hyp"><b>Hipótese</b> Numa rede criada pelo usuário, o Docker oferece <b>DNS interno</b> e <b>isola</b> os containers de outras redes.</p>
+    <ol class="steps" style="counter-reset:s 3">
+      <li><div><p>Crie a rede:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker network create lab-net</code></pre></div>
+<p>Suba dois containers nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name b1 --network lab-net alpine:3.22 sleep 3600</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name b2 --network lab-net alpine:3.22 sleep 3600</code></pre></div>
+      </div></li>
+      <li><div><p>Teste a resolução de nomes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec b1 ping -c2 b2</code></pre></div>
+<p>Veja quem responde o DNS:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec b1 nslookup b2</code></pre></div>
+<p>E para onde ele aponta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec b1 cat /etc/resolv.conf</code></pre></div>
+      </div></li>
+      <li><div><p>Teste o isolamento entre redes: <code>a1</code> (bridge padrão) tentando alcançar <code>b1</code> (<code>lab-net</code>):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 -W2 $(docker inspect -f '{{(index .NetworkSettings.Networks "lab-net").IPAddress}}' b1) || echo "isolado"</code></pre></div>
+<p>Conecte <code>a1</code> também à <code>lab-net</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker network connect lab-net a1</code></pre></div>
+<p>Teste de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec a1 ping -c2 b1</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><p>Ping pelo nome funciona e o <code>resolv.conf</code> aponta para <code>nameserver 127.0.0.11</code> (DNS embutido do Docker). <code>a1</code> não alcança <code>b1</code> até ser conectado à <code>lab-net</code>; depois, resolve até pelo nome.</p></div>
+    <p class="section-label" style="margin-top:22px">Parte 3 · host</p>
+    <p class="hyp"><b>Hipótese</b> Com <code>--network host</code> o container usa a pilha de rede do host: <b>sem isolamento e sem NAT</b>.</p>
+    <ol class="steps" style="counter-reset:s 6">
+      <li><div><p>Rode um nginx na rede do host, <b>sem</b> <code>-p</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name h1 --network host nginx:stable-alpine</code></pre></div>
+<p>Acesse direto:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 1; curl -sI localhost:80 | head -1</code></pre></div>
+      </div></li>
+      <li><div><p>Veja as interfaces que o container enxerga:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network host alpine:3.22 ip -brief addr</code></pre></div>
+<p>Compare com as do host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>ip -brief addr</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><p>O <code>curl</code> na porta 80 responde sem nenhum <code>-p</code>, e o container lista as mesmas interfaces do codespace (<code>eth0</code>, <code>docker0</code>, <code>veth…</code>).</p></div>
+    <p class="section-label" style="margin-top:22px">Parte 4 · none</p>
+    <p class="hyp"><b>Hipótese</b> Com <code>--network none</code> o container fica <b>totalmente isolado</b>: só existe o loopback.</p>
+    <ol class="steps" style="counter-reset:s 8">
+      <li><div><p>Rode um container sem rede:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network none alpine:3.22 ip addr</code></pre></div>
+<p>Tente sair para a internet:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --network none alpine:3.22 ping -c2 -W2 8.8.8.8</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><p>Só aparece a interface <code>lo</code>, e o ping falha com <code>Network unreachable</code>.</p></div>
+    <p class="section-label" style="margin-top:22px">Limpeza</p>
+    <ol class="steps" style="counter-reset:s 9">
+      <li><div><p>Remova os containers:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f a1 a2 b1 b2 w1 h1</code></pre></div>
+<p>E a rede:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker network rm lab-net</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="tip"><b>Overlay</b><p>O driver <code>overlay</code> liga containers em hosts diferentes e depende do Swarm. Ele aparece no tópico 2.7 (Docker Swarm).</p></div>
+    <div class="warn"><b>Docker Desktop (Mac/Windows)</b><p>A Parte 3 deve ser feita no Codespaces: no Docker Desktop, o “host” é a VM interna do Docker, e o <code>--network host</code> não expõe as portas no seu computador por padrão.</p></div>
+    <label class="done"><input type="checkbox" id="ex-2-3"> Exercício 2.3 concluído</label>
+  </div>
+</article>
+
+<!-- 2.4 -->
+<article class="topico" id="a2-t4">
+  <div class="topico-head"><span class="topico-num">2.4</span><h2>Armazenamento e persistência</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Três formas de montar dados</h3>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Volume</th><th>Bind mount</th><th>tmpfs</th></tr></thead>
+        <tbody>
+          <tr><td><b>Onde fica</b></td><td>Área gerenciada pelo Docker (<code>/var/lib/docker/volumes</code>)</td><td>Qualquer diretório do host</td><td>Memória RAM do host</td></tr>
+          <tr><td><b>Persiste?</b></td><td>Sim, independente do container</td><td>Sim (é o arquivo do host)</td><td>Não</td></tr>
+          <tr><td><b>Uso típico</b></td><td>Bancos de dados, dados de aplicação</td><td>Código em desenvolvimento, configs</td><td>Cache, arquivos temporários, segredos em memória</td></tr>
+          <tr><td><b>Sintaxe</b></td><td><code>-v dados:/data</code></td><td><code>-v /host/dir:/dir</code></td><td><code>--tmpfs /cache</code></td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Prefira <code>--mount type=volume,src=dados,dst=/data</code> em scripts: é mais explícito que <code>-v</code>. O conceito reaparece no Kubernetes como PersistentVolume, hostPath e emptyDir.</p>
+    </div>
+    <div class="slide">
+      <h3>Comandos de volume</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Gerenciar</h4><ul><li><code>docker volume create</code></li><li><code>docker volume ls</code></li><li><code>docker volume inspect</code></li><li><code>docker volume rm</code> / <code>prune</code></li></ul></div>
+        <div class="card-mini"><h4>Copiar arquivos</h4><ul><li><code>docker cp &lt;container&gt;:/caminho .</code></li><li><code>docker cp arquivo &lt;container&gt;:/caminho</code></li><li>Funciona mesmo com o container parado</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.4</span><h3>Dados que sobrevivem ao container</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Validar uma hipótese por tipo de armazenamento: camada de escrita, volume, bind mount e tmpfs. Em cada parte, confira se o dado sobrevive ao <code>restart</code> e à remoção do container.</p>
+    <p class="section-label" style="margin-top:6px">Parte 1 · sem montagem (camada de escrita)</p>
+    <p class="hyp"><b>Hipótese</b> A camada de escrita pertence ao container: os dados <b>sobrevivem a stop/restart</b>, mas <b>somem quando o container é removido</b>.</p>
+    <ol class="steps">
+      <li><div><p>Suba o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name c1 alpine:3.22 sleep 3600</code></pre></div>
+<p>Grave um arquivo dentro dele:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec c1 sh -c 'echo "dado importante" &gt; /tmp/arquivo.txt'</code></pre></div>
+<p>Reinicie e confira que o arquivo continua lá:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker restart c1 &amp;&amp; docker exec c1 cat /tmp/arquivo.txt</code></pre></div>
+<p>Remova o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f c1</code></pre></div>
+<p>Suba um novo, com o mesmo nome:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name c1 alpine:3.22 sleep 3600</code></pre></div>
+<p>Procure o arquivo, que não deveria estar mais lá:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec c1 cat /tmp/arquivo.txt; docker rm -f c1</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><p>Depois do <code>restart</code> o arquivo continua lá; no container recriado, <code>cat</code> falha com <code>No such file or directory</code>.</p></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>A camada de escrita sobrevive ao restart, mas morre junto com o container.</li>
+      <li>O volume é gerenciado pelo Docker, sobrevive à remoção e pode ser compartilhado entre containers.</li>
+      <li>O bind mount liga uma pasta do host, ótimo para desenvolvimento; com <code>:ro</code>, o container não escreve.</li>
+      <li>O tmpfs fica em memória e some no restart: bom para dados temporários e sensíveis.</li>
+    </ul></div>
+    <p class="section-label" style="margin-top:22px">Parte 2 · volume nomeado</p>
+    <p class="hyp"><b>Hipótese</b> Um volume vive <b>fora do ciclo de vida do container</b> e é gerenciado pelo Docker: pode ser usado por vários containers.</p>
+    <ol class="steps" style="counter-reset:s 1">
+      <li><div><p>Crie um volume:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume create dados</code></pre></div>
+<p>Grave nele com um container descartável:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -v dados:/data alpine:3.22 sh -c 'echo "gravado em $(date)" &gt;&gt; /data/log.txt'</code></pre></div>
+      </div></li>
+      <li><div><p>Leia com <b>outro</b> container e grave de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -v dados:/data alpine:3.22 sh -c 'echo "gravado em $(date)" &gt;&gt; /data/log.txt; cat /data/log.txt'</code></pre></div>
+      </div></li>
+      <li><div><p>Liste os volumes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume ls</code></pre></div>
+<p>Veja onde este fica no host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume inspect dados --format '{{.Mountpoint}}'</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><p><code>log.txt</code> mostra duas linhas, gravadas por containers diferentes que já foram removidos. O volume fica em <code>/var/lib/docker/volumes/dados/_data</code>.</p></div>
+    <p class="section-label" style="margin-top:22px">Parte 3 · bind mount</p>
+    <p class="hyp"><b>Hipótese</b> Bind mount liga uma pasta do host ao container: <b>o que muda de um lado aparece do outro</b>, e os arquivos são do host.</p>
+    <ol class="steps" style="counter-reset:s 4">
+      <li><div><p>Crie uma pasta no host com uma página:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/bind &amp;&amp; echo '&lt;h1&gt;v1 via bind mount&lt;/h1&gt;' &gt; ~/labs/bind/index.html</code></pre></div>
+<p>Sirva-a com o nginx, somente leitura (<code>:ro</code>):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name bind -p 8082:80 -v ~/labs/bind:/usr/share/nginx/html:ro nginx:stable-alpine</code></pre></div>
+<p>Acesse:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 1; curl -s localhost:8082</code></pre></div>
+      </div></li>
+      <li><div><p>Edite o arquivo <b>no host</b>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>echo '&lt;h1&gt;v2 editado no host&lt;/h1&gt;' &gt; ~/labs/bind/index.html</code></pre></div>
+<p>Acesse de novo, sem reiniciar nada:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8082</code></pre></div>
+      </div></li>
+      <li><div><p>Tente escrever pelo container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec bind sh -c 'echo teste &gt; /usr/share/nginx/html/x.html'</code></pre></div>
+<p>Remova o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f bind</code></pre></div>
+<p>Confira que o arquivo continua no host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>ls ~/labs/bind</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><p>O segundo <code>curl</code> já mostra “v2 editado no host”. A escrita pelo container falha com <code>Read-only file system</code>, e <code>index.html</code> continua no host depois do <code>rm</code>.</p></div>
+    <p class="section-label" style="margin-top:22px">Parte 4 · tmpfs</p>
+    <p class="hyp"><b>Hipótese</b> tmpfs vive <b>na memória</b> do host: é rápido, mas <b>não persiste nem a um restart</b>.</p>
+    <ol class="steps" style="counter-reset:s 7">
+      <li><div><p>Monte um tmpfs:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name tmp --tmpfs /cache:size=16m alpine:3.22 sleep 3600</code></pre></div>
+<p>Grave nele e confira onde ele está:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec tmp sh -c 'echo "temporario" &gt; /cache/a.txt; df -h /cache; cat /cache/a.txt'</code></pre></div>
+      </div></li>
+      <li><div><p>Reinicie o container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker restart tmp</code></pre></div>
+<p>Procure o arquivo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec tmp ls /cache</code></pre></div>
+<p>Remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f tmp</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><p><code>df</code> mostra <code>/cache</code> como <code>tmpfs</code> de 16 MB; depois do <code>restart</code>, a pasta está vazia.</p></div>
+    <p class="section-label" style="margin-top:22px">Resumo e limpeza</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Tipo</th><th>Sobrevive ao restart?</th><th>Sobrevive ao <code>rm</code>?</th><th>Onde fica</th></tr></thead>
+      <tbody>
+        <tr><td>Camada de escrita</td><td>Sim</td><td>Não</td><td>Dentro do container</td></tr>
+        <tr><td>Volume</td><td>Sim</td><td>Sim</td><td>Área do Docker</td></tr>
+        <tr><td>Bind mount</td><td>Sim</td><td>Sim</td><td>Pasta do host</td></tr>
+        <tr><td>tmpfs</td><td>Não</td><td>Não</td><td>Memória do host</td></tr>
+      </tbody>
+    </table></div>
+    <ol class="steps" style="counter-reset:s 9">
+      <li><div><p>Remova o volume criado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume rm dados</code></pre></div>
+<p>Confira que sumiu:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume ls</code></pre></div>
+      </div></li>
+    </ol>
+    <label class="done"><input type="checkbox" id="ex-2-4"> Exercício 2.4 concluído</label>
+  </div>
+</article>
+
+<!-- 2.5 -->
+<article class="topico" id="a2-t5">
+  <div class="topico-head"><span class="topico-num">2.5</span><h2>Logs de containers</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Como o Docker captura logs</h3>
+      <div class="flow">
+        <div class="node"><b>Aplicação</b><span>escreve em stdout / stderr</span></div>
+        <div class="arrow">→</div>
+        <div class="node hl"><b>Log driver</b><span>configurado no dockerd ou por container</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>Destino</b><span>arquivo local, syslog, CloudWatch, Splunk…</span></div>
+      </div>
+      <ul>
+        <li>Container deve logar em <b>stdout/stderr</b>, não em arquivo. A imagem oficial do NGINX, por exemplo, liga <code>access.log</code> ao stdout.</li>
+        <li>Prefira logs estruturados (JSON) para facilitar busca e correlação.</li>
+        <li><code>docker logs</code> lê do driver local. Desde o Docker 20.10, o <b>dual logging</b> mantém uma cópia local mesmo com drivers remotos.</li>
+      </ul>
+    </div>
+    <div class="slide">
+      <h3>Log drivers disponíveis</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Driver</th><th>Destino</th></tr></thead>
+        <tbody>
+          <tr><td><code>json-file</code></td><td>Arquivo JSON no host. <b>Padrão</b> do Docker</td></tr>
+          <tr><td><code>local</code></td><td>Formato binário compacto, com rotação por padrão. Recomendado para uso local</td></tr>
+          <tr><td><code>none</code></td><td>Descarta os logs</td></tr>
+          <tr><td><code>syslog</code></td><td>Daemon syslog (local ou remoto)</td></tr>
+          <tr><td><code>journald</code></td><td>systemd journal</td></tr>
+          <tr><td><code>gelf</code></td><td>Graylog e coletores compatíveis (Logstash)</td></tr>
+          <tr><td><code>fluentd</code></td><td>Fluentd / Fluent Bit</td></tr>
+          <tr><td><code>awslogs</code></td><td>Amazon CloudWatch Logs (padrão no ECS)</td></tr>
+          <tr><td><code>gcplogs</code></td><td>Google Cloud Logging</td></tr>
+          <tr><td><code>splunk</code></td><td>Splunk HTTP Event Collector</td></tr>
+          <tr><td><code>etwlogs</code></td><td>Event Tracing for Windows</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Também existem plugins de terceiros (Loki, Elasticsearch, entre outros).</p>
+    </div>
+    <div class="slide">
+      <h3>Configuração e rotação</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Padrão do host</h4><p><code>/etc/docker/daemon.json</code>:</p>
+<div class="code"><span class="lang">json</span><pre><code>{
+  "log-driver": "local",
+  "log-opts": { "max-size": "10m", "max-file": "3" }
+}</code></pre></div>
+        </div>
+        <div class="card-mini"><h4>Por container</h4><ul><li><code>--log-driver syslog</code></li><li><code>--log-opt max-size=10m</code></li><li><code>--log-opt mode=non-blocking</code>: não trava a aplicação se o destino ficar lento</li></ul></div>
+        <div class="card-mini"><h4>Lendo logs</h4><ul><li><code>docker logs -f web</code></li><li><code>--tail 50</code>, <code>--since 10m</code></li><li><code>--timestamps</code></li><li><code>docker compose logs -f</code></li></ul></div>
+      </div>
+      <p class="note">O <code>json-file</code> sem <code>max-size</code> cresce sem limite e pode encher o disco do host. No Kubernetes, o kubelet grava os logs em <code>/var/log/pods</code> e um DaemonSet (Fluent Bit, por exemplo) envia para CloudWatch, OpenSearch ou Loki.</p>
+    </div>
+    <div class="slide">
+      <h3>De comandos soltos a um arquivo</h3>
+      <p>Repare no padrão dos últimos quatro tópicos: cada peça da aplicação foi um comando <code>docker</code> separado, com flags para decorar e repetir toda vez que o ambiente precisa subir de novo.</p>
+      <div class="flow">
+        <div class="node"><b>docker run</b><span>Tópico 2.2 · subir e operar o container</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>docker network</b><span>Tópico 2.3 · conectar os containers entre si</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>docker volume</b><span>Tópico 2.4 · persistir os dados</span></div>
+        <div class="arrow">→</div>
+        <div class="node hl"><b>--log-driver</b><span>Tópico 2.5 · para onde vão os logs</span></div>
+      </div>
+      <p class="note">A seguir, Docker Compose: as mesmas peças — serviço, rede, volume, log — declaradas <b>uma única vez</b>, num arquivo versionado com o código. Um <code>docker compose up</code> sobe tudo, sempre do mesmo jeito, para qualquer pessoa do time.</p>
+    </div>
+  </div>
+  <div class="tip"><b>Sem exercício prático</b><p>Tópico conceitual. Os comandos de leitura de logs já foram usados no exercício 2.2 e a prática com o Compose vem no tópico 2.6.</p></div>
+</article>
+
+
+<!-- 2.6 -->
+<article class="topico" id="a2-t6">
+  <div class="topico-head"><span class="topico-num">2.6</span><h2>Docker Compose</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide divider">
+      <h3>Docker Compose</h3>
+      <p><b>O que é:</b> a ferramenta do próprio Docker para definir e rodar aplicações com vários containers a partir de <b>um único arquivo</b> (<code>compose.yaml</code>), com os serviços, as redes e os volumes da aplicação inteira.<br><b>Problema que resolve:</b> até aqui, cada container do WordPress (app + banco) foi subido na mão, repetindo rede, volume e ordem de inicialização toda vez. O Compose troca essa sequência de comandos decorados por uma definição declarativa, versionada com o código.</p>
+    </div>
+    <div class="slide">
+      <h3>Para que usar o Docker Compose?</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Ambiente de desenvolvimento</h4><p>App, banco, cache e outras dependências sobem juntos com um comando — sem instalar nada localmente.</p></div>
+        <div class="card-mini"><h4>Testes automatizados</h4><p>O ambiente inteiro é criado e destruído em poucos comandos, isolado a cada execução do CI.</p></div>
+        <div class="card-mini"><h4>Deploy em host único</h4><p>Mesma definição também serve para rodar em produção num único host Docker.</p></div>
+      </div>
+      <p class="note">Fonte: <a href="https://docs.docker.com/compose/intro/features-uses/" target="_blank" rel="noopener">Docker docs · Compose: features and uses</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Um compose.yaml de exemplo</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+        <div class="code"><span class="lang">yaml</span><pre><code>services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - html-data:/usr/share/nginx/html
+    networks:
+      - app-net
+
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=senha
+    expose:
+      - "5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - app-net
+
+volumes:
+  html-data:
+  db-data:
+
+networks:
+  app-net:
+    driver: bridge</code></pre></div>
+        <div>
+          <div class="cpd-top">
+            <div class="cpd-col"><div class="cpd-user">Usuário<small>navegador</small></div><div class="cpd-ar-v">↓<small>host:8080</small></div></div>
+            <div class="cpd-ar" style="visibility:hidden">⇄</div>
+            <div class="cpd-col"></div>
+          </div>
+          <div class="cpd">
+            <span class="cpd-label">network: app-net (bridge)</span>
+            <div class="cpd-row">
+              <div class="cpd-col"><div class="cpd-svc"><b>web</b><small>nginx:alpine</small></div><div class="cpd-ar-v">↓</div><div class="cpd-vol">html-data</div></div>
+              <div class="cpd-ar">⇄<small>db:5432<br>(expose)</small></div>
+              <div class="cpd-col"><div class="cpd-svc"><b>db</b><small>postgres:16</small></div><div class="cpd-ar-v">↓</div><div class="cpd-vol">db-data</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>A aplicação descrita em um arquivo</h3>
+      <p>Docker Compose define serviços, redes e volumes de forma declarativa em <code>compose.yaml</code>. Um comando sobe o ambiente inteiro, igual para todo o time.</p>
+      <div class="cols">
+        <div class="card-mini"><h4>services</h4><p>Cada container: <code>image</code> ou <code>build</code>, <code>ports</code>, <code>environment</code>, <code>volumes</code>, <code>depends_on</code>, <code>healthcheck</code>, <code>restart</code>.</p></div>
+        <div class="card-mini"><h4>volumes</h4><p>Volumes nomeados, criados com o prefixo do projeto.</p></div>
+        <div class="card-mini"><h4>networks</h4><p>Por padrão, uma rede <code>&lt;projeto&gt;_default</code> com DNS pelo nome do serviço.</p></div>
+      </div>
+      <p class="note">O campo <code>version:</code> é obsoleto na Compose Specification e gera aviso. Use <code>docker compose</code> (v2, plugin) em vez de <code>docker-compose</code> (v1, descontinuado).</p>
+    </div>
+    <div class="slide">
+      <h3>Comandos mais utilizados no dia a dia</h3>
+      <div class="tbl"><table>
+        <tbody>
+          <tr><td><code>docker compose up -d</code></td><td>Cria e sobe tudo em segundo plano</td></tr>
+          <tr><td><code>docker compose ps</code></td><td>Estado e saúde dos serviços</td></tr>
+          <tr><td><code>docker compose logs -f wordpress</code></td><td>Acompanha os logs de um serviço</td></tr>
+          <tr><td><code>docker compose exec db sh</code></td><td>Shell num serviço em execução</td></tr>
+          <tr><td><code>docker compose config</code></td><td>Valida e mostra o YAML final (com variáveis resolvidas)</td></tr>
+          <tr><td><code>docker compose down</code> / <code>down -v</code></td><td>Remove containers e redes / também os volumes</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="slide">
+      <h3>Ordem de inicialização com healthcheck</h3>
+      <p><code>depends_on</code> simples só espera o container <b>iniciar</b>, não ficar <b>pronto</b>. Com <code>condition: service_healthy</code>, o WordPress só sobe depois que o banco responde ao healthcheck.</p>
+      <p><code>restart</code>: <code>no</code> · <code>always</code> · <code>on-failure</code> · <code>unless-stopped</code>.</p>
+      <p class="note">No Kubernetes, o equivalente é a <code>readinessProbe</code>, e a aplicação deve tolerar dependências indisponíveis com retry.</p>
+    </div>
+  <div class="slide">
+      <h3>Limites de recursos no Compose</h3>
+<div class="code"><span class="lang">yaml</span><pre><code>services:
+  api:
+    image: minha/api:v1
+    deploy:
+      replicas: 3
+      resources:
+        limits:   { cpus: "0.50", memory: 256M }
+        reservations: { memory: 128M }</code></pre></div>
+      <ul>
+        <li>Sem limite, um container pode consumir toda a CPU e memória do host e derrubar os vizinhos.</li>
+        <li>Escalar funciona para serviços <b>stateless</b>. Não escale um banco com <code>--scale</code>: cada réplica teria seus próprios dados.</li>
+        <li>Serviços com <code>ports: "8080:80"</code> fixo não escalam no mesmo host (conflito de porta).</li>
+      </ul>
+    </div>
+    
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.5</span><h3>WordPress + MariaDB com Compose</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Provisionar um WordPress com banco de dados, volumes e rede próprios, e comprovar a persistência após destruir os containers. Base: <a href="https://github.com/gersontpc/containers/tree/main/Lab-02" target="_blank" rel="noopener">containers/Lab-02</a>.</p>
+    <ol class="steps">
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/wordpress &amp;&amp; cd ~/labs/wordpress</code></pre></div>
+<p>Crie o <code>compose.yaml</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; compose.yaml &lt;&lt;'EOF'
+services:
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: senha1234
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: blog
+      MARIADB_PASSWORD: blog1234
+    volumes:
+      - db-data:/var/lib/mysql
+    networks: [backend]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  wordpress:
+    image: wordpress:6-apache
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: blog
+      WORDPRESS_DB_PASSWORD: blog1234
+      WORDPRESS_DB_NAME: wordpress
+    ports:
+      - "8080:80"
+    volumes:
+      - wp-data:/var/www/html
+    networks: [backend]
+
+volumes:
+  db-data:
+  wp-data:
+
+networks:
+  backend:
+EOF</code></pre></div>
+<p>Valide o YAML:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose config --quiet &amp;&amp; echo "YAML válido"</code></pre></div>
+      </div></li>
+      <li><div><p>Suba os serviços:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose up -d</code></pre></div>
+<p>Acompanhe a ordem de inicialização:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose ps</code></pre></div>
+<p>Veja o log do banco:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose logs db --tail 5</code></pre></div>
+      </div></li>
+      <li><div><p>Abra a porta 8080 pela aba <b>Ports</b>, conclua a instalação do WordPress e publique um post de teste.</p></div></li>
+      <li><div><p>Destrua os containers, mantendo os volumes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose down</code></pre></div>
+<p>Confira que os volumes continuam lá:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker volume ls | grep wordpress</code></pre></div>
+<p>Suba de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose up -d</code></pre></div>
+      </div></li>
+      <li><div><p>Ao terminar, remova tudo, inclusive volumes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker compose down -v</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li><code>docker compose ps</code> mostra <code>db</code> como <code>(healthy)</code> antes de o <code>wordpress</code> iniciar.</li><li>Após <code>down</code> + <code>up</code>, o site volta com o post criado: os dados estão nos volumes <code>wordpress_db-data</code> e <code>wordpress_wp-data</code>.</li><li>Depois do <code>down -v</code>, os volumes somem e a instalação começa do zero.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>O Compose descreve serviços, redes e volumes num único arquivo declarativo.</li>
+      <li><code>depends_on</code> com <code>condition: service_healthy</code> garante a ordem: o banco saudável antes do WordPress.</li>
+      <li>Volumes nomeados mantêm os dados entre <code>down</code> e <code>up</code>; o <code>down -v</code> apaga tudo.</li>
+      <li>O Compose não reconcilia: se um container cair, ninguém sobe outro. É o que o Swarm traz.</li>
+    </ul></div>
+    <div class="warn"><b>Segurança</b><p>Senhas no YAML servem só para laboratório. Em projetos reais use um arquivo <code>.env</code> fora do Git ou <code>secrets:</code> do Compose.</p></div>
+    <label class="done"><input type="checkbox" id="ex-2-5"> Exercício 2.5 concluído</label>
+  </div>
+</article>
+
+<!-- 2.7 -->
+<article class="topico" id="a2-t7">
+  <div class="topico-head"><span class="topico-num">2.7</span><h2>Docker Swarm</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide divider">
+      <h3>Docker Swarm</h3>
+      <p><b>O que é:</b> o orquestrador nativo do Docker — transforma vários hosts Docker (um cluster) em um único recurso, usando o <b>mesmo formato</b> do Compose (<code>docker stack deploy -c compose.yaml</code>).<br><b>Problema que resolve:</b> o Compose sobe uma aplicação muito bem, mas só <b>num host só</b>. Se esse host cai, ou se a demanda cresce além da capacidade de uma máquina, não há para onde crescer nem quem reponha o que caiu. O Swarm distribui os serviços por vários nós e os mantém no ar sozinho.</p>
+    </div>
+    <div class="slide">
+      <h3>Por que orquestrar containers?</h3>
+      <div class="flow">
+        <div class="node hl"><b>Estado desejado</b><span>“3 réplicas de web:v2”</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>Observa</b><span>estado atual do cluster</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>Compara</b><span>diferença entre os dois</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>Age</b><span>cria, remove, move containers</span></div>
+      </div>
+      <ul>
+        <li><b>Scheduling</b>: decide em qual nó cada container roda.</li>
+        <li><b>Auto-reparo</b>: container ou nó caiu, a réplica volta em outro lugar.</li>
+        <li><b>Rolling update e rollback</b>, <b>service discovery</b> e <b>balanceamento</b>.</li>
+      </ul>
+    </div>
+    <div class="slide">
+      <h3>Conceito: arquitetura do Docker Swarm</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Managers</h4><p>Guardam o estado do cluster e reconciliam o desejado com o real. Replicados via <b>Raft</b>: precisam de quórum (N/2 + 1). 3 managers toleram 1 falha; 5 toleram 2.</p></div>
+        <div class="card-mini"><h4>Workers</h4><p>Executam as <b>tasks</b> (containers) de cada <b>service</b>.</p></div>
+        <div class="card-mini"><h4>Rede</h4><p><code>2377/tcp</code> gerência · <code>7946/tcp+udp</code> descoberta · <code>4789/udp</code> overlay (VXLAN). Routing mesh publica a porta em todos os nós.</p></div>
+      </div>
+      <p class="note">Portainer oferece uma interface gráfica para operar um cluster Swarm.</p>
+    </div>
+    <div class="slide">
+      <h3>Docker Swarm ainda é utilizado hoje?</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Onde ele ainda aparece</h4><ul><li>Times pequenos que já usam Docker e não querem a complexidade operacional do Kubernetes</li><li>Clusters simples, poucos nós, sem exigência de recursos avançados (CRDs, operators, autoscaling fino)</li><li>Ferramentas como Portainer mantêm suporte de primeira classe a Swarm</li></ul></div>
+        <div class="card-mini"><h4>Por que o mercado foi para o Kubernetes</h4><ul><li>Ecossistema CNCF: Helm, operators, service mesh, observabilidade — tudo pensado para K8s primeiro</li><li>Toda grande nuvem oferece Kubernetes gerenciado (EKS, GKE, AKS); Swarm gerenciado praticamente não existe</li><li>Mais vagas, mais comunidade, mais integrações de terceiros</li></ul></div>
+      </div>
+      <p class="note">Resposta curta: sim, ainda é usado, mas é nicho. Para quem já domina Docker, continua sendo o caminho mais simples até o dia em que o cluster exigir o que só o Kubernetes oferece — e é exatamente aí que entram as Aulas 03 (Amazon ECS) e 04 (Kubernetes).</p>
+    </div>
+    <div class="slide">
+      <h3>Diagrama de baixo nível</h3>
+      <div class="cpd-diagram" data-swarm-flow>
+        <div class="cpd-top">
+          <div class="cpd-col"><div class="cpd-user" data-node="client">Cliente<small>requisição HTTP</small></div></div>
+        </div>
+        <div class="cpd-top" style="margin:2px 0 2px">
+          <div class="cpd-col"><div class="cpd-ar-v">↓<small>qualquer nó, porta 8080</small></div></div>
+        </div>
+        <div class="cpd-top">
+          <div class="cpd-col"><div class="cpd-user" data-node="mesh" style="border-color:var(--signal);color:var(--signal)">Routing mesh<small>balanceia entre os nós</small></div></div>
+        </div>
+        <div class="cpd-top" style="margin:2px 0 10px">
+          <div class="cpd-col"><div class="cpd-ar-v">↓<small>8080 → 80 (porta do container)</small></div></div>
+        </div>
+        <div class="cpd">
+          <span class="cpd-label">cluster Swarm · overlay network VXLAN (4789/udp)</span>
+          <div class="cpd-row">
+            <div class="cpd-svc hl" data-node="m0"><b>manager 1</b><small class="st">raft: líder</small></div>
+            <div class="cpd-svc" data-node="m1"><b>manager 2</b><small class="st">raft: seguidor</small></div>
+            <div class="cpd-svc" data-node="m2"><b>manager 3</b><small class="st">raft: seguidor</small></div>
+          </div>
+          <div class="cpd-ar-v" style="margin:12px 0 6px">↕<small>2377/tcp · gerência · 7946/tcp+udp · descoberta</small></div>
+          <div class="cpd-row">
+            <div class="cpd-worker"><b>worker 1</b><div class="cpd-ctr" data-node="w0"><b>web.1</b><small>nginx:alpine</small></div></div>
+            <div class="cpd-worker"><b>worker 2</b><div class="cpd-ctr" data-node="w1"><b>web.2</b><small>nginx:alpine</small></div></div>
+            <div class="cpd-worker"><b>worker 3</b><div class="cpd-ctr" data-node="w2"><b>web.3</b><small>nginx:alpine</small></div></div>
+          </div>
+          <div class="cpd-ext">Quórum (N/2)+1: com 3 managers, o cluster tolera a perda de 1 sem parar de decidir</div>
+        </div>
+        <div class="cpd-dot" data-swarm-dot hidden></div>
+        <div class="cpd-dot raft" data-raft-dot hidden></div>
+      </div>
+      <div class="cpd-play-row">
+        <button type="button" class="btn" data-swarm-play><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.3v11.4c0 .6.6 1 1.1.7l9-5.7a.8.8 0 0 0 0-1.4l-9-5.7c-.5-.3-1.1.1-1.1.7Z"/></svg>Reproduzir requisição</button>
+        <button type="button" class="btn ghost" data-raft-play><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.3v11.4c0 .6.6 1 1.1.7l9-5.7a.8.8 0 0 0 0-1.4l-9-5.7c-.5-.3-1.1.1-1.1.7Z"/></svg>Reproduzir eleição Raft</button>
+      </div>
+      <p class="note">"Reproduzir requisição": a bolinha verde entra pelo Cliente, passa pela routing mesh e cai num container diferente a cada clique. "Reproduzir eleição Raft": simula o <b>líder caindo</b> (cinza, tracejado) — sem heartbeat, outro manager vira <b>candidato</b> (laranja) e pede voto ao único <b>eleitor</b> que resta; com o próprio voto do candidato, já são 2 de 3 (maioria), e ele assume como novo <b>líder</b> (verde). O nó caído volta como seguidor ao final, pronto para a próxima queda.</p>
+    </div>
+    <div class="slide">
+      <h3>Raft: por que esse algoritmo aparece tanto</h3>
+      <p>O diagrama anterior resolve um problema que não é só do Swarm: como vários processos, espalhados em máquinas diferentes, concordam sobre um único valor — "quem é o líder", "qual é o estado atual" — mesmo quando um deles cai a qualquer momento. Esse problema se chama <b>consenso distribuído</b>, e o Raft é hoje a solução mais usada para ele.</p>
+      <div class="cols">
+        <div class="card-mini"><h4>Para que serve</h4><p>Mantém um <b>log replicado</b> idêntico entre várias réplicas, com um líder só por vez. É a peça que sustenta bancos de dados distribuídos, service discovery e o control plane de orquestradores.</p></div>
+        <div class="card-mini"><h4>Por que importa</h4><p>Publicado em 2014 (Diego Ongaro e John Ousterhout, Stanford) como alternativa ao <b>Paxos</b> — correto, porém notoriamente difícil de entender e implementar. O Raft virou a escolha padrão de qualquer sistema distribuído novo.</p></div>
+        <div class="card-mini"><h4>Quem usa Raft</h4><ul><li><b>Docker Swarm</b> — eleição dos managers (este tópico)</li><li><b>Kubernetes</b> — dentro do <code>etcd</code>, seu banco de estado (Aula 04)</li><li><b>HashiCorp</b> — Consul, Nomad e Vault</li><li><b>Bancos distribuídos</b> — CockroachDB, TiKV/TiDB, YugabyteDB</li><li><b>Filas e streaming</b> — RabbitMQ (quorum queues), Kafka (modo KRaft, substituindo o ZooKeeper)</li></ul></div>
+      </div>
+      <p class="note">Mesmo algoritmo, sempre o mesmo motivo: eleger um líder e replicar um log com segurança. O Raft do Swarm e o Raft dentro do <code>etcd</code> do Kubernetes resolvem exatamente o mesmo problema.</p>
+    </div>
+    <div class="slide">
+      <h3>Como o Raft decide quem manda</h3>
+      <p>Os três managers do diagrama anterior rodam o mesmo algoritmo de consenso entre si: só <b>um</b> é líder por vez, e nenhuma mudança vira estado oficial do cluster sem passar pela maioria.</p>
+      <div class="cpd">
+        <span class="cpd-label">Raft · consenso entre os managers</span>
+        <div class="cpd-row">
+          <div class="cpd-svc hl"><b>manager 1</b><small>líder</small></div>
+          <div class="cpd-svc"><b>manager 2</b><small>seguidor</small></div>
+          <div class="cpd-svc"><b>manager 3</b><small>seguidor</small></div>
+        </div>
+        <div class="cpd-ext">↕ heartbeat constante do líder · se ele some, um seguidor vira candidato e pede voto aos outros</div>
+      </div>
+      <div class="cols">
+        <div class="card-mini"><h4>1. Eleição</h4><p>Sem heartbeat do líder, um seguidor vira candidato e pede voto aos demais. Quem conseguir maioria (2 de 3) vence e assume como líder.</p></div>
+        <div class="card-mini"><h4>2. Replicação do log</h4><p>Toda mudança (criar service, escalar, atualizar) é uma entrada de log que só o líder propõe e envia aos seguidores.</p></div>
+        <div class="card-mini"><h4>3. Commit por quórum</h4><p>A entrada só vira estado oficial do cluster quando a <b>maioria</b> confirma tê-la gravado — não é preciso esperar todo mundo.</p></div>
+      </div>
+      <p class="note">Por isso o número de managers deve ser ímpar: com 3, o cluster tolera perder 1 sem parar de decidir (quórum 2/3); com 5, tolera perder 2 (quórum 3/5). Um número par não ganha tolerância extra e ainda arrisca empate na votação.</p>
+    </div>
+    <div class="slide">
+      <h3>O ciclo do Raft, em loop</h3>
+      <p>As mesmas três fases do slide anterior, animadas em sequência — eleição, liderança e replicação se repetindo continuamente.</p>
+      <div class="cpd cpd-anim">
+        <div class="cpd-frame">
+          <div class="cpd-row">
+            <div class="cpd-svc"><b>manager 1</b><small>seguidor</small></div>
+            <div class="cpd-svc"><b>manager 2</b><small>seguidor</small></div>
+            <div class="cpd-svc"><b>manager 3</b><small>seguidor</small></div>
+          </div>
+          <div class="cpd-ext">1 · Estado inicial: todos os managers são seguidores (followers)</div>
+        </div>
+        <div class="cpd-frame" style="animation-delay:4s">
+          <div class="cpd-row">
+            <div class="cpd-svc cand"><b>manager 1</b><small>candidato</small></div>
+            <div class="cpd-svc"><b>manager 2</b><small>seguidor</small></div>
+            <div class="cpd-svc"><b>manager 3</b><small>seguidor</small></div>
+          </div>
+          <div class="cpd-ext">2 · Sem heartbeat do líder, manager 1 vira candidato e pede voto aos outros</div>
+        </div>
+        <div class="cpd-frame" style="animation-delay:8s">
+          <div class="cpd-row">
+            <div class="cpd-svc hl"><b>manager 1</b><small>líder</small></div>
+            <div class="cpd-svc"><b>manager 2</b><small>seguidor</small></div>
+            <div class="cpd-svc"><b>manager 3</b><small>seguidor</small></div>
+          </div>
+          <div class="cpd-ext">3 · Com maioria dos votos (2 de 3), manager 1 vira líder e envia heartbeats</div>
+        </div>
+        <div class="cpd-frame" style="animation-delay:12s">
+          <div class="cpd-row">
+            <div class="cpd-svc hl"><b>manager 1</b><small>líder → replica</small></div>
+            <div class="cpd-svc"><b>manager 2</b><small>grava log</small></div>
+            <div class="cpd-svc"><b>manager 3</b><small>grava log</small></div>
+          </div>
+          <div class="cpd-ext">4 · O líder propõe a mudança; vira commit quando a maioria confirma</div>
+        </div>
+      </div>
+      <p class="note">Baseado na visualização interativa de <a href="https://thesecretlivesofdata.com/raft/" target="_blank" rel="noopener">The Secret Lives of Data · Raft</a> — vale abrir e brincar com a eleição e as falhas de nó. Especificação completa em <a href="https://raft.github.io/" target="_blank" rel="noopener">raft.github.io</a>.</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.6</span><h3>Swarm de um nó: auto-reparo e rolling update</h3><span class="lab-time">~25 min</span></div>
+    <p class="lab-goal">Ver na prática o loop de reconciliação que o Compose não oferece: réplica que cai volta sozinha.</p>
+    <ol class="steps">
+      <li><div><p>Inicie o Swarm:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker swarm init || docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')</code></pre></div>
+<p>Confira o nó:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker node ls</code></pre></div>
+<p>Crie um service com 3 réplicas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service create --name web --replicas 3 -p 8083:80 nginx:1.27-alpine</code></pre></div>
+<p>Veja as tasks:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service ps web</code></pre></div>
+      </div></li>
+      <li><div><p>Mate um dos containers:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f $(docker ps -q --filter name=web. | head -1)</code></pre></div>
+<p>Veja o Swarm repor:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 5; docker service ps web</code></pre></div>
+      </div></li>
+      <li><div><p>Escale para 5 réplicas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service scale web=5</code></pre></div>
+<p>Faça um rolling update, uma réplica por vez:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service update --image nginx:1.28-alpine --update-parallelism 1 --update-delay 5s web</code></pre></div>
+<p>Acompanhe o estado das tasks:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service ps web --filter desired-state=running</code></pre></div>
+<p>Volte para a versão anterior:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker service rollback web</code></pre></div>
+      </div></li>
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/swarm &amp;&amp; cd ~/labs/swarm</code></pre></div>
+<p>Crie o arquivo da stack:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; stack.yaml &lt;&lt;'EOF'
+services:
+  whoami:
+    image: traefik/whoami
+    ports: ["8084:80"]
+    deploy:
+      replicas: 3
+      update_config: { parallelism: 1, delay: 5s }
+      restart_policy: { condition: any }
+EOF</code></pre></div>
+<p>Faça o deploy da stack:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stack deploy -c stack.yaml demo</code></pre></div>
+<p>Confira os serviços:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stack services demo</code></pre></div>
+<p>Chame o serviço várias vezes e veja o routing mesh alternar entre as réplicas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for i in $(seq 6); do curl -s localhost:8084 | grep Hostname; done</code></pre></div>
+      </div></li>
+      <li><div><p>Limpe e saia do Swarm (o ECS vem na Aula 03 e o Kubernetes, na Aula 04):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stack rm demo; docker service rm web; docker swarm leave --force</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Após o <code>rm -f</code>, <code>service ps</code> mostra uma task <code>Failed</code>/<code>Shutdown</code> e uma nova <code>Running</code>: o Swarm reconciliou.</li><li>O update troca as réplicas uma a uma, com 5 s de intervalo; o rollback volta para 1.27.</li><li>As requisições na porta 8084 são respondidas por hostnames diferentes (routing mesh).</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>Um orquestrador mantém o estado desejado: réplica que cai é reposta sozinha.</li>
+      <li>Escalar é mudar um número; o rolling update troca as réplicas aos poucos e permite rollback.</li>
+      <li>O routing mesh distribui as requisições entre as réplicas numa mesma porta.</li>
+      <li>É o mesmo loop de reconciliação que aparece no ECS e no Kubernetes.</li>
+    </ul></div>
+    <label class="done"><input type="checkbox" id="ex-2-6"> Exercício 2.6 concluído</label>
+  </div>
+</article>
+
+</div></div>
+</section>

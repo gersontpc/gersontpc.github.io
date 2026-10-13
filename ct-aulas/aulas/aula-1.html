@@ -1,0 +1,1346 @@
+<!-- Aula 01: fragmento carregado por ../index.html (assets/ct.js). Não é uma página completa: edite aqui o conteúdo da aula. -->
+<section class="panel" id="aula-1" data-panel="aula-1" hidden>
+<div class="aula-head">
+  <div>
+    <div class="eyebrow">Aula 01 · Build &amp; Ship</div>
+    <h1>Tudo começa na imagem</h1>
+    <p class="subtitle">Do conceito à prática</p>
+    <p class="lead">Antes de rodar, escalar ou orquestrar, existe uma imagem. Nesta aula vamos do container como processo isolado aos padrões da OCI e aos runtimes, passando pela anatomia de uma imagem e pelo Dockerfile enxuto e seguro, até versionar e publicar no Docker Hub.</p>
+    <div class="meta"><span class="chip">11 tópicos</span><span class="chip">7 exercícios</span><span class="chip">OCI · runtimes · Dockerfile · Hadolint · Trivy · Docker Hub</span><span class="chip chip-gh">GitHub Codespaces</span></div>
+  </div>
+</div>
+<div class="aula-intro">
+  <div class="section-label">Roteiro da aula</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Da ideia à imagem publicada</h3>
+      <div class="flow">
+        <div class="node"><b>Entender</b><span>Tópicos 1.1–1.4 · bare metal, VM e container, por que containers, OCI, runtimes, anatomia da imagem</span><span class="ex-range">Exercício 1.2</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>Construir</b><span>Tópicos 1.5–1.7 · primeira imagem, anatomia e camadas, boas práticas e Hadolint</span><span class="ex-range">Exercícios 1.1, 1.3–1.4</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>Otimizar</b><span>Tópicos 1.8–1.9 · medir tamanho, CVEs e SBOM (cadeia de suprimentos), resolver com multi-stage e distroless</span><span class="ex-range">Exercícios 1.5–1.6</span></div>
+        <div class="arrow">→</div>
+        <div class="node hl"><b>Distribuir</b><span>Tópico 1.10 · tags, SemVer, push e multi-plataforma</span><span class="ex-range">Exercício 1.7</span></div>
+      </div>
+      <div class="cols">
+        <div class="card-mini"><h4>Ao final da aula você vai saber</h4><ul>
+          <li>Explicar o que é um container e quem o executa (runtimes)</li>
+          <li>Ler a estrutura de uma imagem OCI: index, manifest, config e camadas</li>
+          <li>Escrever um Dockerfile otimizado, validado pelo Hadolint</li>
+          <li>Reduzir tamanho e vulnerabilidades com multi-stage e distroless</li>
+          <li>Versionar e publicar imagens com uma estratégia de tags</li>
+        </ul></div>
+        <div class="card-mini"><h4>Por que isso importa</h4><ul>
+          <li><b>Escalabilidade</b>: imagem menor, pull e cold start mais rápidos</li>
+          <li><b>FinOps</b>: menos transferência e armazenamento</li>
+          <li><b>Segurança</b>: menos pacotes, menos CVEs</li>
+          <li>Tudo o que vem depois (containers, Kubernetes, EKS) roda a partir dessa imagem</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="aula-body">
+<nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
+<div class="topicos">
+
+<!-- 1.1 -->
+<article class="topico" id="a1-t1">
+  <div class="topico-head"><span class="topico-num">1.1</span><h2>Onde tudo começou</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Três gerações de infraestrutura</h3>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Servidor físico</th><th>Máquina virtual</th><th>Container</th></tr></thead>
+        <tbody>
+          <tr><td><b>Isola</b></td><td>Hardware inteiro</td><td>Hardware virtual + SO convidado</td><td>Processo (kernel compartilhado)</td></tr>
+          <tr><td><b>Inicialização</b></td><td>Minutos</td><td>Dezenas de segundos</td><td>Milissegundos a segundos</td></tr>
+          <tr><td><b>Tamanho</b></td><td>Disponível no hardware</td><td>GB (SO completo)</td><td>MB (só app + dependências)</td></tr>
+          <tr><td><b>Densidade</b></td><td>1 aplicação por máquina</td><td>Dezenas por host</td><td>Centenas por host</td></tr>
+          <tr><td><b>Entrega</b></td><td>Instalação manual</td><td>Imagem de VM (AMI)</td><td>Imagem OCI versionada em registry</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="slide">
+      <h3>Do hardware até a aplicação</h3>
+      <div class="stk-wrap">
+        <div class="stk">
+          <div class="stk-t">Bare metal</div>
+          <div class="stk-row"><div class="L app">App A</div><div class="L app">App B</div></div>
+          <div class="L lib">Bins / Libs compartilhadas</div>
+          <div class="L os">Sistema operacional</div>
+          <div class="L hw">Hardware</div>
+          <p class="stk-n">Uma máquina, um SO. Apps disputam as mesmas bibliotecas e recursos.</p>
+        </div>
+        <div class="stk">
+          <div class="stk-t">Máquina virtual</div>
+          <div class="stk-row">
+            <div class="grp"><div class="L app">App A</div><div class="L lib">Bins / Libs</div><div class="L gos">SO convidado</div><span class="grp-l">VM</span></div>
+            <div class="grp"><div class="L app">App B</div><div class="L lib">Bins / Libs</div><div class="L gos">SO convidado</div><span class="grp-l">VM</span></div>
+          </div>
+          <div class="L hyp">Hypervisor</div>
+          <div class="L os">SO do host <small>(ou hypervisor tipo 1)</small></div>
+          <div class="L hw">Hardware</div>
+          <p class="stk-n">Cada VM carrega um SO completo com kernel próprio. Isolamento forte, custo em GB e boot lento.</p>
+        </div>
+        <div class="stk">
+          <div class="stk-t">Container</div>
+          <div class="stk-row">
+            <div class="grp"><div class="L app">App A</div><div class="L lib">Bins / Libs</div><span class="grp-l">container</span></div>
+            <div class="grp"><div class="L app">App B</div><div class="L lib">Bins / Libs</div><span class="grp-l">container</span></div>
+          </div>
+          <div class="L rt">Container runtime <small>(containerd + runc)</small></div>
+          <div class="L os">SO do host <small>kernel compartilhado</small></div>
+          <div class="L hw">Hardware <small>(em cloud, uma VM)</small></div>
+          <p class="stk-n">Cada container leva só a app e suas dependências. O kernel é do host: leve, rápido e denso.</p>
+        </div>
+      </div>
+    </div>
+  <div class="slide">
+      <h3>Por que precisamos de containers?</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>“Na minha máquina funciona”</h4><p>Versões diferentes de linguagem, bibliotecas e SO entre o notebook do dev, homologação e produção.</p></div>
+        <div class="card-mini"><h4>Conflito de dependências</h4><p>Duas aplicações no mesmo servidor precisando de versões diferentes da mesma biblioteca.</p></div>
+        <div class="card-mini"><h4>Ambientes que divergem</h4><p>Servidores configurados à mão acumulam ajustes (drift) e ninguém consegue reproduzi-los.</p></div>
+        <div class="card-mini"><h4>Entrega lenta</h4><p>Provisionar uma VM levava dias de chamado; o deploy era manual, raro e arriscado.</p></div>
+        <div class="card-mini"><h4>Recurso ocioso</h4><p>Um servidor por aplicação, com boa parte da CPU e da memória sem uso.</p></div>
+        <div class="card-mini"><h4>A resposta</h4><p>Empacotar a aplicação <b>com tudo o que ela precisa</b> num artefato único, leve e que roda igual em qualquer lugar.</p></div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>Por que foi adotado em escala</h3>
+      <ul>
+        <li><b>Experiência simples</b>: o Docker (2013) juntou tecnologias que já existiam no kernel (namespaces, cgroups) numa experiência de três comandos: <code>build</code>, <code>push</code>, <code>run</code>.</li>
+        <li><b>Artefato imutável e portátil</b>: a mesma imagem roda no notebook, no CI, no data center e em qualquer cloud.</li>
+        <li><b>Leve</b>: sobe em segundos e ocupa MB, então dá para rodar muitas réplicas por servidor e criar ou destruir sob demanda.</li>
+        <li><b>Distribuição fácil</b>: registries como o Docker Hub tornaram o compartilhamento de software tão simples quanto um <code>git pull</code>.</li>
+        <li><b>Padrão aberto</b>: OCI (2015) e CNCF garantiram que ninguém ficasse preso a um fornecedor, e o ecossistema cresceu em torno do mesmo formato.</li>
+        <li><b>Encaixe perfeito</b> com cloud e microsserviços: cada serviço vira um container independente, escalado e atualizado separadamente. O Kubernetes (2014) virou o padrão para orquestrar isso.</li>
+      </ul>
+    </div>
+    <div class="slide">
+      <h3>O que os containers habilitaram no DevOps</h3>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Antes</th><th>Com containers</th></tr></thead>
+        <tbody>
+          <tr><td><b>Entrega</b></td><td>Pacote gerado a cada ambiente, deploy manual</td><td><b>Build once, deploy many</b>: a mesma imagem passa por todos os ambientes no CI/CD</td></tr>
+          <tr><td><b>Ambiente</b></td><td>Documento de instalação e servidor configurado à mão</td><td>Dockerfile versionado no Git: ambiente como código</td></tr>
+          <tr><td><b>Rollback</b></td><td>Reinstalar a versão anterior e torcer</td><td>Voltar para a tag anterior em segundos</td></tr>
+          <tr><td><b>Testes</b></td><td>Ambiente de teste compartilhado e disputado</td><td>Ambientes efêmeros por branch ou pull request, com dependências reais</td></tr>
+          <tr><td><b>Times</b></td><td>Deploy do monolito coordenado entre áreas</td><td>Microsserviços com ciclos de entrega independentes</td></tr>
+          <tr><td><b>Operação</b></td><td>Escala e recuperação manuais</td><td>Autoescala e auto-reparo com orquestradores; GitOps e Platform Engineering sobre a mesma base</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Container não é DevOps, mas foi o artefato comum que permitiu automatizar o caminho do commit até a produção.</p>
+    </div>
+  </div>
+</article>
+
+<!-- 1.2 -->
+<article class="topico" id="a1-t2">
+  <div class="topico-head"><span class="topico-num">1.2</span><h2>Open Container Initiative (OCI)</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Um padrão aberto para containers</h3>
+      <p>Projeto da Linux Foundation criado em 2015 para garantir interoperabilidade: uma imagem criada com uma ferramenta roda em qualquer outra (Docker, Podman, containerd, CRI-O, Kubernetes, ECS, EKS).</p>
+      <div class="cols">
+        <div class="card-mini"><h4>image-spec</h4><p>Formato da imagem: index, manifest, config e camadas, endereçados por digest SHA-256.</p><a class="spec-link" href="https://github.com/opencontainers/image-spec" target="_blank" rel="noopener">github.com/opencontainers/image-spec</a></div>
+        <div class="card-mini"><h4>runtime-spec</h4><p>Como executar um container a partir de um bundle (rootfs + <code>config.json</code>). Referência: <b>runc</b>.</p><a class="spec-link" href="https://github.com/opencontainers/runtime-spec" target="_blank" rel="noopener">github.com/opencontainers/runtime-spec</a></div>
+        <div class="card-mini"><h4>distribution-spec</h4><p>API HTTP de push e pull usada pelos registries (Docker Hub, ECR, GHCR, Harbor).</p><a class="spec-link" href="https://github.com/opencontainers/distribution-spec" target="_blank" rel="noopener">github.com/opencontainers/distribution-spec</a></div>
+      </div>
+      <p class="note">Repositório oficial da OCI, com as três especificações e o runc: <a href="https://github.com/opencontainers" target="_blank" rel="noopener">github.com/opencontainers</a> · site: <a href="https://opencontainers.org" target="_blank" rel="noopener">opencontainers.org</a></p>
+    </div>
+    <div class="slide">
+      <h3>O que a padronização trouxe</h3>
+      <ul>
+        <li><b>Portabilidade</b>: build com Docker, execução com containerd no Kubernetes, sem conversão.</li>
+        <li><b>Liberdade de escolha</b>: troca de ferramenta ou fornecedor sem refazer as imagens.</li>
+        <li><b>Imagens multi-plataforma</b>: um único nome serve <code>amd64</code> e <code>arm64</code> (Graviton, Apple Silicon).</li>
+        <li><b>Ecossistema</b>: scanners, assinaturas, SBOM e registries falam o mesmo formato.</li>
+      </ul>
+      <p class="note">Participam da OCI empresas como Docker, Google, Microsoft, AWS, Red Hat e IBM.</p>
+    </div>
+  </div>
+</article>
+
+<!-- 1.3 -->
+<article class="topico" id="a1-t3">
+  <div class="topico-head"><span class="topico-num">1.3</span><h2>Container runtimes</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>O que é um container runtime?</h3>
+      <ul>
+        <li><b>Container runtime</b> é o componente responsável por <b>criar, iniciar e gerenciar containers</b> no sistema operacional.</li>
+        <li>Executa containers de acordo com padrões, como a especificação da <b>OCI</b>.</li>
+        <li>Basicamente, <b>pega uma imagem de container e a transforma em um processo vivo</b>, isolado no sistema.</li>
+      </ul>
+    </div>
+    <div class="slide">
+      <h3>Tipos de container runtime</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Tipo</th><th>Descrição</th><th>Exemplos</th></tr></thead>
+        <tbody>
+          <tr><td><b>Low-level</b><br>baixo nível</td><td>Só executam o container: criam, isolam e gerenciam o processo. Simples e diretos.</td><td>runc, crun, runsc (gVisor)</td></tr>
+          <tr><td><b>High-level</b><br>alto nível</td><td>Gerenciam o ciclo de vida completo (baixar imagem, criar, iniciar, parar, remover) e chamam um low-level para executar.</td><td>containerd, CRI-O, Docker Engine</td></tr>
+          <tr><td><b>Sandboxed</b><br>segurança extra</td><td>Executam containers dentro de máquinas virtuais leves para aumentar o isolamento.</td><td>Kata Containers, gVisor, Firecracker</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="slide">
+      <h3>Cada camada, um papel</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Low-level</h4><ul><li>Transformam uma imagem em um processo no Linux</li><li>Trabalham direto com <b>cgroups</b> e <b>namespaces</b></li><li>Não gerenciam imagens nem clusters</li><li><b>runc</b>: referência da OCI · <b>crun</b>: em C, mais leve · <b>runsc</b>: intercepta chamadas de sistema</li></ul></div>
+        <div class="card-mini"><h4>High-level</h4><ul><li>Baixam imagens, criam snapshots, montam redes e volumes</li><li>Chamam um low-level (runc) para a execução final</li><li><b>containerd</b>: usado pelo Docker e pelo Kubernetes (CRI) · <b>CRI-O</b>: feito para o Kubernetes · <b>Docker Engine</b>: CLI + API + containerd</li></ul></div>
+        <div class="card-mini"><h4>Sandboxed</h4><ul><li>Em vez de isolar só no kernel, criam uma pequena VM por container</li><li>Para multi-tenant, cloud pública e setores regulados</li><li><b>Kata</b>: microVM por container · <b>gVisor</b>: kernel em user-space · <b>Firecracker</b>: base do AWS Lambda e Fargate</li></ul></div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>Docker e o kernel Linux</h3>
+      <div class="stk-wrap kd-wrap">
+        <div class="stk kd">
+          <div class="stk-t">Docker Engine</div>
+          <div class="L app kd-top">docker CLI</div>
+          <div class="kd-ar">↓ <small>REST API</small></div>
+          <div class="L lib">dockerd <small>imagens, redes, volumes, build</small></div>
+          <div class="kd-ar">↓ <small>gRPC</small></div>
+          <div class="L rt">containerd <small>runtime de alto nível</small></div>
+          <div class="kd-ar">↓</div>
+          <div class="L lib">containerd-shim-runc-v2 <small>um por container</small></div>
+          <div class="kd-ar">↓</div>
+          <div class="L rt kd-now">runc <small>runtime de baixo nível · usa a libcontainer</small></div>
+          <div class="kd-ar">↓ <small>chama o kernel</small></div>
+        </div>
+        <div class="kd-side">
+          <ul>
+            <li><b>docker CLI</b>: cliente. Só envia requisições para a API.</li>
+            <li><b>dockerd</b>: o daemon. Gerencia imagens, redes, volumes e build.</li>
+            <li><b>containerd</b>: runtime de alto nível. Baixa imagens, cria snapshots e controla o ciclo de vida.</li>
+            <li><b>shim</b>: mantém cada container vivo mesmo se o dockerd ou o containerd reiniciarem.</li>
+            <li><b>runc</b>: runtime de baixo nível. Configura namespaces e cgroups e inicia o processo.</li>
+          </ul>
+          <p class="note">A libcontainer nasceu no Docker 0.9 (2014) substituindo o LXC, foi doada à OCI em 2015 e virou o runc. Desde o Docker 1.11 (2016) o Engine roda sobre containerd + runc.</p>
+        </div>
+      </div>
+      <div class="kd-kernel">
+        <div class="kd-kt">Linux kernel <small>os recursos por trás do isolamento</small></div>
+        <div class="kd-feats"><div class="kf"><b>cgroups</b><span>Controla e limita CPU, memória, I/O e número de processos de cada container</span></div><div class="kf"><b>namespaces</b><span>Cada container tem seus próprios processos, rede, pontos de montagem e hostname</span></div><div class="kf"><b>capabilities</b><span>Divide os poderes do root em partes; o container recebe só as necessárias</span></div><div class="kf"><b>seccomp</b><span>Filtra as chamadas de sistema que o processo pode fazer</span></div><div class="kf"><b>SELinux / AppArmor</b><span>Políticas obrigatórias que restringem o que o processo pode acessar</span></div><div class="kf"><b>Netfilter</b><span>Firewall, NAT e filtragem do tráfego dos containers (iptables/nftables)</span></div><div class="kf"><b>Netlink</b><span>Interface entre kernel e user-space para configurar interfaces e rotas</span></div><div class="kf"><b>OverlayFS</b><span>Union filesystem que empilha as camadas da imagem e a camada de escrita</span></div></div>
+      </div>
+      <p class="note">O Kubernetes usa o mesmo caminho a partir do containerd (via CRI), sem o dockerd.</p>
+    </div>
+  </div>
+</article>
+
+<!-- 1.4 -->
+<article class="topico" id="a1-t4">
+  <div class="topico-head"><span class="topico-num">1.4</span><h2>Anatomia de uma imagem: Docker × OCI</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Por que o padrão OCI surgiu?</h3>
+      <p>O formato de imagem nasceu <b>dentro do Docker</b> e, até 2015, era definido e controlado por uma única empresa. Com concorrentes surgindo, o risco era cada ferramenta ter o seu formato.</p>
+      <div class="timeline">
+        <div><b>mar/2013</b><span>Docker é lançado com formato próprio: camadas identificadas por IDs aleatórios, sem hash de conteúdo</span></div>
+        <div><b>dez/2014</b><span>CoreOS lança o <b>rkt</b> e a especificação <b>appc</b> (App Container), com outro formato de imagem (ACI)</span></div>
+        <div class="hl"><b>22/jun/2015</b><span>Nasce na DockerCon, sob a Linux Foundation, o Open Container Project (depois <b>OCI</b>). Docker doa o formato e o runtime (libcontainer → <b>runc</b>). Fundadores incluem Docker, CoreOS, Google, Microsoft, Red Hat, AWS e IBM</span></div>
+        <div><b>2016</b><span>Docker 1.10 (fev) adota o <b>Image Manifest V2, Schema 2</b>, endereçado por conteúdo. Em abril a OCI cria a image-spec <b>a partir do Docker v2.2</b>. No fim do ano o appc para de evoluir</span></div>
+        <div class="hl"><b>19/jul/2017</b><span><b>runtime-spec</b> e <b>image-spec</b> 1.0</span></div>
+        <div><b>4/mai/2021</b><span><b>distribution-spec</b> 1.0, baseada na Docker Registry HTTP API V2. Em mar/2024 saem as versões 1.1 de image e distribution</span></div>
+      </div>
+      <div class="cols">
+        <div class="card-mini"><h4>O problema</h4><p>Sem padrão, cada ferramenta teria seu formato: uma imagem feita no Docker poderia não rodar no rkt, no Kubernetes ou numa cloud. O mercado ficaria preso a um fornecedor.</p></div>
+        <div class="card-mini"><h4>A solução</h4><p>Em vez de criar algo do zero, a OCI <b>padronizou o que já funcionava</b>: o formato do Docker, com governança neutra e aberta para todo o ecossistema.</p></div>
+        <div class="card-mini"><h4>Resultado</h4><p>Docker, Podman, containerd, CRI-O, Kubernetes, ECS e EKS falam o mesmo formato. Por isso uma imagem Docker e uma imagem OCI são quase idênticas.</p></div>
+      </div>
+      <p class="note">Fontes: <a href="https://opencontainers.org/posts/announcements/2015-06-20-industry-leaders-unite-to-create-project-for-open-container-standard/" target="_blank" rel="noopener">anúncio da OCI (2015)</a> · <a href="https://www.infoq.com/news/2014/12/coreos-rocket/" target="_blank" rel="noopener">CoreOS Rocket (2014)</a> · <a href="https://github.com/opencontainers/tob/blob/main/proposals/image-format/README.md" target="_blank" rel="noopener">proposta da image-spec</a> · <a href="https://github.com/appc/spec" target="_blank" rel="noopener">appc</a> · <a href="https://opencontainers.org/posts/announcements/2017-07-17-open-container-initiative-oci-releases-v1-0-of-container-standards/" target="_blank" rel="noopener">OCI 1.0 (2017)</a> · <a href="https://opencontainers.org/posts/announcements/2021-05-04-oci-dist-spec-v1/" target="_blank" rel="noopener">distribution-spec 1.0 (2021)</a></p>
+    </div>
+    <div class="slide">
+      <h3>Os blocos de uma imagem: Docker × OCI</h3>
+      <div class="mp dxo">
+        <div class="mp-col">
+          <div class="stk-t">Imagem Docker</div>
+          <p class="dx-sub">Formato criado pelo Docker e especificado como <b>Image Manifest V2, Schema 2</b> (Docker 1.10, 2016).</p>
+          <div class="L idx">Manifest list<small>multi-arquitetura</small></div><div class="mp-ar">↓</div><div class="L man">Manifest V2<small>schema 2</small></div><div class="mp-ar">↓</div><div class="mp-pair"><div class="L cfg">Config<small>JSON do container</small></div><div class="L lay">Layers<small>tar + gzip</small></div></div>
+          <div class="dx-dl"><div class="dx-k">Origem</div><div class="dx-v">Docker Inc., formato proprietário que virou padrão de fato</div><div class="dx-k">Em disco</div><div class="dx-v"><code>manifest.json</code> + <code>repositories</code> (docker save legado)</div><div class="dx-k">Uso hoje</div><div class="dx-v">Imagens antigas e registries legados; ainda aceito por todos os runtimes</div></div>
+        </div>
+        <div class="mp-col oci">
+          <div class="stk-t">Imagem OCI</div>
+          <p class="dx-sub">Padrão aberto da Linux Foundation: <b>OCI image-spec</b> (v1.0 em 2017, v1.1 em 2024), derivado do formato Docker.</p>
+          <div class="L idx">Image index<small>multi-arquitetura</small></div><div class="mp-ar">↓</div><div class="L man">Image manifest<small>v1</small></div><div class="mp-ar">↓</div><div class="mp-pair"><div class="L cfg">Config<small>mesmo modelo</small></div><div class="L lay">Layers<small>tar + gzip ou zstd</small></div></div>
+          <div class="dx-dl"><div class="dx-k">Origem</div><div class="dx-v">Comunidade OCI (Docker, Google, Red Hat, AWS, Microsoft…)</div><div class="dx-k">Em disco</div><div class="dx-v"><code>oci-layout</code> + <code>index.json</code> + <code>blobs/sha256/</code></div><div class="dx-k">Extras</div><div class="dx-v">Annotations e artefatos ligados à imagem (SBOM, assinaturas) via <code>subject</code>/referrers</div><div class="dx-k">Uso hoje</div><div class="dx-v">Padrão atual: containerd, Podman, Kubernetes, BuildKit e as imagens oficiais do Docker Hub</div></div>
+        </div>
+      </div>
+      <p class="note">Na prática são quase idênticos: mesma ideia de manifest, config e camadas, endereçados por digest. Mudam os <i>media types</i> e os recursos extras do OCI. Todo runtime atual lê os dois, e o Docker converte entre eles de forma transparente.</p>
+    </div>
+    <div class="slide">
+      <h3>Tag × digest: endereçamento por conteúdo</h3>
+      <blockquote class="anota">
+        <b>Anotação · endereçamento por conteúdo</b>
+        <p>Cada bloco da imagem (index, manifest, config e cada camada) é identificado pelo <b>hash SHA-256 do próprio conteúdo</b>: o <b>digest</b> (<code>sha256:3f9c…</code>). Mesmo conteúdo gera sempre o mesmo digest; mudou um único byte, o digest é outro.</p>
+        <ul>
+          <li><b>Integridade</b>: no pull, o Docker recalcula o hash de cada blob e rejeita o que não bater.</li>
+          <li><b>Reaproveitamento</b>: camadas com o mesmo digest são baixadas e armazenadas uma única vez, mesmo usadas por várias imagens.</li>
+          <li><b>Tag = ponteiro móvel</b>: <code>nginx:stable-alpine</code> hoje aponta para um digest e, depois de uma atualização, para outro. Funciona como um branch no Git.</li>
+          <li><b>Digest = identidade imutável</b>: <code>nginx@sha256:…</code> sempre traz exatamente os mesmos bytes. Funciona como o hash de um commit.</li>
+        </ul>
+        <p>Por isso, em produção, fixe a imagem pelo digest (ou use <code>imagem:tag@sha256:…</code>): garante que o que foi testado é o que está rodando.</p>
+      </blockquote>
+      <div class="rec">
+        <div class="rec-h">Recomendado: versão + SHA curto do commit</div>
+        <div class="rec-body">
+          <div class="rec-tag"><span class="t-v">v1.0.0</span><span class="t-s">-</span><span class="t-c">3123a51</span></div>
+          <div class="rec-parts">
+            <div><b class="t-v">v1.0.0</b> versão no formato <code>vMAJOR.MINOR.PATCH</code> (<a href="#a1-t11" data-jump="a1-t11">SemVer<sup>ref</sup></a>): diz o que mudou</div>
+            <div><b class="t-c">3123a51</b> os 7 primeiros caracteres do SHA do commit (<code>git rev-parse --short HEAD</code>): diz de onde veio</div>
+          </div>
+        </div>
+        <ul>
+          <li><b>Rastreável</b>: <code>git show 3123a51</code> mostra o commit, o autor e a mudança que gerou a imagem.</li>
+          <li><b>Única e imutável</b>: cada commit gera uma tag diferente, que nunca é reaproveitada. Com <i>tag immutability</i> ativo no registry, nem por engano ela é sobrescrita.</li>
+          <li><b>Simples</b>: legível para pessoas, sem precisar copiar o digest completo.</li>
+        </ul>
+        <p class="rec-note">Em SemVer, o trecho após o hífen é um identificador de pré-release; como tags Docker não aceitam <code>+</code> (build metadata), o hífen é a convenção usada.</p>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>Single-platform × multi-platform</h3>
+      <div class="mp">
+        <div class="mp-col">
+          <div class="stk-t">Single-platform</div>
+          <div class="L tag">app:1.0 <small>tag</small></div>
+          <div class="mp-ar">↓</div>
+          <div class="L man">Manifest</div>
+          <div class="mp-ar">↓</div>
+          <div class="mp-pair"><div class="L cfg">Config <small>linux/amd64</small></div><div class="L lay">Layers</div></div>
+          <p class="stk-n" style="min-height:0">Um manifest, uma config, um conjunto de camadas. Só roda na arquitetura em que foi construída.</p>
+        </div>
+        <div class="mp-col mp-multi">
+          <div class="stk-t">Multi-platform</div>
+          <div class="L tag">app:1.0 <small>tag</small></div>
+          <div class="mp-ar">↓</div>
+          <div class="L idx">Index <small>manifest list</small></div>
+          <div class="mp-split">
+            <div><div class="mp-ar">↓</div><div class="L man">Manifest <small>linux/amd64</small></div><div class="mp-ar">↓</div><div class="mp-pair"><div class="L cfg">Config</div><div class="L lay">Layers</div></div></div>
+            <div><div class="mp-ar">↓</div><div class="L man">Manifest <small>linux/arm64</small></div><div class="mp-ar">↓</div><div class="mp-pair"><div class="L cfg">Config</div><div class="L lay">Layers</div></div></div>
+          </div>
+          <p class="stk-n" style="min-height:0">Um índice aponta para um manifest por plataforma, cada um com sua config e suas camadas.</p>
+        </div>
+      </div>
+      <div class="cols">
+        <div class="card-mini"><h4>Como o Docker escolhe</h4><p>No <code>pull</code>/<code>run</code>, seleciona automaticamente a variante da arquitetura do host: <code>arm64</code> num Mac M-series ou Graviton, <code>amd64</code> num x86. Para forçar: <code>--platform linux/arm64</code>.</p></div>
+        <div class="card-mini"><h4>Como construir</h4><ul><li><b>Emulação QEMU</b>: mais simples, sem mudar o Dockerfile, porém mais lenta</li><li><b>Nós nativos</b> por arquitetura no builder: mais rápido</li><li><b>Cross-compilation</b> com multi-stage (Go, Rust)</li></ul></div>
+      </div>
+      <p class="note">Fonte: <a href="https://docs.docker.com/build/building/multi-platform/" target="_blank" rel="noopener">Docker docs · Multi-platform builds</a>. Na prática: exercício 1.2, parte 3, e exercício 1.7, parte 2.</p>
+    </div>
+    <div class="slide">
+      <h3>Como emular outra arquitetura localmente?</h3>
+      <p>O host do Codespaces é <code>amd64</code>. Sem ajuda, o kernel dele não sabe executar um binário compilado para <code>arm64</code> — e vice-versa num Mac Apple Silicon. É aí que entra o <b>QEMU</b>.</p>
+      <div class="cols">
+        <div class="card-mini"><h4>O que é o QEMU</h4><p>Emulador de processador de código aberto, capaz de traduzir instruções de uma arquitetura para outra em tempo real (por exemplo, <code>arm64</code> → <code>amd64</code>).</p></div>
+        <div class="card-mini"><h4>binfmt_misc: a ponte com o kernel</h4><p>O Docker registra o QEMU no kernel do host via <code>binfmt_misc</code>. A partir daí, sempre que o kernel encontra um binário de outra arquitetura, ele encaminha a execução ao QEMU em vez de recusar — de forma transparente para o container e para quem roda o <code>docker run</code>.</p></div>
+      </div>
+      <p class="note">Emulado é <b>compatível, não rápido</b>: instrução por instrução traduzida custa tempo de CPU, então serve para testar e validar <code>--platform</code>, não para produção. Mãos à obra no exercício 1.2, parte 3.</p>
+    </div>
+    <div class="slide">
+      <h3>Formato Docker × formato OCI</h3>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Docker (Image Manifest V2, Schema 2)</th><th>OCI (image-spec v1)</th></tr></thead>
+        <tbody>
+          <tr><td><b>Lista multi-plataforma</b></td><td>Manifest list<br><code>…docker.distribution.manifest.list.v2+json</code></td><td>Image index<br><code>…oci.image.index.v1+json</code></td></tr>
+          <tr><td><b>Manifest</b></td><td><code>…docker.distribution.manifest.v2+json</code></td><td><code>…oci.image.manifest.v1+json</code></td></tr>
+          <tr><td><b>Camadas</b></td><td><code>…docker.image.rootfs.diff.tar.gzip</code></td><td><code>…oci.image.layer.v1.tar+gzip</code> (também zstd)</td></tr>
+          <tr><td><b>Em disco</b></td><td><code>manifest.json</code> + <code>repositories</code></td><td><code>oci-layout</code> + <code>index.json</code> + <code>blobs/sha256/</code></td></tr>
+          <tr><td><b>Extras</b></td><td>—</td><td>Annotations, artefatos (SBOM, assinaturas) ligados à imagem</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">O formato OCI nasceu do formato Docker, por isso são quase idênticos. Registries e runtimes atuais aceitam os dois.</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.2</span><h3>Formato Docker × formato OCI na prática</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Usar <code>docker manifest inspect</code> para enxergar, num registry real, exatamente as peças da tabela acima: o índice multi-plataforma, o manifest de cada plataforma e as camadas. Depois, olhar por dentro da sua própria imagem para ver o mesmo formato Docker gravado em disco, e rodar localmente, via QEMU, cada uma das plataformas do índice inspecionado.</p>
+    <p class="section-label" style="margin-top:6px">Parte 1 · O índice multi-plataforma</p>
+    <ol class="steps">
+      <li><div><p>Peça o manifesto de uma imagem multi-plataforma do Docker Hub. Sem <code>--verbose</code>, o Docker resolve para a plataforma do seu host e mostra só aquele manifest:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker manifest inspect nginx:stable-alpine</code></pre></div>
+<p>Repare no <code>mediaType</code> do manifest (<code>…docker.distribution.manifest.v2+json</code>) e na lista <code>layers</code>, cada uma com seu próprio <code>mediaType</code> (<code>…docker.image.rootfs.diff.tar.gzip</code>) e <code>digest</code>.</p>
+      </div></li>
+      <li><div><p>Agora peça o manifesto <b>sem resolver a plataforma</b>: o <code>--verbose</code> mostra o índice completo, com um manifest por arquitetura:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker manifest inspect --verbose nginx:stable-alpine</code></pre></div>
+<p>O conjunto dessas entradas, uma por <code>Platform.architecture</code>, é a <b>manifest list</b> — o equivalente Docker do <b>image index</b> da OCI. Conte quantas plataformas aparecem.</p>
+      </div></li>
+    </ol>
+    <p class="section-label" style="margin-top:22px">Parte 2 · Sua imagem, o mesmo formato, gravado em disco</p>
+    <ol class="steps" style="counter-reset:s 2">
+      <li><div><p>A imagem do exercício 1.1 ainda não foi para um registry, então <code>docker manifest inspect</code> não a alcança — ele só lê de registries. Para ver o formato Docker <b>local</b>, exporte-a com <code>docker save</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker save "$IMAGE:1.0.0" -o /tmp/site.tar</code></pre></div>
+<p>Agora liste o conteúdo do tar:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>tar -tvf /tmp/site.tar</code></pre></div>
+<p>Aparecem um <code>manifest.json</code>, um <code>repositories</code> e um arquivo por camada — exatamente a linha "Em disco" da tabela para o formato Docker, sem <code>oci-layout</code> nem <code>index.json</code>.</p>
+      </div></li>
+      <li><div><p>Abra o <code>manifest.json</code> e confira que ele referencia o <code>Config</code> e a lista de <code>Layers</code> da sua imagem, descritos no mesmo vocabulário do formato Docker que você viu na Parte 1:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>tar -xOf /tmp/site.tar manifest.json | python3 -m json.tool</code></pre></div>
+      </div></li>
+    </ol>
+    <p class="section-label" style="margin-top:22px">Parte 3 · Rodando as duas plataformas do índice, via QEMU</p>
+    <ol class="steps" style="counter-reset:s 4">
+      <li><div><p>Registre os emuladores QEMU no host (uma vez por Codespace):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --privileged --rm tonistiigi/binfmt --install all</code></pre></div>
+      </div></li>
+      <li><div><p><b>Emular a imagem de uma arquitetura ARM64</b> — o manifest <code>linux/arm64</code> do índice, traduzido instrução a instrução pelo QEMU:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --platform linux/arm64 alpine:3.22 uname -m   # → aarch64, emulado</code></pre></div>
+      </div></li>
+      <li><div><p><b>Emular a imagem de uma arquitetura AMD64</b> — o manifest <code>linux/amd64</code> do mesmo índice, nativo na arquitetura do Codespace:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --platform linux/amd64 alpine:3.22 uname -m   # → x86_64, nativo</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li>Sem <code>--verbose</code>: um manifest só, com <code>mediaType</code> <code>docker.distribution.manifest.v2+json</code> e uma lista de <code>layers</code>.</li>
+      <li>Com <code>--verbose</code>: várias entradas, uma por <code>Platform.architecture</code> (ao menos <code>amd64</code> e <code>arm64</code>), cada uma com seu próprio manifest e digest — a manifest list completa.</li>
+      <li><code>tar -tvf</code> lista <code>manifest.json</code>, <code>repositories</code> e um <code>.tar</code> por camada.</li>
+      <li><code>--platform linux/amd64</code> devolve <code>x86_64</code> sem aviso; <code>--platform linux/arm64</code> devolve <code>aarch64</code>, ambos a partir do mesmo índice inspecionado na Parte 1.</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>Uma imagem é um conjunto de documentos: índice multi-plataforma → manifest de cada plataforma → config e camadas, todos endereçados por digest.</li>
+      <li>O mesmo nome de imagem entrega binários diferentes conforme a arquitetura: o cliente escolhe o manifest certo.</li>
+      <li>Os formatos Docker e OCI têm a mesma estrutura; o que muda é o <code>mediaType</code>.</li>
+      <li>Com o QEMU, dá para rodar uma imagem de outra arquitetura para testar.</li>
+    </ul></div>
+    <div class="tip"><b>Por que não dá pra inspecionar a imagem local direto</b><p><code>docker manifest inspect</code> conversa com a <b>distribution-spec</b> de um registry; uma imagem que só existe no cache local (<code>docker image ls</code>) ainda não tem manifest publicado. É por isso que, no exercício 1.7, depois do <code>docker push</code>, você vai poder rodar <code>docker manifest inspect "$IMAGE:1.0.0"</code> nela também.</p></div>
+    <label class="done"><input type="checkbox" id="ex-1-2"> Exercício 1.2 concluído</label>
+  </div>
+</article>
+
+<!-- 1.5 -->
+<article class="topico" id="a1-t5">
+  <div class="topico-head"><span class="topico-num">1.5</span><h2>Dockerfile → imagem → registry → container</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>O ciclo de vida de uma imagem</h3>
+      <div class="lcs">
+        <div class="lc">
+          <div class="lc-h"><span class="lc-n">1</span><b>Dockerfile</b><span class="lc-v">escrever</span></div>
+          <div class="lc-cmd">FROM nginx:stable-alpine<br>COPY index.html /usr/share/…<br>CMD ["nginx","-g","daemon off;"]</div>
+          <p class="lc-w">A receita em texto: imagem base, arquivos, comandos de build e como iniciar o processo.</p>
+          <div class="lc-f"><span>Onde vive</span>Repositório Git, versionado junto com o código</div>
+          <div class="lc-t">Tópicos 1.5–1.7</div>
+        </div>
+        <div class="lc-ar" aria-hidden="true">→</div>
+        <div class="lc hl">
+          <div class="lc-h"><span class="lc-n">2</span><b>Imagem</b><span class="lc-v">construir</span></div>
+          <div class="lc-cmd">docker build -t user/site:1.0.0 .</div>
+          <p class="lc-w">O BuildKit executa cada instrução, gera camadas somente leitura e a config. O resultado ganha um digest <code>sha256</code>.</p>
+          <div class="lc-f"><span>Onde vive</span>Cache local do Docker (<code>docker image ls</code>)</div>
+          <div class="lc-t">Tópicos 1.4 e 1.6</div>
+        </div>
+        <div class="lc-ar" aria-hidden="true">→</div>
+        <div class="lc">
+          <div class="lc-h"><span class="lc-n">3</span><b>Registry</b><span class="lc-v">distribuir</span></div>
+          <div class="lc-cmd">docker push user/site:1.0.0</div>
+          <p class="lc-w">Envia só as camadas que o registry ainda não tem (distribution-spec). Outros ambientes fazem <code>pull</code> pela tag ou pelo digest.</p>
+          <div class="lc-f"><span>Onde vive</span>Docker Hub, Amazon ECR, GHCR, Harbor</div>
+          <div class="lc-t">Tópico 1.10</div>
+        </div>
+        <div class="lc-ar" aria-hidden="true">→</div>
+        <div class="lc">
+          <div class="lc-h"><span class="lc-n">4</span><b>Container</b><span class="lc-v">executar</span></div>
+          <div class="lc-cmd">docker run -d -p 8080:80 user/site:1.0.0</div>
+          <p class="lc-w">O runtime baixa a imagem se preciso, adiciona uma camada de escrita, aplica namespaces e cgroups e inicia o processo como PID 1.</p>
+          <div class="lc-f"><span>Onde vive</span>Host ou nó do cluster, enquanto estiver rodando</div>
+          <div class="lc-t">Aula 02</div>
+        </div>
+      </div>
+      <div class="lc-foot"><b>Build once, run anywhere:</b> o mesmo artefato, com o mesmo digest, sai do build e roda no notebook, no CI, em homologação e em produção. Muda a configuração do ambiente (variáveis, secrets), nunca a imagem.</div>
+    </div>
+    <div class="slide">
+      <h3>Instruções essenciais na construção de um Dockerfile</h3>
+      <div class="cols instr"><div><div class="tbl"><table><thead><tr><th>Instrução</th><th>O que faz</th><th>Observação</th></tr></thead><tbody><tr><td><code>ADD</code></td><td>Adiciona arquivos e diretórios locais ou remotos</td><td class="obs">Também extrai tar e baixa URL; prefira COPY</td></tr><tr><td><code>ARG</code></td><td>Usa variáveis de tempo de build</td><td class="obs">Nunca para segredos</td></tr><tr><td><code>CMD</code></td><td>Especifica o comando padrão</td><td class="obs">Substituído pelos argumentos do docker run</td></tr><tr><td><code>COPY</code></td><td>Copia arquivos e diretórios</td><td class="obs">Aceita --from para multi-stage</td></tr><tr><td><code>ENTRYPOINT</code></td><td>Especifica o executável padrão</td><td class="obs">Use a forma exec: ["app"]</td></tr><tr><td><code>ENV</code></td><td>Define variáveis de ambiente</td><td class="obs">Persistem na imagem e no container</td></tr><tr><td><code>EXPOSE</code></td><td>Descreve em quais portas a aplicação escuta</td><td class="obs">Só documenta; não publica a porta</td></tr><tr><td><code>FROM</code></td><td>Cria um novo estágio de build a partir de uma imagem base</td><td class="obs">Fixe a versão, nunca latest</td></tr><tr><td><code>HEALTHCHECK</code></td><td>Verifica a saúde do container</td><td class="obs">Usado pelo Docker e pelo Swarm</td></tr></tbody></table></div></div><div><div class="tbl"><table><thead><tr><th>Instrução</th><th>O que faz</th><th>Observação</th></tr></thead><tbody><tr><td><code>LABEL</code></td><td>Adiciona metadados à imagem</td><td class="obs">Use org.opencontainers.image.*</td></tr><tr><td><code>MAINTAINER</code></td><td>Especifica o autor da imagem</td><td class="obs">Obsoleto: use LABEL</td></tr><tr><td><code>ONBUILD</code></td><td>Instruções executadas quando a imagem for usada como base em outro build</td><td class="obs">Pouco usado</td></tr><tr><td><code>RUN</code></td><td>Executa comandos de build</td><td class="obs">Cada RUN gera uma camada</td></tr><tr><td><code>SHELL</code></td><td>Define o shell padrão da imagem</td><td class="obs">Padrão: ["/bin/sh", "-c"]</td></tr><tr><td><code>STOPSIGNAL</code></td><td>Define o sinal enviado para encerrar o container</td><td class="obs">Padrão: SIGTERM</td></tr><tr><td><code>USER</code></td><td>Define o usuário e o grupo</td><td class="obs">Rode como não-root</td></tr><tr><td><code>VOLUME</code></td><td>Cria pontos de montagem de volume</td><td class="obs">Dados fora da camada de escrita</td></tr><tr><td><code>WORKDIR</code></td><td>Muda o diretório de trabalho</td><td class="obs">Prefira a cd dentro de RUN</td></tr></tbody></table></div></div></div>
+      <p class="note">As 18 instruções da <a href="https://docs.docker.com/reference/dockerfile/" target="_blank" rel="noopener">referência oficial do Dockerfile</a>, na mesma ordem da documentação.</p>
+    </div>
+    <div class="slide">
+      <h3>ENTRYPOINT × CMD e o contexto de build</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Dockerfile</th><th><code>docker run img</code></th><th><code>docker run img --help</code></th></tr></thead>
+        <tbody>
+          <tr><td><code>CMD ["nginx","-g","daemon off;"]</code></td><td>nginx -g daemon off;</td><td>--help (substitui o CMD)</td></tr>
+          <tr><td><code>ENTRYPOINT ["nginx"]</code><br><code>CMD ["-g","daemon off;"]</code></td><td>nginx -g daemon off;</td><td>nginx --help</td></tr>
+        </tbody>
+      </table></div>
+      <ul>
+        <li><code>docker build -t usuario/app:1.0.0 .</code>: o <code>.</code> é o <b>contexto</b>, tudo que o build pode copiar.</li>
+        <li>Outro nome de arquivo: <code>docker build -f Dockerfile.dev -t app:dev .</code></li>
+        <li>O <code>.dockerignore</code> tira do contexto <code>.git</code>, <code>node_modules</code>, segredos e artefatos locais.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.1</span><h3>Preparando o ambiente e criando a primeira imagem</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Validar o Docker no Codespaces, escrever um Dockerfile, construir a imagem e testá-la. A imagem criada aqui é a base dos próximos exercícios.</p>
+    <p class="section-label" style="margin-top:6px">Parte 1 · Preparando o ambiente</p>
+    <ol class="steps">
+      <li><div><p>Confira o cliente e o servidor Docker:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker version</code></pre></div>
+<p>Rode o primeiro container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm hello-world</code></pre></div>
+      </div></li>
+      <li><div><p>Compare o kernel e a distribuição do host (tópico 1.1 na prática):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>uname -r; grep PRETTY_NAME /etc/os-release</code></pre></div>
+<p>Agora os mesmos dados, vistos de dentro de um container Alpine:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm alpine:3.22 sh -c 'uname -r; grep PRETTY_NAME /etc/os-release'</code></pre></div>
+      </div></li>
+    </ol>
+    <p class="section-label" style="margin-top:22px">Parte 2 · Criando a imagem</p>
+    <ol class="steps" style="counter-reset:s 2">
+      <li><div><p>Crie a pasta do laboratório e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/site &amp;&amp; cd ~/labs/site</code></pre></div>
+<p>Crie a página:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; index.html &lt;&lt;'EOF'
+&lt;!doctype html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;Container Technologies | Lab&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Container Technologies&lt;/h1&gt;
+  &lt;p&gt;Minha primeira imagem Docker no GitHub Codespaces.&lt;/p&gt;
+  &lt;p&gt;Versão da aplicação: 1.0.0&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+EOF</code></pre></div>
+      </div></li>
+      <li><div><p>Crie o <code>Dockerfile</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile &lt;&lt;'EOF'
+FROM nginx:stable-alpine
+LABEL org.opencontainers.image.title="site" \
+      org.opencontainers.image.description="Página servida pelo NGINX"
+COPY index.html /usr/share/nginx/html/index.html
+EXPOSE 80
+HEALTHCHECK --interval=10s --timeout=3s CMD wget -qO- http://localhost/ || exit 1
+CMD ["nginx", "-g", "daemon off;"]
+EOF</code></pre></div>
+<p>Confira o arquivo gerado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat Dockerfile</code></pre></div>
+      </div></li>
+      <li><div><p>Crie o <code>.dockerignore</code> para tirar do contexto de build o que não deve ir para a imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; .dockerignore &lt;&lt;'EOF'
+.git
+*.md
+.env
+EOF</code></pre></div>
+<p>Confira o arquivo gerado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat .dockerignore</code></pre></div>
+      </div></li>
+      <li><div><p>Defina o usuário do Docker Hub e o nome da imagem (variáveis usadas até o exercício 1.7):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>export DOCKERHUB_USER="seu-usuario-dockerhub"
+export IMAGE="$DOCKERHUB_USER/container-technologies"</code></pre></div>
+<p>Construa a imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -t "$IMAGE:1.0.0" .</code></pre></div>
+<p>Confira que ela aparece no cache local:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image ls "$IMAGE"</code></pre></div>
+      </div></li>
+      <li><div><p>Execute um container a partir da imagem criada. <code>-d</code> roda em segundo plano, <code>--name</code> dá um nome e <code>-p 8080:80</code> liga a porta 8080 do Codespaces à porta 80 do container:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name site -p 8080:80 "$IMAGE:1.0.0"</code></pre></div>
+      </div></li>
+      <li><div><p>Liste os containers em execução. Aguarde alguns segundos até o <code>STATUS</code> mostrar <code>(healthy)</code>, resultado do <code>HEALTHCHECK</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker ps</code></pre></div>
+      </div></li>
+      <li><div><p>Acesse a aplicação pelo terminal e, depois, pelo navegador na aba <b>Ports</b> (porta 8080):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl localhost:8080</code></pre></div>
+      </div></li>
+      <li><div><p>Pare e remova o container em execução:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker rm -f site</code></pre></div>
+<p>Confirme que ele sumiu da lista:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker ps -a --filter name=site</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li><code>docker version</code> mostra <code>Client</code> e <code>Server</code>; o <code>uname -r</code> é igual no host e no container, mas o <code>os-release</code> muda (Ubuntu × Alpine).</li>
+      <li>A imagem aparece com a tag <code>1.0.0</code>; o <code>docker ps</code> mostra o container <code>site</code> com <code>0.0.0.0:8080-&gt;80/tcp</code> e <code>(healthy)</code>.</li><li>O <code>curl</code> devolve o HTML da página, que também abre em <code>https://…-8080.app.github.dev</code>; depois do <code>docker rm -f</code>, o container some da lista.</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>Um container compartilha o kernel do host: o <code>uname -r</code> é o mesmo, mas a distribuição (<code>os-release</code>) é a da imagem.</li>
+      <li>O ciclo básico: Dockerfile → <code>docker build</code> → imagem com tag → <code>docker run</code> → container.</li>
+      <li>O <code>.dockerignore</code> enxuga o contexto de build, e o <code>HEALTHCHECK</code> deixa o Docker saber se a aplicação está saudável.</li>
+      <li>Publicar a porta (<code>-p 8080:80</code>) é o que liga o container ao mundo de fora.</li>
+    </ul></div>
+    <div class="tip"><b>Mantenha o terminal aberto</b><p>As variáveis <code>DOCKERHUB_USER</code> e <code>IMAGE</code> são usadas até o exercício 1.7. Se abrir outro terminal, exporte-as de novo.</p></div>
+    <label class="done"><input type="checkbox" id="ex-1-1"> Exercício 1.1 concluído</label>
+  </div>
+</article>
+
+<!-- 1.6 -->
+<article class="topico" id="a1-t6">
+  <div class="topico-head"><span class="topico-num">1.6</span><h2>Camadas e cache de build</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>O sistema de arquivos por trás das camadas</h3>
+      <div class="cols ufs">
+        <div class="stk">
+          <div class="stk-t">Union filesystem (OverlayFS)</div>
+          <div class="L app">merged <small>o que o container enxerga: uma árvore única</small></div>
+          <div class="kd-ar">↑ <small>sobreposição</small></div>
+          <div class="L hyp" style="border-style:dashed">upperdir <small>camada de escrita do container · copy-on-write</small></div>
+          <div class="L lib">lowerdir 3 <small>COPY index.html · somente leitura</small></div>
+          <div class="L lib">lowerdir 2 <small>RUN apk add … · somente leitura</small></div>
+          <div class="L gos">lowerdir 1 <small>FROM alpine · somente leitura</small></div>
+        </div>
+        <div>
+          <ul>
+            <li>O kernel empilha as camadas da imagem (<b>lowerdir</b>) e uma camada gravável (<b>upperdir</b>) e mostra ao container uma visão única (<b>merged</b>).</li>
+            <li><b>Copy-on-write</b>: ao alterar um arquivo de uma camada inferior, ele é copiado para a upperdir antes da escrita. A imagem nunca muda.</li>
+            <li>Apagar um arquivo cria um <b>whiteout</b> na camada de cima: ele some da visão, mas continua ocupando espaço na camada de baixo.</li>
+            <li>Várias imagens e containers compartilham as mesmas camadas em disco.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Backend de armazenamento</th><th>Situação</th></tr></thead>
+        <tbody>
+          <tr><td><b>containerd image store</b> (snapshotter <code>overlayfs</code>)</td><td><b>Padrão em instalações novas desde o Docker Engine 29</b> (nov/2025). É o mesmo mecanismo do containerd no Kubernetes e suporta imagens multi-plataforma e attestations nativamente</td></tr>
+          <tr><td><code>overlay2</code></td><td>Driver clássico, padrão por anos e ainda o mais compatível. Continua em uso em instalações atualizadas de versões anteriores</td></tr>
+          <tr><td><code>fuse-overlayfs</code>, <code>btrfs</code>, <code>zfs</code>, <code>vfs</code></td><td>Casos específicos: rootless em kernel antigo, sistemas de arquivos avançados, testes</td></tr>
+          <tr><td><code>aufs</code>, <code>devicemapper</code>, <code>overlay</code></td><td>Legados, removidos das versões atuais</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Descubra o seu com <code>docker info</code> (linhas <code>Storage Driver</code> e <code>driver-type</code>). Fonte: <a href="https://docs.docker.com/engine/storage/drivers/select-storage-driver/" target="_blank" rel="noopener">Docker docs · Select a storage driver</a> e <a href="https://www.docker.com/blog/docker-engine-version-29/" target="_blank" rel="noopener">Docker Engine v29</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Cada instrução, uma camada</h3>
+      <div class="stack">
+        <div class="rw">Container: camada de escrita <small>efêmera · copy-on-write</small></div>
+        <div>CMD ["nginx","-g","daemon off;"] <small>só metadado, 0 B</small></div>
+        <div>COPY index.html /usr/share/nginx/html/ <small>camada</small></div>
+        <div>RUN apk add --no-cache curl <small>camada</small></div>
+        <div>FROM nginx:stable-alpine <small>camadas da base</small></div>
+      </div>
+      <ul>
+        <li><code>RUN</code>, <code>COPY</code> e <code>ADD</code> criam camadas. <code>ENV</code>, <code>CMD</code>, <code>EXPOSE</code> e <code>LABEL</code> só alteram a configuração.</li>
+        <li>As camadas são somente leitura e compartilhadas entre imagens e containers (union filesystem, overlay2).</li>
+        <li>Apagar um arquivo numa camada posterior não reduz a imagem: ele continua na camada anterior.</li>
+      </ul>
+    </div>
+    <div class="slide">
+      <h3>Qual será a mais otimizada?</h3>
+      <div class="opts">
+        <div class="opt">
+          <div class="opt-t"><b>Opção A:</b> um único <code>RUN</code> encadeado</div>
+          <div class="opt-df"><span>Dockerfile</span><pre>FROM ubuntu:latest
+
+RUN apt-get install -y nginx \
+    wget \
+    curl \
+    jq \
+    &amp;&amp; curl -o /usr/share/nginx/html/index.html \
+       https://nginx.com/index.html
+
+ENTRYPOINT [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]</pre></div>
+          <div class="kd-ar">↓ <small>docker build</small></div>
+          <div class="opt-layers"><span>Imagem · 2 camadas + 1 metadado</span><div class="L meta">ENTRYPOINT [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]</div><div class="L lib big">RUN apt-get install nginx wget curl jq &amp;&amp; curl …</div><div class="L gos">FROM ubuntu:latest</div></div>
+        </div>
+        <div class="opt">
+          <div class="opt-t"><b>Opção B:</b> um <code>RUN</code> por pacote</div>
+          <div class="opt-df"><span>Dockerfile</span><pre>FROM ubuntu:latest
+
+RUN apt-get install -y nginx
+RUN apt-get install -y wget
+RUN apt-get install -y curl
+RUN apt-get install -y jq
+RUN curl -o /usr/share/nginx/html/index.html \
+       https://nginx.com/index.html
+
+ENTRYPOINT [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]</pre></div>
+          <div class="kd-ar">↓ <small>docker build</small></div>
+          <div class="opt-layers"><span>Imagem · 6 camadas + 1 metadado</span><div class="L meta">ENTRYPOINT [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]</div><div class="L lib">RUN curl -o …/index.html</div><div class="L lib">RUN apt-get install -y jq</div><div class="L lib">RUN apt-get install -y curl</div><div class="L lib">RUN apt-get install -y wget</div><div class="L lib">RUN apt-get install -y nginx</div><div class="L gos">FROM ubuntu:latest</div></div>
+        </div>
+      </div>
+      <p class="note">Menos camadas não é o único critério: o que mais pesa é o que fica dentro delas (cache do apt, arquivos temporários) e a ordem, que define o reaproveitamento do cache.</p>
+    </div>
+    <div class="slide">
+      <h3>Cache: do que muda menos para o que muda mais</h3>
+      <p>O build compara cada instrução com a do cache. Na <b>primeira</b> camada que mudar (ou cuja anterior já tenha mudado), o Docker para de reaproveitar e reconstrói dali para cima, na ordem do Dockerfile.</p>
+      <div class="cols">
+        <div class="card-mini">
+          <h4 style="color:var(--signal)">Ruim: <code>COPY . .</code> antes de instalar</h4>
+          <div class="opt-df"><span>Dockerfile</span><pre>FROM node:20-alpine
+COPY . .
+RUN npm install
+CMD [&quot;node&quot;,&quot;server.js&quot;]</pre></div>
+          <div class="stk" style="margin-top:10px">
+            <div class="L hyp">CMD</div>
+            <div class="L hyp">RUN npm install<small>reinstala tudo de novo</small></div>
+            <div class="L hyp">COPY . .<small>muda a cada commit</small></div>
+            <div class="L app">FROM node:20-alpine<small>cache</small></div>
+          </div>
+        </div>
+        <div class="card-mini">
+          <h4 style="color:var(--ok)">Bom: manifesto antes do código</h4>
+          <div class="opt-df"><span>Dockerfile</span><pre>FROM node:20-alpine
+COPY package.json package-lock.json ./
+RUN npm install
+COPY . .
+CMD [&quot;node&quot;,&quot;server.js&quot;]</pre></div>
+          <div class="stk" style="margin-top:10px">
+            <div class="L hyp">CMD</div>
+            <div class="L hyp">COPY . .<small>muda sempre, mas é rápida</small></div>
+            <div class="L app">RUN npm install<small>cache hit — pulado</small></div>
+            <div class="L app">COPY package*.json<small>só muda com o manifesto</small></div>
+            <div class="L app">FROM node:20-alpine<small>cache</small></div>
+          </div>
+        </div>
+      </div>
+      <p class="note">Nos dois casos o <code>COPY . .</code> muda a cada commit — a diferença é o que está <b>abaixo</b> dele na pilha. No Bom, o <code>npm install</code> já rodou antes de copiar o código e continua em cache; no Ruim, ele é uma camada acima do código e é refeito toda vez.</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.3</span><h3>Explorando a imagem: configuração, camadas e cache</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Abrir a imagem criada no exercício 1.1 para ver na prática a anatomia OCI (tópico 1.4) e o efeito das camadas e do cache no tamanho e no tempo de build.</p>
+    <p class="section-label" style="margin-top:6px">Parte 1 · Anatomia da sua imagem</p>
+    <ol class="steps">
+      <li><div><p>O <code>Cmd</code> e o <code>Entrypoint</code> herdados da base:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect "$IMAGE:1.0.0" --format 'Cmd={{json .Config.Cmd}} Entrypoint={{json .Config.Entrypoint}}'</code></pre></div>
+<p>As labels OCI que você definiu no Dockerfile:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect "$IMAGE:1.0.0" --format 'Labels={{json .Config.Labels}}'</code></pre></div>
+<p>Quantas camadas a sua imagem tem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect "$IMAGE:1.0.0" --format '{{len .RootFS.Layers}} camadas'</code></pre></div>
+<p>E quantas a imagem base já trazia:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect nginx:stable-alpine --format '{{len .RootFS.Layers}} camadas na base'</code></pre></div>
+<p>Por fim, o histórico completo de instruções:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker history "$IMAGE:1.0.0"</code></pre></div>
+      </div></li>
+      <li><div><p>O documento que o registry devolve para a imagem base (index ou manifest list):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker buildx imagetools inspect --raw nginx:stable-alpine | python3 -m json.tool | head -25</code></pre></div>
+      </div></li>
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/oci &amp;&amp; cd ~/labs/oci</code></pre></div>
+<p>Exporte a sua imagem no formato OCI:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker save "$IMAGE:1.0.0" -o site.tar</code></pre></div>
+<p>Extraia o tar e liste o conteúdo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>tar -xf site.tar &amp;&amp; ls</code></pre></div>
+<p>Veja o <code>oci-layout</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat oci-layout; echo</code></pre></div>
+<p>E o início do <code>index.json</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>python3 -m json.tool index.json | head -20</code></pre></div>
+<p>Por fim, os blobs de conteúdo (camadas e config, endereçados por digest):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>ls blobs/sha256 | head</code></pre></div>
+      </div></li>
+    </ol>
+    <p class="section-label" style="margin-top:22px">Parte 2 · Camadas e cache</p>
+    <ol class="steps" style="counter-reset:s 3">
+      <li><div><p>Veja qual backend de armazenamento o seu Docker usa:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker info --format 'Storage Driver: {{.Driver}}'</code></pre></div>
+<p>Com mais contexto (snapshotter, se for containerd image store):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker info | grep -iA2 'storage driver'</code></pre></div>
+      </div></li>
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/camadas &amp;&amp; cd ~/labs/camadas</code></pre></div>
+<p>Crie um Dockerfile que escreve e apaga um arquivo de 50 MB em instruções <code>RUN</code> separadas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile.ruim &lt;&lt;'EOF'
+FROM alpine:3.22
+RUN dd if=/dev/zero of=/lixo bs=1M count=50
+RUN rm /lixo
+EOF</code></pre></div>
+<p>Construa a imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -f Dockerfile.ruim -t camadas:ruim .</code></pre></div>
+<p>Veja o tamanho de cada camada no histórico:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker history camadas:ruim | head -4</code></pre></div>
+      </div></li>
+      <li><div><p>Agora o mesmo resultado, escrevendo e apagando o arquivo numa única instrução:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile.bom &lt;&lt;'EOF'
+FROM alpine:3.22
+RUN dd if=/dev/zero of=/lixo bs=1M count=50 &amp;&amp; rm /lixo
+EOF</code></pre></div>
+<p>Construa e compare o tamanho final das duas imagens:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -f Dockerfile.bom -t camadas:bom .</code></pre></div>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image ls camadas</code></pre></div>
+      </div></li>
+      <li><div><p>Altere só o HTML do site:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/site &amp;&amp; sed -i 's/1.0.0/1.0.1/' index.html</code></pre></div>
+<p>Reconstrua e observe quais etapas usam <code>CACHED</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -t "$IMAGE:1.0.1" .</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li>Sua imagem tem uma camada a mais que a base (a do <code>COPY</code>); <code>CMD</code>, <code>LABEL</code> e <code>HEALTHCHECK</code> aparecem no histórico com 0 B.</li>
+      <li>O <code>mediaType</code> da base é <code>application/vnd.oci.image.index.v1+json</code>; o <code>docker save</code> gera <code>oci-layout</code>, <code>index.json</code> e <code>blobs/</code>.</li>
+      <li>O <code>docker info</code> mostra <code>overlayfs</code> com <code>driver-type: io.containerd.snapshotter.v1</code> (containerd image store) ou <code>overlay2</code> (driver clássico).</li><li><code>camadas:ruim</code> tem cerca de 60 MB; <code>camadas:bom</code> fica no tamanho do Alpine.</li>
+      <li>No último build, só o <code>COPY</code> em diante é refeito; o resto vem do cache.</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>Cada instrução que altera arquivos vira uma camada; metadados como <code>CMD</code> e <code>LABEL</code> não ocupam espaço.</li>
+      <li>Apagar um arquivo numa camada posterior não diminui a imagem: ele continua na camada anterior.</li>
+      <li>A ordem das instruções define o aproveitamento do cache: o que muda pouco vem antes.</li>
+      <li>Uma imagem OCI em disco é <code>oci-layout</code>, <code>index.json</code> e <code>blobs/</code>.</li>
+    </ul></div>
+    <label class="done"><input type="checkbox" id="ex-1-3"> Exercício 1.3 concluído</label>
+  </div>
+</article>
+
+<!-- 1.7 -->
+<article class="topico" id="a1-t7">
+  <div class="topico-head"><span class="topico-num">1.7</span><h2>Boas práticas e Hadolint</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Boas práticas de Dockerfile</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Base</h4><ul><li>Imagem mínima e oficial (slim, alpine, distroless)</li><li>Versão fixada, nunca <code>latest</code>; em produção, fixe o digest</li><li>Rebuild periódico para receber correções da base</li></ul></div>
+        <div class="card-mini"><h4>Build</h4><ul><li>Ordem pensando no cache</li><li><code>RUN</code> encadeado e limpeza na mesma instrução (<code>--no-cache</code>, <code>rm -rf /var/lib/apt/lists/*</code>)</li><li><code>COPY</code> em vez de <code>ADD</code>; <code>.dockerignore</code></li><li>Multi-stage para separar build e runtime</li></ul></div>
+        <div class="card-mini"><h4>Execução</h4><ul><li><code>USER</code> não-root</li><li>Forma exec em <code>ENTRYPOINT</code>/<code>CMD</code> para receber SIGTERM</li><li>Nenhum segredo em <code>ENV</code>, <code>ARG</code> ou camadas (use <code>--secret</code>)</li><li><code>LABEL</code>s OCI com origem e versão</li></ul></div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>Hadolint: linter de Dockerfile</h3>
+      <p>Analisa o Dockerfile contra boas práticas (regras <code>DLxxxx</code>) e roda o ShellCheck nos comandos <code>RUN</code> (regras <code>SCxxxx</code>).</p>
+      <div class="cols">
+        <div class="card-mini"><h4>O que valida</h4><ul><li>Sintaxe</li><li>Melhores práticas</li><li>Segurança</li><li>Consistência e manutenibilidade</li></ul></div>
+        <div class="card-mini"><h4>Exemplos de regras</h4><ul><li><code>DL3007</code> uso de <code>latest</code></li><li><code>DL3008</code> pacotes sem versão</li><li><code>DL3020</code> <code>ADD</code> em vez de <code>COPY</code></li><li><code>DL3025</code> CMD na forma shell</li></ul></div>
+        <div class="card-mini"><h4>Onde usar</h4><ul><li>Web: hadolint.github.io/hadolint</li><li>CLI ou container</li><li>Extensão do VS Code</li><li>CI: <code>hadolint/hadolint-action</code></li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.4</span><h3>Validando Dockerfiles com Hadolint</h3><span class="lab-time">~20 min</span></div>
+    <p class="lab-goal">Validar o Dockerfile do exercício 1.1, depois corrigir um Dockerfile cheio de más práticas até o Hadolint aprovar.</p>
+    <ol class="steps">
+      <li><div><p>Entre na pasta do Dockerfile criado no exercício 1.1:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/site</code></pre></div>
+<p>Valide-o com o Hadolint:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -i hadolint/hadolint &lt; Dockerfile &amp;&amp; echo "Dockerfile OK"</code></pre></div>
+      </div></li>
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/lint &amp;&amp; cd ~/labs/lint</code></pre></div>
+<p>Crie uma aplicação mínima:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>echo 'print("ola, containers")' &gt; app.py</code></pre></div>
+<p>Crie um Dockerfile cheio de más práticas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile &lt;&lt;'EOF'
+FROM ubuntu:latest
+MAINTAINER aluno@example.com
+RUN apt-get update
+RUN apt-get install -y python3 curl
+ADD app.py /app/app.py
+WORKDIR /app
+CMD python3 app.py
+EOF</code></pre></div>
+<p>Analise-o com o Hadolint:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -i hadolint/hadolint &lt; Dockerfile</code></pre></div>
+      </div></li>
+      <li><div><p>Corrija até não restar aviso:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile &lt;&lt;'EOF'
+FROM python:3.13-alpine
+LABEL org.opencontainers.image.authors="aluno@example.com"
+WORKDIR /app
+COPY app.py .
+RUN adduser -D -u 10001 app
+USER app
+CMD ["python3", "app.py"]
+EOF</code></pre></div>
+<p>Confira que o Hadolint aprova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm -i hadolint/hadolint &lt; Dockerfile &amp;&amp; echo "Dockerfile OK"</code></pre></div>
+<p>Construa e rode:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -t lint-ok . &amp;&amp; docker run --rm lint-ok</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>O Dockerfile do site passa (ou só gera avisos informativos).</li><li>O Dockerfile problemático aponta, entre outras, <code>DL3007</code>, <code>DL4000</code>, <code>DL3008</code>, <code>DL3009</code>, <code>DL3015</code>, <code>DL3020</code>, <code>DL3025</code> e <code>DL3059</code>.</li><li>A versão corrigida imprime “Dockerfile OK” e o container mostra <code>ola, containers</code>.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>Um linter de Dockerfile pega más práticas antes do build: tag <code>latest</code>, pacotes sem versão, cache do apt esquecido.</li>
+      <li>Cada regra (<code>DLxxxx</code>) explica o problema e como corrigir.</li>
+      <li>O Hadolint pode virar uma etapa do pipeline: Dockerfile ruim nem chega a gerar imagem.</li>
+    </ul></div>
+    <label class="done"><input type="checkbox" id="ex-1-4"> Exercício 1.4 concluído</label>
+  </div>
+</article>
+
+<!-- 1.8 -->
+<article class="topico" id="a1-t8">
+  <div class="topico-head"><span class="topico-num">1.8</span><h2>Tamanho, segurança e cadeia de suprimentos</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>O tamanho da imagem importa muito</h3>
+      <div class="sz">
+        <div class="sz-col">
+          <div class="sz-bar">
+            <div class="L app">App</div>
+            <div class="L lib">Dependências de build e de runtime</div>
+            <div class="L hyp">Compiladores e SDK</div>
+            <div class="L lib kd-old">Cache do apt, arquivos temporários</div>
+            <div class="L lib kd-old">Ferramentas: curl, vim, shell…</div>
+            <div class="L gos">SO completo (ubuntu)</div>
+          </div>
+          <div class="sz-t"><b>~2 GB</b><span>imagem gorda</span></div>
+          <div class="sz-meter"><i style="width:100%"></i></div>
+        </div>
+        <div class="sz-col">
+          <div class="sz-bar">
+            <div class="L app">App</div>
+            <div class="L lib">Só o runtime</div>
+            <div class="L gos">Base mínima</div>
+          </div>
+          <div class="sz-t"><b>~300 MB</b><span>imagem enxuta</span></div>
+          <div class="sz-meter"><i style="width:15%"></i></div>
+        </div>
+        <div class="sz-info">
+          <p><b>Mesma aplicação, 6,7× menos bytes.</b></p>
+          <p>Numa rede de 1 Gbps (~125 MB/s), o pull em cada nó novo leva cerca de <b>16 s</b> contra <b>2,4 s</b>, antes mesmo de a aplicação começar a subir.</p>
+          <p>Multiplique pelo número de nós, réplicas e deploys por dia.</p>
+        </div>
+      </div>
+      <div class="cols">
+        <div class="card-mini"><h4>Escalabilidade</h4><p>Pull da imagem e cold start: cada novo nó ou pod precisa baixar a imagem.</p></div>
+        <div class="card-mini"><h4>FinOps</h4><p>Transferência de dados e storage no registry e nos nós.</p></div>
+        <div class="card-mini"><h4>Segurança</h4><p>Cada pacote a mais é uma CVE em potencial e um item de compliance.</p></div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>Pesquisa: as principais imagens base</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Imagem</th><th>Tamanho</th><th>Pacotes</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Pulls</th><th>Mantenedor</th></tr></thead>
+        <tbody style="font-variant-numeric:tabular-nums">
+          <tr><td>Ubuntu</td><td>101 MB</td><td>131</td><td>0</td><td>0</td><td>3</td><td>5</td><td>1B+</td><td>Canonical</td></tr>
+          <tr><td>Alpine</td><td>8,51 MB</td><td>20</td><td>0</td><td>1</td><td>2</td><td>2</td><td>1B+</td><td>Alpine Linux</td></tr>
+          <tr><td>Debian</td><td>142 MB</td><td>111</td><td>0</td><td>1</td><td>1</td><td>22</td><td>1B+</td><td>Debian Project</td></tr>
+          <tr><td>Fedora</td><td>175 MB</td><td>153</td><td>0</td><td>0</td><td>0</td><td>0</td><td>100M+</td><td>Red Hat</td></tr>
+          <tr><td>AlmaLinux</td><td>206 MB</td><td>180</td><td>0</td><td>0</td><td>4</td><td>0</td><td>10M+</td><td>AlmaLinux OS</td></tr>
+          <tr><td>Arch Linux</td><td>157 MB</td><td>130</td><td>0</td><td>1</td><td>3</td><td>0</td><td>10M+</td><td>Arch Linux Team</td></tr>
+          <tr><td>Oracle Linux</td><td>264 MB</td><td>123</td><td>0</td><td>0</td><td>0</td><td>0</td><td>10M+</td><td>Oracle</td></tr>
+          <tr><td>Amazon Linux</td><td>182 MB</td><td>3</td><td>0</td><td>1</td><td>2</td><td>0</td><td>50M+</td><td>AWS</td></tr>
+          <tr><td><b>Wolfi</b></td><td><b>14,3 MB</b></td><td><b>15</b></td><td>0</td><td>0</td><td>0</td><td>0</td><td>1M+</td><td>Chainguard</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Consulta realizada em maio de 2026, a partir do SBOM e do scan de cada imagem. Fonte: <a href="https://github.com/gersontpc/kubeautoday-talk" target="_blank" rel="noopener">gersontpc/kubeautoday-talk</a> (KubeAutoDay São Paulo, “Do Build ao Deploy: Containers Distroless Multi-Plataforma”).</p>
+    </div>
+    <div class="slide">
+      <h3>BusyBox: o canivete suíço de 2,5 MB</h3>
+      <p>Um único binário que implementa centenas de comandos Unix (<code>sh</code>, <code>ls</code>, <code>wget</code>, <code>nslookup</code>, <code>vi</code>, <code>ps</code>, <code>tar</code>…). É a base do Alpine e das imagens <code>busybox</code>, muito usada para troubleshooting e init containers.</p>
+      <p class="note">Útil para depurar, mas cada comando disponível na imagem de produção também está disponível para um atacante.</p>
+    </div>
+    <div class="slide">
+      <h3>Cadeia de suprimentos de software</h3>
+      <p>Tudo o que entra na sua imagem veio de algum lugar. A <b>cadeia de suprimentos</b> (software supply chain) é o caminho completo, do código até o container em produção, e cada elo pode introduzir uma falha ou um ataque.</p>
+      <div class="flow">
+        <div class="node"><b>Código</b><span>seu repositório</span></div><div class="arrow">→</div>
+        <div class="node"><b>Dependências</b><span>pip, npm, maven, go mod</span></div><div class="arrow">→</div>
+        <div class="node"><b>Imagem base</b><span>FROM de terceiros</span></div><div class="arrow">→</div>
+        <div class="node"><b>Build / CI</b><span>pipeline, runners</span></div><div class="arrow">→</div>
+        <div class="node"><b>Registry</b><span>push / pull</span></div><div class="arrow">→</div>
+        <div class="node hl"><b>Deploy</b><span>container rodando</span></div>
+      </div>
+      <div class="cols">
+        <div class="card-mini"><h4>Casos reais</h4><ul><li><b>Log4Shell</b> (2021): falha numa biblioteca Java presente em milhares de imagens</li><li><b>SolarWinds</b> (2020): pipeline de build comprometido distribuiu código malicioso assinado</li><li><b>xz utils</b> (2024): backdoor inserido numa dependência de sistema das distros Linux</li></ul></div>
+        <div class="card-mini"><h4>Como se proteger</h4><ul><li>Imagem base mínima, de fonte confiável e fixada por digest</li><li>Scan de vulnerabilidades no CI (Trivy)</li><li><b>SBOM</b> de toda imagem publicada</li><li>Assinatura e proveniência (Sigstore/cosign, SLSA)</li></ul></div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>SBOM: a lista de ingredientes da imagem</h3>
+      <p><b>Software Bill of Materials</b> é o inventário de tudo o que compõe um artefato: pacotes do SO, bibliotecas da aplicação, versões, licenças e origem. Como o rótulo de um alimento, diz exatamente o que tem dentro.</p>
+      <div class="cols">
+        <div class="card-mini"><h4>Para que serve</h4><ul><li>Saiu uma CVE nova: descobrir em minutos quais imagens usam a versão afetada</li><li>Auditoria e compliance de licenças</li><li>Exigido por regulações e contratos (governo dos EUA, setor financeiro)</li></ul></div>
+        <div class="card-mini"><h4>Formatos</h4><ul><li><b>SPDX</b> (Linux Foundation, padrão ISO/IEC 5962)</li><li><b>CycloneDX</b> (OWASP)</li><li>Ambos em JSON, anexáveis à imagem no registry como artefato OCI</li></ul></div>
+        <div class="card-mini"><h4>Como gerar</h4><ul><li><code>trivy image --format cyclonedx</code></li><li><code>syft &lt;imagem&gt;</code></li><li><code>docker buildx build --sbom=true</code> (atestado no push)</li><li><code>docker scout sbom</code> (substitui o antigo <code>docker sbom</code>)</li></ul></div>
+      </div>
+      <p class="note">Imagens construídas com apko (como as do <code>image-base</code> e da pesquisa) geram SBOM automaticamente a cada build.</p>
+    </div>
+    <div class="slide">
+      <h3>A mesma ideia, numa caixa de cereal</h3>
+      <p>O rótulo de informação nutricional de uma embalagem já resolve, há décadas, o mesmo problema do SBOM: dizer exatamente o que tem dentro, para quem precisa decidir algo a partir disso.</p>
+      <div class="mp dxo">
+        <div class="mp-col">
+          <div class="stk-t" style="display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 34 34" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><rect x="4" y="8" width="26" height="22" rx="1.5" stroke-width="2.2"/><path d="M4 8L17 3L30 8" stroke-width="1.8"/><rect x="10" y="14" width="14" height="11" rx="1" stroke-width="1.4" stroke="var(--signal)"/><path d="M12.5 17.5h9M12.5 20.5h9M12.5 23.5h6" stroke-width="1.2"/></svg>Rótulo da caixa de cereal</div>
+          <div class="dx-dl">
+            <div class="dx-k">Identificação</div><div class="dx-v">Nome do produto, marca e lote</div>
+            <div class="dx-k">Lista de itens</div><div class="dx-v">Ingredientes, em ordem decrescente de quantidade</div>
+            <div class="dx-k">Quantidade</div><div class="dx-v">Gramas e % VD por porção</div>
+            <div class="dx-k">Origem</div><div class="dx-v">Fabricante, CNPJ, país de origem</div>
+            <div class="dx-k">Alerta</div><div class="dx-v">"Contém glúten", "contém leite"</div>
+            <div class="dx-k">Validade</div><div class="dx-v">Data de fabricação e validade</div>
+            <div class="dx-k">Selo</div><div class="dx-v">Registro ANVISA/Inmetro no rótulo</div>
+          </div>
+        </div>
+        <div class="mp-col oci">
+          <div class="stk-t" style="display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 34 34" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><rect x="2" y="7" width="30" height="20" rx="1.5" stroke-width="2.2"/><path d="M2 10.5h30M2 23.5h30" stroke-width="1.4"/><path d="M7 12.5v9M11 12.5v9M15 12.5v9M19 12.5v9" stroke-width="1.8"/><path d="M23.5 10.5v13" stroke-width="1.4"/><path d="M26.5 12.5v9M29 12.5v9" stroke-width="1.8" stroke="var(--signal)"/></svg>SBOM da imagem</div>
+          <div class="dx-dl">
+            <div class="dx-k">Identificação</div><div class="dx-v">Nome:tag da imagem e digest <code>sha256</code></div>
+            <div class="dx-k">Lista de itens</div><div class="dx-v">Componentes: pacotes do SO e bibliotecas da aplicação</div>
+            <div class="dx-k">Quantidade</div><div class="dx-v">Versão exata de cada componente</div>
+            <div class="dx-k">Origem</div><div class="dx-v">Fornecedor de cada pacote (campo <code>purl</code>)</div>
+            <div class="dx-k">Alerta</div><div class="dx-v">CVEs conhecidas por componente</div>
+            <div class="dx-k">Validade</div><div class="dx-v">Data de geração do SBOM</div>
+            <div class="dx-k">Selo</div><div class="dx-v">Assinatura e proveniência (Sigstore/cosign, SLSA)</div>
+          </div>
+        </div>
+      </div>
+      <p class="note">A pergunta que o rótulo responde é sempre a mesma, só muda o produto: <b>"isso é seguro para eu consumir?"</b>. Um recall de lote de alimento é o mesmo gesto que um alerta de CVE: olhar o rótulo/SBOM de tudo que está em uso e achar quem tem aquele item.</p>
+    </div>
+    <div class="slide">
+      <h3>Trivy: scan de vulnerabilidades</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>O que encontra</h4><ul><li>CVEs em pacotes do SO e bibliotecas da aplicação</li><li>Misconfigurações (Dockerfile, Kubernetes, Terraform)</li><li>Segredos expostos e licenças</li></ul></div>
+        <div class="card-mini"><h4>Como usar no pipeline</h4><ul><li><code>--severity HIGH,CRITICAL</code></li><li><code>--exit-code 1</code> quebra o build</li><li><code>--ignore-unfixed</code> foca no que tem correção</li><li>Gera SBOM (SPDX, CycloneDX)</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.5</span><h3>Medindo o problema: reproduzindo a pesquisa com Trivy</h3><span class="lab-time">~25 min</span></div>
+    <p class="lab-goal">Antes de otimizar, medir. Comparar tamanho, pacotes e vulnerabilidades de imagens base, avaliar a sua própria imagem, usar o Trivy como gate de pipeline e gerar o SBOM da imagem.</p>
+    <ol class="steps">
+      <li><div><p>Crie um alias para o Trivy (via container, com cache persistente):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>alias trivy='docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.cache/trivy:/root/.cache aquasec/trivy:latest'</code></pre></div>
+<p>Confira que funciona:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy --version</code></pre></div>
+      </div></li>
+      <li><div><p>Baixe algumas imagens base:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for i in ubuntu:24.04 debian:12 alpine:3.22 busybox:1.36 cgr.dev/chainguard/wolfi-base:latest; do docker pull -q $i; done</code></pre></div>
+<p>Compare os tamanhos:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image ls --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}' | grep -E 'ubuntu|debian|alpine|busybox|wolfi'</code></pre></div>
+      </div></li>
+      <li><div><p>Conte pacotes e vulnerabilidades de cada uma:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for i in ubuntu:24.04 debian:12 alpine:3.22 cgr.dev/chainguard/wolfi-base:latest; do
+  echo "== $i"
+  trivy image --quiet --list-all-pkgs --format json $i | python3 -c "import json,sys; d=json.load(sys.stdin); print('pacotes:', sum(len(r.get('Packages',[])) for r in d.get('Results',[])))"
+  trivy image --quiet --scanners vuln $i | grep -E '^Total'
+done</code></pre></div>
+      </div></li>
+      <li><div><p>Avalie a sua imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy image --severity HIGH,CRITICAL "$IMAGE:1.0.1"</code></pre></div>
+<p>Baixe uma imagem antiga e cheia de CVEs conhecidas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker pull -q python:3.4-alpine</code></pre></div>
+<p>Use o exit code do Trivy como gate de pipeline:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet python:3.4-alpine &gt; /dev/null; echo "python:3.4-alpine → exit $?"</code></pre></div>
+      </div></li>
+      <li><div><p>Gere o SBOM da sua imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy image --quiet --format cyclonedx "$IMAGE:1.0.1" &gt; ~/labs/sbom-site.json</code></pre></div>
+<p>Consulte o inventário de componentes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>python3 -c "import json; d=json.load(open('$HOME/labs/sbom-site.json')); c=d['components']; print(len(c),'componentes'); [print(x['name'],x.get('version','')) for x in c if x['name'] in ('openssl','libssl3','musl','busybox','nginx','zlib')]"</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li>A ordem de tamanho segue a pesquisa: Ubuntu e Debian na casa das dezenas de MB, Alpine e Wolfi poucos MB, BusyBox o menor.</li>
+      <li>Wolfi e Alpine têm poucas dezenas de pacotes; Ubuntu e Debian, mais de cem.</li>
+      <li><code>python:3.4-alpine</code> retorna exit <code>1</code>: num pipeline, o build seria barrado.</li><li>O SBOM lista dezenas de componentes da sua imagem com versão; é com ele que se responde “estamos afetados?” quando sai uma CVE nova.</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>A imagem base define boa parte do tamanho, dos pacotes e das vulnerabilidades da sua imagem.</li>
+      <li>Medir antes de otimizar: tamanho, número de pacotes e CVEs por severidade.</li>
+      <li>O <code>--exit-code</code> transforma o Trivy num gate de pipeline.</li>
+      <li>O SBOM é o inventário da imagem: responde rápido “estamos afetados?” quando sai uma CVE nova.</li>
+    </ul></div>
+    <label class="done"><input type="checkbox" id="ex-1-5"> Exercício 1.5 concluído</label>
+  </div>
+</article>
+
+<!-- 1.9 -->
+<article class="topico" id="a1-t9">
+  <div class="topico-head"><span class="topico-num">1.9</span><h2>Multi-stage e distroless</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Separar o que constrói do que executa</h3>
+      <p>O multi-stage divide a construção em etapas independentes no mesmo Dockerfile. No final, só os artefatos necessários são copiados para a imagem de produção.</p>
+      <div class="cols">
+        <div class="card-mini"><h4>Menor</h4><p>Compiladores, SDKs e bibliotecas de desenvolvimento ficam fora da imagem final.</p></div>
+        <div class="card-mini"><h4>Mais segura</h4><p>Sem ferramentas de build nem arquivos temporários ou sensíveis na imagem publicada.</p></div>
+        <div class="card-mini"><h4>Build mais rápido</h4><p>Etapas independentes rodam em paralelo e aproveitam cache.</p></div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>Como funciona</h3>
+      <div class="flow">
+        <div class="node"><b>Etapa 1: build</b><span>FROM golang:1.25-alpine AS build · compila o binário</span></div>
+        <div class="arrow">→</div>
+        <div class="node hl"><b>COPY --from=build</b><span>copia só o artefato</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>Etapa 2: produção</b><span>FROM distroless/static · binário + usuário nonroot</span></div>
+      </div>
+      <ul>
+        <li>Cada <code>FROM</code> inicia uma etapa; <code>AS nome</code> permite referenciá-la.</li>
+        <li><code>docker build --target build</code> para parar numa etapa (útil para testes).</li>
+        <li>Vale para qualquer linguagem: <code>pip install --user</code> numa etapa e cópia de <code>/root/.local</code> na outra, <code>npm ci</code> + cópia do <code>dist/</code>, <code>mvn package</code> + cópia do <code>.jar</code>.</li>
+      </ul>
+    </div>
+      <div class="slide">
+      <h3>Distroless</h3>
+      <p>Imagens que contêm apenas a aplicação e suas dependências de runtime: sem shell, sem gerenciador de pacotes, sem utilitários como <code>curl</code>, <code>wget</code> ou <code>netcat</code>. Se um componente não está lá, ele não pode ser explorado.</p>
+      <div class="cols">
+        <div class="card-mini"><h4>Opções</h4><ul><li>Google distroless (<code>gcr.io/distroless/*</code>)</li><li>Chainguard / Wolfi</li><li>Construção própria com <b>apko + melange</b>, sem Dockerfile</li></ul></div>
+        <div class="card-mini"><h4>gersontpc/image-base</h4><ul><li>Java, Python, Go, Node.js e .NET, amd64 e arm64</li><li>Camada única, non-root, SBOM a cada build</li><li>Trivy barra CVEs HIGH/CRITICAL antes do push</li></ul></div>
+      </div>
+      <p class="note">Benefícios observados na pesquisa: menos CVEs, pull mais rápido e redução de custo de 20% a 30%. Sem shell, a depuração usa ephemeral containers (Aula 05).</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.6</span><h3>Resolvendo: da imagem grande à distroless</h3><span class="lab-time">~35 min</span></div>
+    <p class="lab-goal">Construir a mesma aplicação Go em estágio único e em multi-stage com distroless, e provar a diferença com os números e com o Trivy. Guarde esta pasta: a aplicação volta na Aula 05.</p>
+    <ol class="steps">
+      <li><div><p>Crie a pasta e entre nela:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/labs/app-go &amp;&amp; cd ~/labs/app-go</code></pre></div>
+<p>Crie o <code>go.mod</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>printf 'module example.com/app-go\n\ngo 1.25\n' &gt; go.mod</code></pre></div>
+<p>Crie a aplicação (responde em <code>/</code> e <code>/healthz</code> e trata SIGTERM):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; main.go &lt;&lt;'EOF'
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    "net/http"
+    "os"
+    "os/signal"
+    "syscall"
+    "time"
+)
+
+func main() {
+    host, _ := os.Hostname()
+    version := os.Getenv("APP_VERSION")
+    if version == "" {
+        version = "v1"
+    }
+    mux := http.NewServeMux()
+    mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Container Technologies | versao=%s | host=%s\n", version, host)
+    })
+    mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("ok\n"))
+    })
+    srv := &amp;http.Server{Addr: ":8080", Handler: mux}
+    go func() {
+        log.Printf("ouvindo em :8080 (versao %s)", version)
+        if err := srv.ListenAndServe(); err != nil &amp;&amp; err != http.ErrServerClosed {
+            log.Fatal(err)
+        }
+    }()
+    stop := make(chan os.Signal, 1)
+    signal.Notify(stop, syscall.SIGTERM, os.Interrupt)
+    &lt;-stop
+    log.Println("SIGTERM recebido, encerrando conexoes...")
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+    srv.Shutdown(ctx)
+}
+EOF</code></pre></div>
+      </div></li>
+      <li><div><p>Crie a versão em estágio único:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile.single &lt;&lt;'EOF'
+FROM golang:1.25
+WORKDIR /src
+COPY . .
+RUN go build -o /usr/local/bin/app .
+EXPOSE 8080
+CMD ["app"]
+EOF</code></pre></div>
+<p>Construa-a:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -f Dockerfile.single -t app-go:single .</code></pre></div>
+      </div></li>
+      <li><div><p>Crie a versão multi-stage com distroless:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; Dockerfile &lt;&lt;'EOF'
+FROM golang:1.25-alpine AS build
+WORKDIR /src
+COPY go.mod ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/app .
+
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /out/app /app
+USER nonroot:nonroot
+EXPOSE 8080
+ENTRYPOINT ["/app"]
+EOF</code></pre></div>
+<p>Construa-a:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker build -t app-go:v1 .</code></pre></div>
+<p>Compare o tamanho das duas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image ls app-go</code></pre></div>
+      </div></li>
+      <li><div><p>Rode a imagem final:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name go1 -p 8081:8080 app-go:v1</code></pre></div>
+<p>Teste os dois endpoints:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8081; curl -s localhost:8081/healthz</code></pre></div>
+<p>Tente abrir um shell (deve falhar: não há shell na imagem):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker exec -it go1 sh</code></pre></div>
+<p>Confira que roda como usuário não-root:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image inspect app-go:v1 -f 'User={{.Config.User}}'</code></pre></div>
+<p>Pare, veja o log de encerramento e remova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker stop go1 &amp;&amp; docker logs go1 | tail -2 &amp;&amp; docker rm go1</code></pre></div>
+      </div></li>
+      <li><div><p>Prove com o Trivy (alias do exercício 1.5) a diferença de vulnerabilidades entre as duas imagens:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for i in app-go:single app-go:v1; do echo "== $i"; trivy image --quiet --scanners vuln $i | grep -E '^Total' | head -3; done</code></pre></div>
+<p>Use a distroless como gate de pipeline:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>trivy image --exit-code 1 --severity HIGH,CRITICAL --quiet app-go:v1 &gt; /dev/null; echo "app-go:v1 → exit $?"</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li><code>app-go:single</code> passa de 800 MB; <code>app-go:v1</code> fica abaixo de 10 MB.</li>
+      <li><code>docker exec … sh</code> retorna <code>executable file not found in $PATH</code>, e a imagem roda como <code>nonroot:nonroot</code>.</li>
+      <li>O Trivy encontra bem menos vulnerabilidades na distroless, e o gate passa com exit <code>0</code>.</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>O multi-stage separa build e execução: o compilador fica no primeiro estágio e só o binário vai para a imagem final.</li>
+      <li>A distroless não tem shell nem gerenciador de pacotes e roda como <code>nonroot</code>: menos superfície de ataque.</li>
+      <li>O ganho é mensurável: de centenas de MB para poucos MB, e bem menos vulnerabilidades.</li>
+      <li>A contrapartida é a depuração: sem shell, ela exige outras técnicas (ephemeral container, na Aula 05).</li>
+    </ul></div>
+    <div class="challenge"><b>Desafio</b><p>Reproduza o lab de apko + melange do repositório <a href="https://github.com/gersontpc/kubeautoday-talk" target="_blank" rel="noopener">kubeautoday-talk</a>: uma imagem Python distroless multi-arquitetura, sem Dockerfile, com 1 camada. Ou troque a base final por <code>scratch</code> e descubra o que se perde.</p></div>
+    <label class="done"><input type="checkbox" id="ex-1-6"> Exercício 1.6 concluído</label>
+  </div>
+</article>
+
+<!-- 1.10 -->
+<article class="topico" id="a1-t10">
+  <div class="topico-head"><span class="topico-num">1.10</span><h2>Tags, versionamento e registry</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Anatomia de uma referência</h3>
+      <p style="font:600 1.15em var(--f-mono);overflow-wrap:anywhere"><span style="color:var(--accent)">docker.io</span>/<span style="color:var(--signal)">usuario</span>/container-technologies:<span style="color:var(--ok)">1.4.2</span></p>
+      <div class="cols">
+        <div class="card-mini"><h4>Registry</h4><p>Docker Hub (padrão), Amazon ECR, GHCR, Harbor, Artifact Registry, ACR.</p></div>
+        <div class="card-mini"><h4>Repositório</h4><p>Usuário ou organização + nome da aplicação.</p></div>
+        <div class="card-mini"><h4>Tag × digest</h4><p>Tag é legível e mutável. Digest (<code>@sha256:…</code>) é imutável.</p></div>
+      </div>
+    </div>
+    <div class="slide">
+      <h3>Boas práticas de tag</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Tag</th><th>Uso</th></tr></thead>
+        <tbody>
+          <tr><td><code>1.4.2</code></td><td>Versão exata (SemVer). É o que vai para produção</td></tr>
+          <tr><td><code>1.4</code> / <code>1</code></td><td>Ponteiros para a última correção da série, úteis para consumidores</td></tr>
+          <tr><td><code>v1.4.2-3f9c2ab</code></td><td><b>Recomendado</b>: versão + SHA curto do commit. Legível, rastreável até o autor e nunca reaproveitada</td></tr>
+          <tr><td><code>sha-3f9c2ab</code></td><td>Commit que gerou a imagem: rastreabilidade do código ao container</td></tr>
+          <tr><td><code>stable</code> + <code>010726-0152</code></td><td>Canal móvel + referência imutável por data (padrão do <code>image-base</code>)</td></tr>
+          <tr><td><code>latest</code></td><td>Evite em produção: não diz qual versão está rodando nem permite rollback confiável</td></tr>
+        </tbody>
+      </table></div>
+      <ul>
+        <li><b>Build once, deploy many</b>: a mesma imagem (mesmo digest) é promovida de dev para produção.</li>
+        <li>Ative <b>tag immutability</b> no registry (o ECR suporta) para impedir sobrescrita.</li>
+        <li>Autentique com <b>token de acesso</b>, nunca com a senha da conta.</li>
+      </ul>
+    </div>
+    <div class="slide">
+      <h3>SemVer + Conventional Commits</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Semantic Versioning</h4><p><code>MAJOR.MINOR.PATCH</code></p><ul><li><b>MAJOR</b>: mudança incompatível</li><li><b>MINOR</b>: funcionalidade compatível</li><li><b>PATCH</b>: correção compatível</li><li>Pré-release: <code>2.0.0-rc.1</code></li></ul></div>
+        <div class="card-mini"><h4>Conventional Commits</h4><ul><li><code>fix: corrige timeout</code> → PATCH</li><li><code>feat: adiciona /healthz</code> → MINOR</li><li><code>feat!: remove API v1</code> ou <code>BREAKING CHANGE:</code> → MAJOR</li><li><code>chore:</code>, <code>docs:</code>, <code>ci:</code> não geram versão</li></ul></div>
+      </div>
+      <p class="note">Com commits semânticos, ferramentas como semantic-release e release-please calculam a próxima versão e a tag da imagem automaticamente no pipeline.</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.7</span><h3>Publicando no Docker Hub, inclusive multi-plataforma</h3><span class="lab-time">~35 min</span></div>
+    <p class="lab-goal">Fechar o ciclo da imagem: publicar com uma estratégia de tags, conferir os digests, executar a partir do registry e gerar uma versão para <code>amd64</code> e <code>arm64</code> (o índice OCI do tópico 1.2).</p>
+    <p class="section-label" style="margin-top:6px">Parte 1 · Tags e push</p>
+    <ol class="steps">
+      <li><div><p>Entre na pasta da imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/labs/site</code></pre></div>
+<p>No Docker Hub, crie um <b>Personal access token</b> (Account settings → Personal access tokens) e o repositório <code>container-technologies</code>. Depois faça login:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker login -u "$DOCKERHUB_USER"      # cole o token quando pedir a senha</code></pre></div>
+      </div></li>
+      <li><div><p>Defina a versão e o SHA curto do commit:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>VERSION=1.0.1
+SHA=$(git rev-parse --short HEAD 2&gt;/dev/null || echo local)</code></pre></div>
+<p>Aplique as tags de série, commit e a tag recomendada (versão + SHA) à mesma imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker tag "$IMAGE:$VERSION" "$IMAGE:1.0"
+docker tag "$IMAGE:$VERSION" "$IMAGE:sha-$SHA"
+docker tag "$IMAGE:$VERSION" "$IMAGE:v$VERSION-$SHA"      # recomendado: vMAJOR.MINOR.PATCH-sha</code></pre></div>
+<p>Publique todas as tags:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker push --all-tags "$IMAGE"</code></pre></div>
+      </div></li>
+      <li><div><p>Confirme que as tags apontam para o mesmo digest:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>for t in 1.0.1 1.0 sha-$SHA v1.0.1-$SHA; do echo -n "$t → "; docker buildx imagetools inspect "$IMAGE:$t" --format '{{json .Manifest.Digest}}'; done</code></pre></div>
+<p>Remova as imagens locais para forçar o <code>pull</code> do registry:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker image rm $(docker image ls "$IMAGE" -q) --force</code></pre></div>
+<p>Rode a partir do registry:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name site -p 8080:80 "$IMAGE:1.0.1" &amp;&amp; sleep 2</code></pre></div>
+<p>Confira a resposta e limpe:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8080 | grep Versão; docker rm -f site</code></pre></div>
+      </div></li>
+    </ol>
+    <p class="section-label" style="margin-top:22px">Parte 2 · Uma imagem, várias plataformas</p>
+    <ol class="steps" style="counter-reset:s 3">
+      <li><div><p>Confira a arquitetura do host:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>uname -m</code></pre></div>
+<p>Habilite a emulação com QEMU:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --privileged --rm tonistiigi/binfmt --install arm64</code></pre></div>
+<p>Rode uma imagem <code>arm64</code> no mesmo host <code>amd64</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker run --rm --platform linux/arm64 alpine:3.22 uname -m</code></pre></div>
+      </div></li>
+      <li><div><p>Altere a versão exibida pela página:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sed -i 's/1.0.1/1.1.0/' index.html</code></pre></div>
+<p>Crie um builder multi-plataforma:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker buildx create --name multi --use</code></pre></div>
+<p>Construa e publique a versão <code>1.1.0</code> para as duas arquiteturas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE:1.1.0" --push .</code></pre></div>
+<p>Confira o índice gerado:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>docker buildx imagetools inspect "$IMAGE:1.1.0"</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li>O Docker Hub mostra as tags <code>1.0.0</code>, <code>1.0.1</code>, <code>1.0</code>, <code>sha-…</code> e <code>1.1.0</code>; as três do passo 3 têm o mesmo digest.</li>
+      <li>O container baixado do registry responde “Versão da aplicação: 1.0.1”.</li>
+      <li>Com <code>--platform linux/arm64</code> a saída é <code>aarch64</code>, e a <code>1.1.0</code> é um índice com manifests <code>linux/amd64</code> e <code>linux/arm64</code>.</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>A tag é um ponteiro que pode mudar; o digest identifica o conteúdo de forma imutável.</li>
+      <li>Uma boa estratégia de tags combina a versão completa, a versão parcial e o SHA do commit, para rastrear a origem.</li>
+      <li>O <code>buildx</code> gera um índice multi-plataforma (amd64 e arm64) com um só nome.</li>
+      <li>Rodar a imagem direto do registry prova que o que foi publicado funciona.</li>
+    </ul></div>
+    <div class="tip"><b>Dica</b><p>Para não digitar o token, crie os secrets <code>DOCKERHUB_USER</code> e <code>DOCKERHUB_TOKEN</code> em Settings → Codespaces e use <code>echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin</code>. Entregue o link do repositório no portal.</p></div>
+    <label class="done"><input type="checkbox" id="ex-1-7"> Exercício 1.7 concluído</label>
+  </div>
+</article>
+
+<!-- 1.11 -->
+<article class="topico" id="a1-t11">
+  <div class="topico-head"><span class="topico-num">1.11</span><h2>Documentação de referência</h2></div>
+  <div class="section-label">Leituras</div>
+  <div class="slides">
+    <div class="slide">
+      <h3>Para aprofundar</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Padrões</h4><ul>
+          <li id="ref-semver"><a href="https://semver.org/lang/pt-BR/" target="_blank" rel="noopener">Semantic Versioning (SemVer)</a></li>
+          <li><a href="https://www.conventionalcommits.org/pt-br/v1.0.0/" target="_blank" rel="noopener">Conventional Commits (semantic commit)</a></li>
+          <li><a href="https://github.com/opencontainers/image-spec" target="_blank" rel="noopener">OCI image-spec</a></li>
+          <li><a href="https://github.com/opencontainers/runtime-spec" target="_blank" rel="noopener">OCI runtime-spec</a></li>
+          <li><a href="https://github.com/opencontainers/distribution-spec" target="_blank" rel="noopener">OCI distribution-spec</a></li>
+          <li><a href="https://spdx.dev/" target="_blank" rel="noopener">SPDX</a> e <a href="https://cyclonedx.org/" target="_blank" rel="noopener">CycloneDX</a> (SBOM)</li>
+        </ul></div>
+        <div class="card-mini"><h4>Docker</h4><ul>
+          <li><a href="https://docs.docker.com/reference/dockerfile/" target="_blank" rel="noopener">Referência do Dockerfile</a></li>
+          <li><a href="https://docs.docker.com/build/building/best-practices/" target="_blank" rel="noopener">Boas práticas de build</a></li>
+          <li><a href="https://docs.docker.com/build/building/multi-stage/" target="_blank" rel="noopener">Multi-stage builds</a></li>
+          <li><a href="https://docs.docker.com/build/cache/" target="_blank" rel="noopener">Cache de build</a></li>
+          <li><a href="https://docs.docker.com/build/building/multi-platform/" target="_blank" rel="noopener">Imagens multi-plataforma</a></li>
+        </ul></div>
+        <div class="card-mini"><h4>Ferramentas</h4><ul>
+          <li><a href="https://github.com/hadolint/hadolint" target="_blank" rel="noopener">Hadolint</a></li>
+          <li><a href="https://trivy.dev/" target="_blank" rel="noopener">Trivy</a></li>
+          <li><a href="https://slsa.dev/" target="_blank" rel="noopener">SLSA</a> e <a href="https://www.sigstore.dev/" target="_blank" rel="noopener">Sigstore</a> (cadeia de suprimentos)</li>
+          <li><a href="https://github.com/GoogleContainerTools/distroless" target="_blank" rel="noopener">Google distroless</a></li>
+          <li><a href="https://edu.chainguard.dev/open-source/build-tools/apko/overview/" target="_blank" rel="noopener">apko</a> e <a href="https://edu.chainguard.dev/open-source/build-tools/melange/overview/" target="_blank" rel="noopener">melange</a></li>
+          <li><a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener">runc</a></li>
+        </ul></div>
+        <div class="card-mini"><h4>Repositórios da disciplina</h4><ul>
+          <li><a href="https://github.com/gersontpc/image-base" target="_blank" rel="noopener">gersontpc/image-base</a></li>
+          <li><a href="https://github.com/gersontpc/kubeautoday-talk" target="_blank" rel="noopener">gersontpc/kubeautoday-talk</a></li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</article>
+
+</div></div>
+</section>
