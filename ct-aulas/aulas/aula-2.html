@@ -186,10 +186,10 @@
   <div class="section-label">Prática</div>
   <div class="lab">
     <div class="lab-head"><span class="lab-tag">Exercício 2.2</span><h3>Operando containers do início ao fim</h3><span class="lab-time">~30 min</span></div>
-    <p class="lab-goal">Executar a imagem publicada na Aula 01, operar o container com a CLI, aplicar limites de recursos e observar o tratamento de sinais.</p>
+    <p class="lab-goal">Executar um container nginx, operá-lo com a CLI, aplicar limites de recursos e observar o tratamento de sinais.</p>
     <ol class="steps">
-      <li><div><p>Defina a imagem (sua do Docker Hub, ou <code>nginx:stable-alpine</code>):</p>
-<div class="code"><span class="lang">terminal</span><pre><code>export IMAGE="seu-usuario-dockerhub/container-technologies:1.0.1"</code></pre></div>
+      <li><div><p>Defina a imagem:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>export IMAGE="nginx:stable-alpine"</code></pre></div>
 <p>Rode o container:</p>
 <div class="code"><span class="lang">terminal</span><pre><code>docker run -d --name web -p 8080:80 --restart unless-stopped "$IMAGE"</code></pre></div>
 <p>Confira que está rodando:</p>
@@ -235,7 +235,7 @@
 <div class="code"><span class="lang">terminal</span><pre><code>docker logs com-trap; docker rm sem-trap com-trap</code></pre></div>
       </div></li>
     </ol>
-    <div class="expect"><b>Resultado esperado</b><ul><li>A página da sua imagem responde na porta 8080 e a política de reinício aparece como <code>unless-stopped</code>.</li><li><code>memory.max</code> = <code>134217728</code>, <code>cpu.max</code> = <code>50000 100000</code> e o <code>docker stats</code> mostra limite de 128 MiB.</li><li>O container <code>oom</code> termina com <code>OOMKilled=true ExitCode=137</code>.</li><li><code>sem-trap</code> leva cerca de 10 s para parar (SIGKILL); <code>com-trap</code> para em cerca de 1 s.</li></ul></div>
+    <div class="expect"><b>Resultado esperado</b><ul><li>A página de boas-vindas do nginx responde na porta 8080 e a política de reinício aparece como <code>unless-stopped</code>.</li><li><code>memory.max</code> = <code>134217728</code>, <code>cpu.max</code> = <code>50000 100000</code> e o <code>docker stats</code> mostra limite de 128 MiB.</li><li>O container <code>oom</code> termina com <code>OOMKilled=true ExitCode=137</code>.</li><li><code>sem-trap</code> leva cerca de 10 s para parar (SIGKILL); <code>com-trap</code> para em cerca de 1 s.</li></ul></div>
     <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
       <li>Limites de recursos viram cgroups no kernel: <code>memory.max</code> e <code>cpu.max</code>.</li>
       <li>Passou do limite de memória, o kernel mata o processo: <code>OOMKilled</code>, código de saída 137.</li>

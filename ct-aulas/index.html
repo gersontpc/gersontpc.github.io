@@ -28,8 +28,8 @@
           <button class="tab" role="tab" data-tab="aula-1">Aula 01 <span class="prog"></span></button>
           <button class="tab" role="tab" data-tab="aula-2">Aula 02 <span class="prog"></span></button>
           <button class="tab" role="tab" data-tab="aula-3">Aula 03 <span class="prog"></span></button>
-          <!-- LIBERAR AULA 04/05: descomente as linhas abaixo
           <button class="tab" role="tab" data-tab="aula-4">Aula 04 <span class="prog"></span></button>
+          <!-- LIBERAR AULA 05: descomente a linha abaixo
           <button class="tab" role="tab" data-tab="aula-5">Aula 05 <span class="prog"></span></button>
           -->
         </div>
@@ -54,9 +54,9 @@
     <button data-go="aula-1"><span class="n">AULA 01</span><h3>Tudo começa na imagem</h3><p>VM × container, OCI, runtimes, anatomia da imagem, Dockerfile, camadas, Hadolint, multi-stage, Trivy, tags e Docker Hub.</p></button>
     <button data-go="aula-2"><span class="n">AULA 02</span><h3>Containers, redes e volumes</h3><p>Arquitetura do Docker, comandos do dia a dia, networks, volumes, log drivers, Compose e Swarm.</p></button>
     <button data-go="aula-3"><span class="n">AULA 03</span><h3>Orquestração e Amazon ECS</h3><p>Orquestradores, Amazon ECS com Fargate e ECR, operação do service, ECS Exec, troubleshooting e auto scaling.</p></button>
-    <!-- LIBERAR AULA 04/05: descomente as linhas abaixo
-    <button data-go="aula-4"><span class="n">AULA 04</span><h3>Kubernetes</h3><p>Arquitetura do Kubernetes, cluster local com k3d, Pods, Deployments, Services, Ingress e Gateway API.</p></button>
-    <button data-go="aula-5"><span class="n">AULA 05</span><h3>Produção e EKS</h3><p>Probes, recursos, HPA, rollouts sem downtime, troubleshooting e Amazon EKS.</p></button>
+    <button data-go="aula-4"><span class="n">AULA 04</span><h3>Kubernetes</h3><p>Conceito, componentes e uso local com kind: Pods e YAML, namespaces e cotas, Deployments, Services, Ingress e Gateway API, probes, HPA, KEDA e VPA, deploy sem downtime e kubectl debug.</p></button>
+    <!-- LIBERAR AULA 05: descomente a linha abaixo
+    <button data-go="aula-5"><span class="n">AULA 05</span><h3>Amazon EKS</h3><p>Kubernetes não gerenciado × gerenciado, cluster EKS com eksctl, control plane, data plane (self-managed, managed, Fargate, Auto Mode) e deploy com load balancer da AWS.</p></button>
     -->
   </div>
 
@@ -148,11 +148,13 @@ docker run --rm hello-world</code></pre></div>
           <tr><td>Trivy</td><td>01</td><td>Scan de vulnerabilidades e SBOM</td></tr>
           <tr><td>Docker Compose</td><td>02</td><td>Aplicações multi-container</td></tr>
           <tr><td>Docker Swarm</td><td>02</td><td>Orquestração nativa do Docker</td></tr>
-          <tr><td>k3d + kubectl</td><td>03–04</td><td>Cluster Kubernetes local</td></tr>
-          <tr><td>eksctl</td><td>04</td><td>Provisionar e operar o Amazon EKS</td></tr>
+          <tr><td>kind + kubectl</td><td>04</td><td>Cluster Kubernetes local</td></tr>
+          <tr><td>cloud-provider-kind</td><td>04</td><td>LoadBalancer, Ingress e Gateway API no kind</td></tr>
+          <tr><td>metrics-server + KEDA</td><td>04</td><td>Métricas para o HPA e escala por eventos</td></tr>
+          <tr><td>eksctl + AWS CLI</td><td>05</td><td>Provisionar e operar o Amazon EKS</td></tr>
         </tbody>
       </table></div>
-      <p class="home-note">Hadolint e Trivy rodam como containers; k3d e eksctl são instalados no próprio exercício em que aparecem.</p>
+      <p class="home-note">Hadolint e Trivy rodam como containers; kind, cloud-provider-kind, metrics-server, KEDA e eksctl são instalados no próprio exercício em que aparecem.</p>
     </div>
   </div>
 
@@ -168,8 +170,10 @@ docker run --rm hello-world</code></pre></div>
 <!--AULA-3-->
 <div data-aula="aulas/aula-3.html" hidden></div>
 <!--/AULA-3-->
-<!-- LIBERAR AULA 04/05: descomente as linhas abaixo
+<!--AULA-4-->
 <div data-aula="aulas/aula-4.html" hidden></div>
+<!--/AULA-4-->
+<!-- LIBERAR AULA 05: descomente a linha abaixo
 <div data-aula="aulas/aula-5.html" hidden></div>
 -->
 </main>

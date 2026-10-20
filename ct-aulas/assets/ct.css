@@ -992,3 +992,16 @@ td code{white-space:nowrap}
 @keyframes cbc0{0%{opacity:1}49.99%{opacity:1}50%{opacity:0}100%{opacity:0}}
 @keyframes cbc1{0%{opacity:0}49.99%{opacity:0}50%{opacity:1}59.99%{opacity:1}60%{opacity:0}100%{opacity:0}}
 @keyframes cbc2{0%{opacity:0}59.99%{opacity:0}60%{opacity:1}100%{opacity:1}}
+
+/* Caixa de narrativa (.story) da Aula 04 */
+.story{border-left:3px solid var(--signal);background:var(--signal-soft);padding:10px 14px;border-radius:0 6px 6px 0;margin:0 0 14px;font-size:15px;max-width:none}
+.story>b:first-child{display:block;font:600 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--signal);margin-bottom:4px}
+.pres-frame .story{font-size:1.7cqw;padding:1cqw 1.6cqw;margin-bottom:1.6cqw}
+.pres-frame .story>b:first-child{font-size:1.1cqw}
+/* Ícones heptagonais dos componentes do Kubernetes nos diagramas SVG (Aula 04) */
+.sc-k8s{fill:var(--accent);stroke:var(--accent);stroke-width:1.5}
+.sc-k8s-t{font:700 10px var(--f-mono);fill:var(--surface)}
+.sc-ico{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.sc-ico-t{font:600 8.5px var(--f-mono);fill:var(--ink)}
+/* Grade "quem cuida de quê" com 4 opções (data plane do EKS, Aula 05) */
+.lt.lt4{grid-template-columns:minmax(0,1.15fr) repeat(4,minmax(0,1fr));font-size:12.5px}
