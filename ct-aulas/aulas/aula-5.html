@@ -1,0 +1,863 @@
+<!-- Aula 05: fragmento carregado por ../index.html (assets/ct.js). Não é uma página completa: edite aqui o conteúdo da aula. -->
+<section class="panel" id="aula-5" data-panel="aula-5" hidden>
+<div class="aula-head">
+  <div>
+    <div class="eyebrow">Aula 05 · Amazon EKS</div>
+    <h1>Kubernetes gerenciado com Amazon EKS</h1>
+    <p class="lead">Na Aula 04 a Loja rodou num cluster kind, e você operava tudo: control plane, nós e add-ons. Hoje ela vai para a AWS: você compara Kubernetes não gerenciado e gerenciado, cria um cluster EKS com eksctl no AWS Academy Learner Lab, entende o control plane e as opções de data plane (self-managed, managed node groups, Fargate e Auto Mode) com o modelo de responsabilidade compartilhada, publica a Loja com um load balancer da AWS e apaga tudo no fim.</p>
+    <div class="meta"><span class="chip">5 tópicos</span><span class="chip">5 exercícios</span><span class="chip">eksctl · AWS CLI · kubectl</span><span class="chip">EKS · Kubernetes v1.37</span><span class="chip">AWS Academy Learner Lab</span><span class="chip chip-gh">GitHub Codespaces</span></div>
+  </div>
+</div>
+<div class="aula-body">
+<nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
+<div class="topicos">
+
+<div class="warn" style="margin-bottom:28px"><b>Como esta aula funciona</b><p>Os exercícios formam uma sequência no mesmo codespace e na mesma sessão do Learner Lab: o 5.1.1 cria o cluster <code>aula5</code> (leva de 15 a 20 minutos, e a aula continua enquanto ele sobe), os seguintes usam esse cluster e o 5.5.1 apaga tudo. O cluster consome os créditos do lab enquanto existir: não pule a limpeza.</p></div>
+
+<!-- 5.1 -->
+<article class="topico" id="a5-t1">
+  <div class="topico-head"><span class="topico-num">5.1</span><h2>Do kind ao EKS: Kubernetes não gerenciado × gerenciado</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide divider">
+      <div class="dv-eyebrow">Capítulo 1 · A Loja vai para a nuvem</div>
+      <h3>Quem vai cuidar do etcd às 3h da manhã?</h3>
+      <p>Na Aula 04, o cluster kind cabia num codespace e você via cada peça: etcd, API server, scheduler. Em produção, alguém precisa manter essas peças em três zonas, fazer backup, aplicar patches e atualizar a versão três vezes por ano. A Loja decide entregar esse trabalho à AWS.</p>
+    </div>
+    <div class="slide">
+      <h3>EKS control plane × Kubernetes control plane</h3>
+      <figure class="sc-fig" style="max-width:800px;margin:0 auto 12px">
+<svg viewBox="0 0 520 300" role="img" aria-label="À esquerda, o Amazon EKS: o kubectl fala com um endpoint do EKS e os workers ficam numa VPC da sua conta AWS. À direita, o mesmo cluster sem gerenciamento: você opera o control plane inteiro, com API server, etcd, scheduler, controller manager e cloud controller manager, e os nós com kubelet e kube-proxy.">
+<text class="sc-lbl" x="130" y="18" text-anchor="middle">Amazon EKS (gerenciado)</text>
+<rect class="sc-box-warn" x="62" y="30" width="186" height="70" rx="8"/>
+<text class="sc-tag" x="155" y="54" text-anchor="middle">Control plane · AWS</text>
+<text class="sc-num" x="155" y="72" text-anchor="middle">aula5.eks.amazonaws.com</text>
+<text class="sc-num" x="155" y="88" text-anchor="middle">etcd e API server ocultos</text>
+<rect class="sc-box" x="6" y="40" width="44" height="34" rx="4"/><text class="sc-num" x="28" y="92" text-anchor="middle">kubectl</text>
+<line class="sc-arrow sc-dash" x1="50.0" y1="57.0" x2="55.0" y2="57.0"/><path class="sc-ah" d="M62,57 L53.0,53.0 L53.0,61.0 Z"/>
+<rect class="sc-box-acc" x="14" y="130" width="232" height="140" rx="8"/>
+<text class="sc-num" x="26" y="148">VPC · sua conta AWS</text>
+<rect class="sc-box" x="28" y="160" width="64" height="70" rx="6"/><text class="sc-num" x="60" y="200" text-anchor="middle">worker</text>
+<rect class="sc-box" x="98" y="160" width="64" height="70" rx="6"/><text class="sc-num" x="130" y="200" text-anchor="middle">worker</text>
+<rect class="sc-box" x="168" y="160" width="64" height="70" rx="6"/><text class="sc-num" x="200" y="200" text-anchor="middle">worker</text>
+<line class="sc-arrow" x1="60.0" y1="160.0" x2="115.1" y2="104.9"/><path class="sc-ah" d="M120,100 L110.8,103.5 L116.5,109.2 Z"/>
+<line class="sc-arrow" x1="130.0" y1="160.0" x2="147.8" y2="106.6"/><path class="sc-ah" d="M150,100 L143.4,107.3 L150.9,109.8 Z"/>
+<line class="sc-arrow" x1="200.0" y1="160.0" x2="186.7" y2="106.8"/><path class="sc-ah" d="M185,100 L183.3,109.7 L191.1,107.8 Z"/>
+<text class="sc-num" x="130" y="258" text-anchor="middle">você cuida dos workers</text>
+<line class="sc-zone" x1="262" y1="10" x2="262" y2="290"/>
+<text class="sc-lbl" x="392" y="18" text-anchor="middle">Kubernetes não gerenciado</text>
+<rect class="sc-box-acc" x="282" y="30" width="226" height="130" rx="8"/>
+<text class="sc-num" x="294" y="48">Control plane · você</text>
+<g transform="translate(320,76)"><polygon class="sc-ico sc-dash" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">c-c-m</text></g><g transform="translate(470,76)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">c-m</text></g>
+<g transform="translate(395,98)"><polygon class="sc-k8s" points="0.0,-30.0 23.5,-18.7 29.2,6.7 13.0,27.0 -13.0,27.0 -29.2,6.7 -23.5,-18.7"/><text class="sc-k8s-t" y="4" text-anchor="middle">api</text></g>
+<g transform="translate(320,132)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">etcd</text></g><g transform="translate(470,132)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">sched</text></g>
+<rect class="sc-box-acc" x="282" y="190" width="108" height="80" rx="8"/><text class="sc-num" x="294" y="206">nó · você</text>
+<g transform="translate(312,240)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">k-proxy</text></g><g transform="translate(362,240)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">kubelet</text></g>
+<rect class="sc-box-acc" x="400" y="190" width="108" height="80" rx="8"/><text class="sc-num" x="412" y="206">nó · você</text>
+<g transform="translate(430,240)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">k-proxy</text></g><g transform="translate(480,240)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">kubelet</text></g>
+<line class="sc-arrow" x1="336.0" y1="190.0" x2="376.0" y2="131.8"/><path class="sc-ah" d="M380,126 L371.6,131.2 L378.2,135.7 Z"/>
+<line class="sc-arrow" x1="454.0" y1="190.0" x2="414.0" y2="131.8"/><path class="sc-ah" d="M410,126 L411.8,135.7 L418.4,131.2 Z"/>
+</svg>
+      </figure>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html" target="_blank" rel="noopener">What is Amazon EKS?</a> · <a href="https://kubernetes.io/docs/concepts/architecture/" target="_blank" rel="noopener">Kubernetes Cluster Architecture</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>O que muda quando o Kubernetes é gerenciado</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Tarefa</th><th>Não gerenciado (kind, kubeadm, kops)</th><th>Gerenciado (EKS)</th></tr></thead>
+        <tbody>
+          <tr><td><b>Instalar o control plane</b></td><td>Você: certificados, etcd, API server, static Pods</td><td>Uma chamada à API do EKS</td></tr>
+          <tr><td><b>Alta disponibilidade</b></td><td>Você distribui e monta o quórum do etcd</td><td>Pelo menos 2 API servers e 3 etcd em 3 zonas</td></tr>
+          <tr><td><b>Backup e patches do etcd</b></td><td>Você</td><td>AWS</td></tr>
+          <tr><td><b>Upgrade de versão</b></td><td>Você, componente por componente</td><td>Você dispara; a AWS atualiza o control plane</td></tr>
+          <tr><td><b>Integração com a nuvem</b></td><td>Você instala o cloud-controller-manager</td><td>Já integrado: IAM, VPC, ELB, EBS</td></tr>
+          <tr><td><b>Disponibilidade</b></td><td>A que você conseguir</td><td>SLA de 99,95% no endpoint da API</td></tr>
+          <tr><td><b>Custo</b></td><td>Só as máquinas, mais o seu tempo</td><td>Preço por hora de cluster, mais os nós</td></tr>
+        </tbody>
+      </table></div>
+      <p>Equivalentes nas outras nuvens: <b>GKE</b> (Google Cloud) e <b>AKS</b> (Azure). O que você aprendeu de Kubernetes na Aula 04 vale igual nos três.</p>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/eks-architecture.html" target="_blank" rel="noopener">EKS architecture</a> · <a href="https://aws.amazon.com/eks/sla/" target="_blank" rel="noopener">Amazon EKS SLA</a> · <a href="https://aws.amazon.com/eks/pricing/" target="_blank" rel="noopener">Amazon EKS pricing</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Workflow de criação de um cluster EKS</h3>
+      <figure class="sc-fig" style="max-width:780px;margin:0 auto 12px">
+<svg viewBox="0 0 520 300" role="img" aria-label="Linha com cinco etapas: criar o cluster EKS, implantar add-ons, provisionar node groups, implantar workloads e expor o serviço. As três primeiras são da plataforma; as duas últimas, da aplicação.">
+<rect class="sc-box-mut" x="10" y="90" width="500" height="80" rx="16"/>
+<line class="sc-line" x1="20" y1="130" x2="500" y2="130"/>
+<path class="sc-ah" d="M510,130 L500,125 L500,135 Z"/>
+<circle class="sc-box-ok" cx="64" cy="130" r="11"/>
+<circle class="sc-box-ok" cx="160" cy="130" r="11"/>
+<circle class="sc-box-ok" cx="256" cy="130" r="11"/>
+<circle class="sc-box-ok" cx="352" cy="130" r="11"/>
+<circle class="sc-box-ok" cx="448" cy="130" r="13"/>
+<line class="sc-arrow" x1="64.0" y1="141.0" x2="64.0" y2="183.0"/><path class="sc-ah" d="M64,190 L68.0,181.0 L60.0,181.0 Z"/><line class="sc-arrow" x1="160.0" y1="141.0" x2="160.0" y2="183.0"/><path class="sc-ah" d="M160,190 L164.0,181.0 L156.0,181.0 Z"/><line class="sc-arrow" x1="256.0" y1="141.0" x2="256.0" y2="183.0"/><path class="sc-ah" d="M256,190 L260.0,181.0 L252.0,181.0 Z"/><line class="sc-arrow" x1="352.0" y1="141.0" x2="352.0" y2="183.0"/><path class="sc-ah" d="M352,190 L356.0,181.0 L348.0,181.0 Z"/><line class="sc-arrow" x1="448.0" y1="143.0" x2="448.0" y2="183.0"/><path class="sc-ah" d="M448,190 L452.0,181.0 L444.0,181.0 Z"/>
+<text class="sc-tag" x="64" y="208" text-anchor="middle">Criar o</text><text class="sc-tag" x="64" y="224" text-anchor="middle">cluster EKS</text>
+<text class="sc-tag" x="160" y="208" text-anchor="middle">Implantar</text><text class="sc-tag" x="160" y="224" text-anchor="middle">add-ons</text>
+<text class="sc-tag" x="256" y="208" text-anchor="middle">Provisionar</text><text class="sc-tag" x="256" y="224" text-anchor="middle">node groups</text>
+<text class="sc-tag" x="352" y="208" text-anchor="middle">Implantar</text><text class="sc-tag" x="352" y="224" text-anchor="middle">workloads</text>
+<text class="sc-tag" x="448" y="208" text-anchor="middle">Expor o</text><text class="sc-tag" x="448" y="224" text-anchor="middle">serviço</text>
+<text class="sc-num" x="64" y="244" text-anchor="middle">5.1</text><text class="sc-num" x="160" y="244" text-anchor="middle">5.1 · 5.3</text><text class="sc-num" x="256" y="244" text-anchor="middle">5.1 · 5.3</text><text class="sc-num" x="352" y="244" text-anchor="middle">5.4</text><text class="sc-num" x="448" y="244" text-anchor="middle">5.4</text>
+<text class="sc-lbl" x="160" y="64" text-anchor="middle">plataforma</text>
+<text class="sc-lbl" x="400" y="64" text-anchor="middle">aplicação</text>
+<line class="sc-tgt" x1="304" y1="40" x2="304" y2="86"/>
+<text class="sc-num" x="260" y="284" text-anchor="middle">Os números mostram em que tópico da aula cada etapa aparece.</text>
+</svg>
+      </figure>
+      <p>Ferramentas: <b>AWS Management Console</b>, <b>AWS CloudFormation</b>, <b>Terraform</b> (EKS Blueprints), <b>AWS CLI</b> e <b>eksctl</b>. Hoje: eksctl, com o cluster descrito num arquivo YAML.</p>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html" target="_blank" rel="noopener">Get started with Amazon EKS</a> · <a href="https://eksctl.io/" target="_blank" rel="noopener">eksctl.io</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>eksctl: o cluster como um arquivo</h3>
+      <div class="scl">
+<div class="code"><span class="lang">cluster.yaml</span><pre><code>apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: aula5
+  region: us-east-1
+  version: "1.37"
+iam:
+  serviceRoleARN: arn:aws:iam::123456789012:role/LabRole
+vpc:
+  subnets:
+    public:
+      us-east-1a: { id: subnet-0aaa… }
+      us-east-1b: { id: subnet-0bbb… }
+      us-east-1c: { id: subnet-0ccc… }
+managedNodeGroups:
+  - name: ng-loja
+    instanceType: t3.medium
+    minSize: 2
+    desiredCapacity: 2
+    maxSize: 3
+    iam:
+      instanceRoleARN: arn:aws:iam::123456789012:role/LabRole
+addons:
+  - name: vpc-cni
+  - name: coredns
+  - name: kube-proxy
+  - name: eks-pod-identity-agent
+  - name: metrics-server</code></pre></div>
+        <div>
+          <ul>
+            <li>CLI oficial do EKS: lê o <code>ClusterConfig</code> e cria tudo por <b>CloudFormation</b> (uma pilha para o cluster, uma por node group).</li>
+            <li><code>iam</code>: no Learner Lab não dá para criar roles, então o cluster e os nós usam a <code>LabRole</code> pronta.</li>
+            <li><code>vpc.subnets</code>: usa as sub-redes da VPC padrão em três zonas, sem criar NAT gateway.</li>
+            <li><code>addons</code>: rede dos Pods (VPC CNI), DNS, kube-proxy, Pod Identity e metrics-server, como EKS add-ons.</li>
+            <li><code>version</code>: sem ele, o eksctl v0.231.0 usaria a 1.34; fixamos a 1.37, a mais nova do EKS (a mesma do kind na Aula 04).</li>
+            <li>No fim, grava o contexto no seu <code>~/.kube/config</code>.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">Referências: <a href="https://eksctl.io/usage/creating-and-managing-clusters/" target="_blank" rel="noopener">eksctl · Creating and managing clusters</a> · <a href="https://eksctl.io/usage/vpc-configuration/" target="_blank" rel="noopener">VPC configuration</a> · <a href="https://eksctl.io/usage/addons/" target="_blank" rel="noopener">Addons</a> · eksctl v0.231.0.</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 5.1.1</span><h3>Criando o cluster EKS com eksctl no Learner Lab</h3><span class="lab-time">~15 min + 20 min de espera</span></div>
+    <p class="lab-goal">Preparar o codespace com as credenciais do Learner Lab, instalar AWS CLI e eksctl, descrever o cluster <code>aula5</code> em YAML e disparar a criação.</p>
+    <div class="warn"><b>AWS Academy Learner Lab</b><p>Use um codespace novo e uma sessão nova do lab. As permissões de IAM são limitadas: o cluster e os nós usam a role pronta <code>LabRole</code>. Trabalhe em <code>us-east-1</code>. A criação leva de 15 a 20 minutos; deixe o comando rodando num terminal e siga com a aula.</p></div>
+    <ol class="steps">
+      <li><div><p>No AWS Academy, abra o <b>Learner Lab</b> e clique em <b>Start Lab</b>. Aguarde a bolinha ao lado de <i>AWS</i> ficar <b>verde</b>.</p>
+<p>Clique em <b>ⓘ AWS Details</b> e, em <b>AWS CLI</b>, clique em <b>Show</b>. Copie o bloco abaixo, troque cada <code>COLE_AQUI</code> pelo valor correspondente e cole no terminal:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/.aws
+cat &gt; ~/.aws/credentials &lt;&lt;'EOF'
+[default]
+aws_access_key_id=COLE_AQUI
+aws_secret_access_key=COLE_AQUI
+aws_session_token=COLE_AQUI
+EOF
+printf '[default]\nregion = us-east-1\n' &gt; ~/.aws/config
+export AWS_REGION=us-east-1</code></pre></div>
+<div class="warn"><b>Credenciais temporárias</b><p>Elas expiram quando a sessão do lab termina (cerca de 4 horas). Ao reiniciar o lab, repita este passo com os valores novos. Não publique essas chaves em repositório, chat ou print.</p></div>
+      </div></li>
+      <li><div><p>Instale a AWS CLI v2:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip &amp;&amp; unzip -q awscliv2.zip &amp;&amp; sudo ./aws/install &amp;&amp; rm -rf aws awscliv2.zip</code></pre></div>
+<p>Valide as credenciais:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws sts get-caller-identity --no-cli-pager</code></pre></div>
+<p>Instale o eksctl v0.231.0:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -sL "https://github.com/eksctl-io/eksctl/releases/download/v0.231.0/eksctl_Linux_amd64.tar.gz" | tar -xz -C /tmp &amp;&amp; sudo install -m 0755 /tmp/eksctl /usr/local/bin/eksctl &amp;&amp; rm /tmp/eksctl</code></pre></div>
+<p>Confira o eksctl e o kubectl:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl version; kubectl version --client</code></pre></div>
+      </div></li>
+      <li><div><p>Crie a pasta da aula e descubra o ARN da <code>LabRole</code> e a VPC padrão:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/eks/aula-5 &amp;&amp; cd ~/eks/aula-5
+LAB_ROLE=$(aws iam get-role --role-name LabRole --query Role.Arn --output text)
+VPC_ID=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text)
+echo "$LAB_ROLE  $VPC_ID"</code></pre></div>
+<p>Pegue as sub-redes da VPC padrão em <code>us-east-1a</code>, <code>us-east-1b</code> e <code>us-east-1c</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>subnet() { aws ec2 describe-subnets --filters Name=vpc-id,Values=$VPC_ID Name=availability-zone,Values=$1 --query 'Subnets[0].SubnetId' --output text; }
+SUBNET_A=$(subnet us-east-1a); SUBNET_B=$(subnet us-east-1b); SUBNET_C=$(subnet us-east-1c)
+echo "$SUBNET_A $SUBNET_B $SUBNET_C"</code></pre></div>
+      </div></li>
+      <li><div><p>Descreva o cluster. O heredoc sem aspas troca as variáveis pelos valores da sua conta:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; cluster.yaml &lt;&lt;EOF
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: aula5
+  region: us-east-1
+  version: "1.37"
+iam:
+  serviceRoleARN: $LAB_ROLE
+vpc:
+  subnets:
+    public:
+      us-east-1a: { id: $SUBNET_A }
+      us-east-1b: { id: $SUBNET_B }
+      us-east-1c: { id: $SUBNET_C }
+managedNodeGroups:
+  - name: ng-loja
+    instanceType: t3.medium
+    minSize: 2
+    desiredCapacity: 2
+    maxSize: 3
+    labels: { role: app }
+    iam:
+      instanceRoleARN: $LAB_ROLE
+addons:
+  - name: vpc-cni
+  - name: coredns
+  - name: kube-proxy
+  - name: eks-pod-identity-agent
+  - name: metrics-server
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+EOF
+cat cluster.yaml</code></pre></div>
+<p>Veja o que o eksctl vai criar, sem criar nada:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl create cluster -f cluster.yaml --dry-run | head -40</code></pre></div>
+      </div></li>
+      <li><div><p>Crie o cluster. Deixe rodando e siga com a aula (15 a 20 minutos):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl create cluster -f cluster.yaml</code></pre></div>
+<p>Em outro terminal, acompanhe as pilhas do CloudFormation que o eksctl criou:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws cloudformation list-stacks --stack-status-filter CREATE_IN_PROGRESS CREATE_COMPLETE --query 'StackSummaries[?contains(StackName,`aula5`)].[StackName,StackStatus]' --output table</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li><code>aws sts get-caller-identity</code> mostra a conta do lab e o ARN da role assumida (<code>assumed-role/…</code>); <code>eksctl version</code> responde <code>0.231.0</code>.</li>
+      <li>O <code>cluster.yaml</code> sai com o ARN real da <code>LabRole</code> e três <code>subnet-…</code> diferentes.</li>
+      <li>Aparecem as pilhas <code>eksctl-aula5-cluster</code> e, depois, <code>eksctl-aula5-nodegroup-ng-loja</code>.</li>
+      <li>O <code>eksctl create cluster</code> termina com a mensagem de que o cluster <code>aula5</code> está pronto e grava o contexto no kubeconfig.</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>No EKS, criar o control plane é uma chamada de API: ninguém instala etcd nem API server.</li>
+      <li>O eksctl transforma um <code>ClusterConfig</code> em pilhas do CloudFormation: o cluster vira código versionável.</li>
+      <li>Cluster, add-ons e node groups são etapas separadas do workflow, mesmo quando um comando faz todas.</li>
+      <li>Em contas com IAM restrito, como o Learner Lab, roles prontas entram no lugar das que o eksctl criaria.</li>
+    </ul></div>
+    <div class="tip"><b>Se a criação falhar</b><p>Leia a mensagem do eksctl e os eventos da pilha no console do CloudFormation. Antes de tentar de novo, apague o que ficou pela metade com <code>eksctl delete cluster -f cluster.yaml --wait</code>.</p></div>
+    <label class="done"><input type="checkbox" id="ex-4-5"> Exercício 5.1.1 concluído</label>
+  </div>
+</article>
+
+<!-- 5.2 -->
+<article class="topico" id="a5-t2">
+  <div class="topico-head"><span class="topico-num">5.2</span><h2>O control plane do EKS</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide divider">
+      <div class="dv-eyebrow">Capítulo 2 · O cérebro que você não vê</div>
+      <h3>Onde foram parar o etcd e o API server?</h3>
+      <p>Enquanto o cluster sobe, a equipe procura os Pods do control plane, como fazia no kind. Eles não estão lá: no EKS, o control plane roda numa conta da AWS, numa VPC gerenciada pelo EKS, e só aparece para você como um endpoint.</p>
+    </div>
+    <div class="slide">
+      <h3>Arquitetura do control plane do EKS</h3>
+      <div class="scl">
+        <div>
+          <ul>
+            <li>Cada cluster tem o <b>seu próprio</b> control plane, sem nada compartilhado entre clusters ou contas.</li>
+            <li>Pelo menos <b>2 instâncias de API server</b> e <b>3 de etcd</b>, em 3 zonas de disponibilidade da região.</li>
+            <li>O etcd fica separado do API server, para operações e atualizações seguras e contínuas.</li>
+            <li>O endpoint é exposto por um <b>NLB</b>, e o EKS troca instâncias com problema, inclusive em outra zona.</li>
+          </ul>
+        </div>
+        <figure class="sc-fig">
+<svg viewBox="0 0 520 300" role="img" aria-label="Uma VPC gerenciada pelo EKS ocupa três zonas de disponibilidade. Em cada zona há um NLB na frente; há instâncias de API server em duas zonas, em sub-redes privadas, e uma instância de etcd em cada uma das três zonas.">
+<rect class="sc-box-warn" x="10" y="10" width="500" height="280" rx="10"/>
+<text class="sc-lbl" x="24" y="30">AWS Cloud · VPC gerenciada pelo EKS</text>
+<rect class="sc-zone" x="24" y="40" width="152" height="240" rx="6"/><text class="sc-num" x="100" y="56" text-anchor="middle">AZ 1</text>
+<rect class="sc-zone" x="184" y="40" width="152" height="240" rx="6"/><text class="sc-num" x="260" y="56" text-anchor="middle">AZ 2</text>
+<rect class="sc-zone" x="344" y="40" width="152" height="240" rx="6"/><text class="sc-num" x="420" y="56" text-anchor="middle">AZ 3</text>
+<rect class="sc-box-acc" x="50" y="66" width="100" height="32" rx="6"/><text class="sc-st" x="100" y="86" text-anchor="middle">NLB</text>
+<rect class="sc-box-acc" x="210" y="66" width="100" height="32" rx="6"/><text class="sc-st" x="260" y="86" text-anchor="middle">NLB</text>
+<rect class="sc-box-acc" x="370" y="66" width="100" height="32" rx="6"/><text class="sc-st" x="420" y="86" text-anchor="middle">NLB</text>
+<rect class="sc-tgt" x="36" y="114" width="448" height="70" rx="6" fill="none"/><text class="sc-num" x="420" y="134" text-anchor="middle">sub-rede privada</text>
+<g transform="translate(100,156)"><polygon class="sc-k8s" points="0.0,-30.0 23.5,-18.7 29.2,6.7 13.0,27.0 -13.0,27.0 -29.2,6.7 -23.5,-18.7"/><text class="sc-k8s-t" y="4" text-anchor="middle">api</text></g><text class="sc-num" x="140" y="160">API</text>
+<g transform="translate(260,156)"><polygon class="sc-k8s" points="0.0,-30.0 23.5,-18.7 29.2,6.7 13.0,27.0 -13.0,27.0 -29.2,6.7 -23.5,-18.7"/><text class="sc-k8s-t" y="4" text-anchor="middle">api</text></g><text class="sc-num" x="300" y="160">API</text>
+<text class="sc-num" x="420" y="168" text-anchor="middle">(sob demanda)</text>
+<rect class="sc-tgt" x="36" y="198" width="448" height="74" rx="6" fill="none"/>
+<g transform="translate(100,238)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">etcd</text></g><g transform="translate(260,238)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">etcd</text></g><g transform="translate(420,238)"><polygon class="sc-ico" points="0.0,-22.0 17.2,-13.7 21.4,4.9 9.5,19.8 -9.5,19.8 -21.4,4.9 -17.2,-13.7"/><text class="sc-ico-t" y="3" text-anchor="middle">etcd</text></g>
+<text class="sc-num" x="180" y="212" text-anchor="middle">etcd · quórum</text>
+</svg>
+        </figure>
+      </div>
+      <p class="note">Referência: <a href="https://docs.aws.amazon.com/eks/latest/userguide/eks-architecture.html" target="_blank" rel="noopener">Amazon EKS architecture</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>O que a AWS garante no control plane</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Disponibilidade</h4><ul>
+          <li>Sobrevive à perda de uma zona inteira.</li>
+          <li>SLA de <b>99,95%</b> mensal no endpoint da API (control plane padrão).</li>
+          <li>Instâncias com problema são substituídas automaticamente.</li>
+        </ul></div>
+        <div class="card-mini"><h4>Operação</h4><ul>
+          <li>Patches, backup e quórum do etcd são da AWS.</li>
+          <li>Ajuste automático de tamanho das instâncias do control plane.</li>
+          <li>Logs do control plane (API, audit, authenticator, controller manager, scheduler) opcionais no CloudWatch.</li>
+        </ul></div>
+        <div class="card-mini"><h4>Versões</h4><ul>
+          <li>Cada minor tem <b>14 meses</b> de suporte padrão e mais <b>12</b> de suporte estendido, pago à parte.</li>
+          <li>Hoje, no padrão: 1.37, 1.36, 1.35 e 1.34.</li>
+          <li>Upgrade in-place pode voltar à minor anterior em até 7 dias.</li>
+        </ul></div>
+      </div>
+      <p class="note">Referências: <a href="https://aws.amazon.com/eks/sla/" target="_blank" rel="noopener">Amazon EKS SLA</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html" target="_blank" rel="noopener">Kubernetes version lifecycle on EKS</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html" target="_blank" rel="noopener">Control plane logs</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Como os nós e o kubectl chegam ao control plane</h3>
+      <div class="scl">
+        <div>
+          <ul>
+            <li>O EKS cria de <b>2 a 4 interfaces de rede (ENIs)</b> nas sub-redes do seu cluster. Por elas passa o tráfego entre control plane e nós, e também <code>logs</code>, <code>exec</code>, <code>attach</code> e <code>port-forward</code>.</li>
+            <li>O <b>endpoint</b> da API é público por padrão, protegido por IAM e RBAC. Dá para ligar o acesso <b>privado</b> (só de dentro da VPC) e limitar ou desligar o público.</li>
+            <li>Com o endpoint privado, o nome do cluster resolve para IPs da sua VPC (zona hospedada privada).</li>
+          </ul>
+        </div>
+        <figure class="sc-fig">
+<svg viewBox="0 0 520 300" role="img" aria-label="Acima, a VPC do control plane, numa conta da AWS, com etcd e API server em duas zonas. Abaixo, a VPC dos workers, na sua conta, onde ficam as ENIs gerenciadas pelo EKS. Os nós, com kubelet e kube-proxy, e o kubectl alcançam o API server pelo endpoint, que resolve para as ENIs quando o acesso privado está ligado.">
+<rect class="sc-box-warn" x="10" y="10" width="360" height="100" rx="8"/><text class="sc-num" x="22" y="28">VPC do control plane · conta da AWS</text>
+<rect class="sc-box" x="40" y="40" width="130" height="56" rx="6"/><text class="sc-num" x="105" y="60" text-anchor="middle">etcd</text><text class="sc-num" x="105" y="82" text-anchor="middle">API server · AZ 1</text>
+<rect class="sc-box" x="210" y="40" width="130" height="56" rx="6"/><text class="sc-num" x="275" y="60" text-anchor="middle">etcd</text><text class="sc-num" x="275" y="82" text-anchor="middle">API server · AZ 2</text>
+<rect class="sc-box-acc" x="10" y="130" width="500" height="160" rx="8"/><text class="sc-num" x="500" y="148" text-anchor="end">VPC dos workers · sua conta</text>
+<rect class="sc-box-warn" x="70" y="140" width="70" height="28" rx="5"/><text class="sc-st" x="105" y="158" text-anchor="middle">ENI EKS</text>
+<rect class="sc-box-warn" x="240" y="140" width="70" height="28" rx="5"/><text class="sc-st" x="275" y="158" text-anchor="middle">ENI EKS</text>
+<line class="sc-arrow" x1="105.0" y1="103.0" x2="105.0" y2="133.0"/><path class="sc-ah" d="M105,140 L109.0,131.0 L101.0,131.0 Z"/><path class="sc-ah" d="M105,96 L101.0,105.0 L109.0,105.0 Z"/><line class="sc-arrow" x1="275.0" y1="103.0" x2="275.0" y2="133.0"/><path class="sc-ah" d="M275,140 L279.0,131.0 L271.0,131.0 Z"/><path class="sc-ah" d="M275,96 L271.0,105.0 L279.0,105.0 Z"/>
+<rect class="sc-box" x="120" y="186" width="210" height="34" rx="6"/><text class="sc-num" x="225" y="207" text-anchor="middle">aula5.…eks.amazonaws.com</text>
+<rect class="sc-box" x="24" y="236" width="140" height="44" rx="6"/><text class="sc-tag" x="94" y="254" text-anchor="middle">worker AZ 1</text><text class="sc-num" x="94" y="270" text-anchor="middle">kubelet · kube-proxy</text>
+<rect class="sc-box" x="186" y="236" width="140" height="44" rx="6"/><text class="sc-tag" x="256" y="254" text-anchor="middle">worker AZ 2</text><text class="sc-num" x="256" y="270" text-anchor="middle">kubelet · kube-proxy</text>
+<line class="sc-arrow sc-dash" x1="94.0" y1="236.0" x2="163.2" y2="221.4"/><path class="sc-ah" d="M170,220 L160.4,217.9 L162.0,225.8 Z"/><line class="sc-arrow sc-dash" x1="256.0" y1="236.0" x2="244.9" y2="224.9"/><path class="sc-ah" d="M240,220 L243.5,229.2 L249.2,223.5 Z"/>
+<rect class="sc-box" x="390" y="200" width="104" height="60" rx="6"/><text class="sc-tag" x="442" y="226" text-anchor="middle">kubectl</text><text class="sc-num" x="442" y="244" text-anchor="middle">você</text>
+<line class="sc-arrow" x1="383.2" y1="218.4" x2="336.8" y2="207.6"/><path class="sc-ah" d="M330,206 L337.9,211.9 L339.7,204.1 Z"/><path class="sc-ah" d="M390,220 L382.1,214.1 L380.3,221.9 Z"/>
+<text class="sc-num" x="442" y="40" text-anchor="middle">endpoint:</text><text class="sc-num" x="442" y="56" text-anchor="middle">público ou</text><text class="sc-num" x="442" y="72" text-anchor="middle">privado</text>
+</svg>
+        </figure>
+      </div>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/network-reqs.html" target="_blank" rel="noopener">VPC and subnet requirements</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html" target="_blank" rel="noopener">Cluster API server endpoint</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Quem pode falar com o cluster: IAM + Kubernetes</h3>
+      <div class="flow">
+        <div class="node"><b>kubectl</b><span>lê o kubeconfig</span></div><div class="arrow">→</div>
+        <div class="node"><b>aws eks get-token</b><span>token assinado com suas credenciais IAM</span></div><div class="arrow">→</div>
+        <div class="node hl"><b>API server do EKS</b><span>autentica a identidade IAM</span></div><div class="arrow">→</div>
+        <div class="node"><b>Access entries</b><span>ligam a identidade IAM a permissões no cluster</span></div><div class="arrow">→</div>
+        <div class="node"><b>RBAC</b><span>autoriza a ação</span></div>
+      </div>
+      <ul>
+        <li>No kind, o kubeconfig tinha um certificado. No EKS, tem um <b>comando</b> (<code>exec</code>) que gera um token com as suas credenciais da AWS.</li>
+        <li><b>Access entries</b> são o jeito recomendado de dar acesso; substituem o antigo ConfigMap <code>aws-auth</code>. Quem cria o cluster recebe acesso de administrador.</li>
+        <li>Para os <b>Pods</b> chamarem serviços da AWS: <b>EKS Pod Identity</b> (add-on <code>eks-pod-identity-agent</code>) ou IRSA.</li>
+      </ul>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html" target="_blank" rel="noopener">Access entries</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html" target="_blank" rel="noopener">Connect kubectl to an EKS cluster</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html" target="_blank" rel="noopener">EKS Pod Identity</a>.</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 5.2.1</span><h3>Conectando e procurando o control plane</h3><span class="lab-time">~15 min</span></div>
+    <p class="lab-goal">Conectar o <code>kubectl</code> ao cluster EKS, confirmar que o control plane não aparece como Pods e ver pela AWS CLI o endpoint, as ENIs, os add-ons e os access entries.</p>
+    <div class="warn"><b>Antes de começar</b><p>Usa o cluster <code>aula5</code> do exercício 5.1.1, já criado. Trabalhe em <code>~/eks/aula-5</code>.</p></div>
+    <ol class="steps">
+      <li><div><p>Veja o contexto que o eksctl gravou e como o kubeconfig se autentica:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/eks/aula-5 &amp;&amp; kubectl config current-context &amp;&amp; kubectl config view --minify -o jsonpath='{.users[0].user.exec.command} {.users[0].user.exec.args}{"\n"}'</code></pre></div>
+<p>Se o contexto não existir (por exemplo, num terminal novo), gere de novo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws eks update-kubeconfig --region us-east-1 --name aula5</code></pre></div>
+      </div></li>
+      <li><div><p>Veja o endpoint, a versão e os nós:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl cluster-info; kubectl version; kubectl get nodes -o wide</code></pre></div>
+<p>Procure o control plane em <code>kube-system</code>, como fazia no kind:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get pods -n kube-system -o wide</code></pre></div>
+      </div></li>
+      <li><div><p>Pergunte à AWS como está o acesso ao endpoint:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws eks describe-cluster --name aula5 --query 'cluster.{versao:version,status:status,publico:resourcesVpcConfig.endpointPublicAccess,privado:resourcesVpcConfig.endpointPrivateAccess,sgCluster:resourcesVpcConfig.clusterSecurityGroupId}' --output table</code></pre></div>
+<p>Veja as ENIs que o EKS criou nas suas sub-redes:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ec2 describe-network-interfaces --filters Name=description,Values="Amazon EKS aula5*" --query 'NetworkInterfaces[].[NetworkInterfaceId,AvailabilityZone,PrivateIpAddress]' --output table</code></pre></div>
+      </div></li>
+      <li><div><p>Liste os add-ons do cluster e as versões:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl get addon --cluster aula5</code></pre></div>
+<p>E quem tem acesso ao cluster (access entries):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws eks list-access-entries --cluster-name aula5 --output table</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li>O contexto se chama algo como <code>…@aula5.us-east-1.eksctl.io</code>, e o kubeconfig usa o comando <code>aws</code> (ou <code>aws-iam-authenticator</code>) com <code>eks get-token</code>.</li>
+      <li>O <code>cluster-info</code> mostra um endpoint <code>https://….eks.amazonaws.com</code>; o servidor está na <code>v1.37</code>; 2 nós <code>Ready</code> em zonas diferentes.</li>
+      <li>Em <code>kube-system</code> há <code>aws-node</code>, <code>coredns</code>, <code>kube-proxy</code>, <code>eks-pod-identity-agent</code> e <code>metrics-server</code>, mas <b>nenhum</b> Pod de <code>etcd</code>, <code>kube-apiserver</code>, <code>kube-scheduler</code> ou <code>kube-controller-manager</code>.</li>
+      <li>O endpoint aparece público (<code>True</code>) e privado <code>False</code>; a lista de ENIs traz interfaces <code>Amazon EKS aula5</code> em zonas diferentes.</li>
+      <li>Os 5 add-ons aparecem com versão e status <code>ACTIVE</code>; há um access entry para a role do lab.</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>No EKS, o control plane não é visível como Pods: é um endpoint que a AWS opera.</li>
+      <li>A ponte entre o control plane e a sua VPC são ENIs gerenciadas pelo EKS.</li>
+      <li>O acesso ao cluster passa pelo IAM (token) e pelos access entries, antes do RBAC.</li>
+      <li>Rede dos Pods, DNS e kube-proxy viram EKS add-ons, com versão gerenciada pela API do EKS.</li>
+    </ul></div>
+    <label class="done"><input type="checkbox" id="ex-4-6"> Exercício 5.2.1 concluído</label>
+  </div>
+</article>
+
+<!-- 5.3 -->
+<article class="topico" id="a5-t3">
+  <div class="topico-head"><span class="topico-num">5.3</span><h2>Data plane: onde rodam os workers</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide divider">
+      <div class="dv-eyebrow">Capítulo 3 · Quem cuida das máquinas</div>
+      <h3>O control plane é da AWS. E os nós?</h3>
+      <p>O control plane é sempre da AWS. Já os nós, onde os Pods da Loja rodam, podem ficar com você, ser divididos com a AWS ou nem aparecer. É a mesma escolha da Aula 03 entre EC2 e Fargate no ECS, agora com quatro opções.</p>
+    </div>
+    <div class="slide">
+      <h3>As quatro opções de data plane</h3>
+      <figure class="sc-fig" style="max-width:800px;margin:0 auto 12px">
+<svg viewBox="0 0 520 300" role="img" aria-label="O control plane do EKS fica numa faixa única acima. Abaixo, quatro formas de data plane: self-managed node groups, com nós EC2 seus; managed node groups, com nós EC2 gerenciados pelo EKS; Fargate, com cada Pod numa micro VM sem nós visíveis; e Auto Mode, com nós escolhidos e operados pela AWS.">
+<rect class="sc-box-warn" x="10" y="14" width="500" height="54" rx="10"/>
+<text class="sc-tag" x="260" y="38" text-anchor="middle">Control plane do EKS · AWS</text>
+<text class="sc-num" x="260" y="56" text-anchor="middle">API server · etcd · scheduler · controllers · 3 zonas</text>
+<rect class="sc-box-acc" x="10" y="92" width="500" height="160" rx="10"/>
+<text class="sc-lbl" x="20" y="108">data plane · sua VPC</text>
+<rect class="sc-zone" x="18" y="116" width="116" height="128" rx="6"/>
+<rect class="sc-box" x="28" y="128" width="44" height="64" rx="5"/><rect class="sc-task" x="34" y="142" width="32" height="14" rx="4"/><rect class="sc-task" x="34" y="162" width="32" height="14" rx="4"/>
+<rect class="sc-box" x="80" y="128" width="44" height="64" rx="5"/><rect class="sc-task" x="86" y="142" width="32" height="14" rx="4"/><rect class="sc-task" x="86" y="162" width="32" height="14" rx="4"/>
+<text class="sc-num" x="76" y="210" text-anchor="middle">nós EC2 seus</text>
+<rect class="sc-zone" x="142" y="116" width="116" height="128" rx="6"/>
+<rect class="sc-box" x="152" y="128" width="44" height="64" rx="5"/><rect class="sc-task" x="158" y="142" width="32" height="14" rx="4"/><rect class="sc-task" x="158" y="162" width="32" height="14" rx="4"/>
+<rect class="sc-box" x="204" y="128" width="44" height="64" rx="5"/><rect class="sc-task" x="210" y="142" width="32" height="14" rx="4"/><rect class="sc-task" x="210" y="162" width="32" height="14" rx="4"/>
+<text class="sc-num" x="200" y="210" text-anchor="middle">EC2 + ASG do EKS</text>
+<rect class="sc-zone" x="266" y="116" width="116" height="128" rx="6"/>
+<rect class="sc-task" x="280" y="140" width="38" height="22" rx="4"/><rect class="sc-task" x="330" y="140" width="38" height="22" rx="4"/><rect class="sc-task" x="305" y="172" width="38" height="22" rx="4"/>
+<text class="sc-num" x="324" y="210" text-anchor="middle">1 Pod = 1 VM</text>
+<rect class="sc-zone" x="390" y="116" width="114" height="128" rx="6"/>
+<rect class="sc-box-warn" x="400" y="128" width="44" height="64" rx="5"/><rect class="sc-task" x="406" y="142" width="32" height="14" rx="4"/><rect class="sc-task" x="406" y="162" width="32" height="14" rx="4"/>
+<rect class="sc-box-warn sc-task-new" x="452" y="128" width="44" height="64" rx="5"/><rect class="sc-task sc-task-new" x="458" y="142" width="32" height="14" rx="4"/>
+<text class="sc-num" x="447" y="210" text-anchor="middle">nós da AWS</text>
+<line class="sc-arrow" x1="76.0" y1="116.0" x2="76.0" y2="75.0"/><path class="sc-ah" d="M76,68 L72.0,77.0 L80.0,77.0 Z"/><line class="sc-arrow" x1="200.0" y1="116.0" x2="200.0" y2="75.0"/><path class="sc-ah" d="M200,68 L196.0,77.0 L204.0,77.0 Z"/><line class="sc-arrow" x1="324.0" y1="116.0" x2="324.0" y2="75.0"/><path class="sc-ah" d="M324,68 L320.0,77.0 L328.0,77.0 Z"/><line class="sc-arrow" x1="447.0" y1="116.0" x2="447.0" y2="75.0"/><path class="sc-ah" d="M447,68 L443.0,77.0 L451.0,77.0 Z"/>
+<text class="sc-tag" x="76" y="272" text-anchor="middle">Self-managed</text>
+<text class="sc-tag" x="200" y="272" text-anchor="middle">Managed node groups</text>
+<text class="sc-tag" x="324" y="272" text-anchor="middle">Fargate</text>
+<text class="sc-tag" x="447" y="272" text-anchor="middle">Auto Mode</text>
+<text class="sc-num" x="260" y="292" text-anchor="middle">Dá para misturar opções no mesmo cluster.</text>
+</svg>
+      </figure>
+      <p class="note">Referência: <a href="https://docs.aws.amazon.com/eks/latest/userguide/eks-compute.html" target="_blank" rel="noopener">Manage compute resources by using nodes</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Modelo de responsabilidade compartilhada no data plane</h3>
+      <div class="lt lt4">
+          <div class="lt-corner"></div>
+          <div class="lt-h">Self-managed<small>EC2 e ASG seus</small></div>
+          <div class="lt-h">Managed node groups<small>EC2 gerenciado pelo EKS</small></div>
+          <div class="lt-h">Fargate<small>serverless, sem nós</small></div>
+          <div class="lt-h">Auto Mode<small>nós operados pela AWS</small></div>
+          <div class="lt-l">Aplicação, imagens, dados, IAM das apps</div>
+          <div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você</div>
+          <div class="lt-l">RBAC, NetworkPolicy, cotas, HPA/VPA, PDB</div>
+          <div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você</div>
+          <div class="lt-l">VPC e configuração do cluster</div>
+          <div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você</div>
+          <div class="lt-l">Add-ons: rede, DNS, LB, storage</div>
+          <div class="lt-c lt-you">Você</div><div class="lt-c lt-you">Você<small>como EKS add-ons</small></div><div class="lt-c lt-you">Você</div><div class="lt-c lt-aws">AWS<small>capacidades do cluster</small></div>
+          <div class="lt-l">Escala dos nós</div>
+          <div class="lt-c lt-you">Você<small>ASG + CAS ou Karpenter</small></div><div class="lt-c lt-you">Você<small>CAS ou Karpenter</small></div><div class="lt-c lt-aws">AWS<small>não há nós</small></div><div class="lt-c lt-aws">AWS<small>Karpenter gerenciado</small></div>
+          <div class="lt-l">Ciclo de vida das instâncias</div>
+          <div class="lt-c lt-you">Você</div><div class="lt-c lt-aws">AWS<small>cria, atualiza e encerra com drain</small></div><div class="lt-c lt-aws">AWS</div><div class="lt-c lt-aws">AWS<small>troca a cada 21 dias, no máximo</small></div>
+          <div class="lt-l">SO, kubelet, runtime, AMI</div>
+          <div class="lt-c lt-you">Você</div><div class="lt-c lt-mix">AWS ou você<small>AMI otimizada; você dispara a atualização</small></div><div class="lt-c lt-aws">AWS</div><div class="lt-c lt-aws">AWS<small>Bottlerocket imutável</small></div>
+          <div class="lt-l">Control plane do Kubernetes</div>
+          <div class="lt-c lt-aws">AWS</div><div class="lt-c lt-aws">AWS</div><div class="lt-c lt-aws">AWS</div><div class="lt-c lt-aws">AWS</div>
+          <div class="lt-l">Hardware e infraestrutura global</div>
+          <div class="lt-c lt-aws">AWS</div><div class="lt-c lt-aws">AWS</div><div class="lt-c lt-aws">AWS</div><div class="lt-c lt-aws">AWS</div>
+          <div class="lt-lg"><span><i style="border-color:var(--accent);background:var(--accent-soft)"></i>você cuida</span><span><i style="border-color:var(--signal);background:var(--signal-soft)"></i>AWS cuida</span><span><i style="border-color:var(--signal);border-style:dashed;background:var(--surface-2)"></i>dividido</span></div>
+      </div>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/best-practices/security.html" target="_blank" rel="noopener">EKS Best Practices · Security</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html" target="_blank" rel="noopener">Managed node groups</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate.html" target="_blank" rel="noopener">Fargate</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/automode.html" target="_blank" rel="noopener">Auto Mode · Shared responsibility</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Self-managed × managed node groups</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Self-managed nodes</h4><ul>
+          <li>Instâncias EC2 e Auto Scaling group seus, registrados no cluster.</li>
+          <li>Você escolhe e atualiza a AMI, o kubelet e o runtime.</li>
+          <li>Para AMI customizada, bootstrap especial ou requisitos que os outros modos não atendem.</li>
+          <li>Mais flexível, mais trabalho.</li>
+        </ul></div>
+        <div class="card-mini"><h4>Managed node groups</h4><ul>
+          <li>O EKS cria e gerencia o ASG na sua conta, nas zonas que você escolher.</li>
+          <li>Criar, atualizar ou encerrar nós é <b>uma operação</b>, e o EKS drena os nós antes.</li>
+          <li>AMI otimizada do EKS; o console avisa quando há atualização.</li>
+          <li>Sem custo extra: você paga só EC2, EBS e o cluster. <b>É o que usamos no lab.</b></li>
+        </ul></div>
+      </div>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html" target="_blank" rel="noopener">Managed node groups</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/worker.html" target="_blank" rel="noopener">Self-managed nodes</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Fargate × Auto Mode</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>AWS Fargate</h4><ul>
+          <li>Sem servidores para escolher ou escalar: cada Pod roda isolado na <b>própria VM</b>.</li>
+          <li>Um <b>Fargate profile</b> diz quais Pods (namespace e labels) vão para o Fargate.</li>
+          <li>Não roda DaemonSets, <code>hostNetwork</code>, <code>hostPort</code> nem GPU; só sub-redes privadas.</li>
+          <li>Paga por Pod, pela CPU e memória pedidas.</li>
+        </ul></div>
+        <div class="card-mini"><h4>EKS Auto Mode</h4><ul>
+          <li>A AWS escolhe, cria, atualiza e encerra os nós (Karpenter por baixo), conforme os Pods pendentes.</li>
+          <li>AMIs Bottlerocket imutáveis, sem SSH; cada nó vive no máximo 21 dias.</li>
+          <li>Rede, load balancer, DNS e storage em bloco viram capacidades gerenciadas do cluster.</li>
+          <li>Paga uma taxa por instância além do EC2.</li>
+        </ul></div>
+      </div>
+      <p>Paralelo com a Aula 03: Fargate no EKS lembra o Fargate do ECS; Auto Mode lembra as ECS Managed Instances.</p>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate.html" target="_blank" rel="noopener">AWS Fargate</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/automode.html" target="_blank" rel="noopener">EKS Auto Mode</a> · <a href="https://aws.amazon.com/eks/pricing/" target="_blank" rel="noopener">Amazon EKS pricing</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Quando usar cada uma</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Opção</th><th>Escolha quando</th><th>Evite quando</th></tr></thead>
+        <tbody>
+          <tr><td><b>Managed node groups</b></td><td>Padrão para a maioria; controle das instâncias sem operar o ciclo de vida</td><td>Precisa de bootstrap muito customizado</td></tr>
+          <tr><td><b>Self-managed</b></td><td>AMI própria, requisitos de compliance, Outposts</td><td>O time não tem tempo para patches e upgrades de nós</td></tr>
+          <tr><td><b>Fargate</b></td><td>Poucos Pods, isolamento forte, cargas esporádicas</td><td>DaemonSets (agentes de log e métricas), GPU, muitos Pods pequenos</td></tr>
+          <tr><td><b>Auto Mode</b></td><td>Quer o mínimo de operação de cluster e nós</td><td>Precisa de SSH no nó, AMI ou CNI customizados</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Referência: <a href="https://docs.aws.amazon.com/eks/latest/userguide/eks-compute.html" target="_blank" rel="noopener">Compare compute options</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Escalando os nós: Cluster Autoscaler e Karpenter</h3>
+      <div class="scl">
+        <div>
+          <ul>
+            <li>O HPA da Aula 04 cria mais Pods; se não houver espaço, eles ficam <code>Pending</code>.</li>
+            <li>O <b>Cluster Autoscaler (CAS)</b> vê os Pods pendentes e aumenta o Auto Scaling group; com nós ociosos, diminui.</li>
+            <li>O <b>Karpenter</b> cria direto a instância que cabe nos Pods pendentes (tipo, tamanho, spot ou on-demand) e consolida nós subutilizados.</li>
+            <li>No Auto Mode, o Karpenter já vem gerenciado pela AWS.</li>
+          </ul>
+        </div>
+        <figure class="sc-fig">
+<svg viewBox="0 0 520 300" role="img" aria-label="Quatro Pods pendentes não cabem no nó cheio. O Cluster Autoscaler percebe e aumenta o grupo de nós, e dois nós novos recebem os Pods.">
+<text class="sc-lbl" x="20" y="40">Pods pendentes</text>
+<rect class="sc-task sc-task-new" x="20" y="54" width="26" height="22" rx="5"/><rect class="sc-task sc-task-new" x="52" y="54" width="26" height="22" rx="5"/><rect class="sc-task sc-task-new" x="84" y="54" width="26" height="22" rx="5"/><rect class="sc-task sc-task-new" x="116" y="54" width="26" height="22" rx="5"/>
+<rect class="sc-box-mut" x="20" y="120" width="120" height="90" rx="8"/><text class="sc-tag" x="80" y="160" text-anchor="middle">nó cheio</text><text class="sc-num" x="80" y="178" text-anchor="middle">✕ não cabe</text>
+<line class="sc-arrow" x1="80.0" y1="76.0" x2="80.0" y2="113.0"/><path class="sc-ah" d="M80,120 L84.0,111.0 L76.0,111.0 Z"/>
+<g transform="translate(240,165)"><polygon class="sc-k8s" points="0.0,-30.0 23.5,-18.7 29.2,6.7 13.0,27.0 -13.0,27.0 -29.2,6.7 -23.5,-18.7"/><text class="sc-k8s-t" y="4" text-anchor="middle">c-m</text></g><text class="sc-tag" x="240" y="212" text-anchor="middle">CAS</text>
+<line class="sc-arrow sc-dash" x1="140.0" y1="165.0" x2="203.0" y2="165.0"/><path class="sc-ah" d="M210,165 L201.0,161.0 L201.0,169.0 Z"/>
+<rect class="sc-box-acc" x="350" y="40" width="150" height="90" rx="8"/><text class="sc-num" x="425" y="58" text-anchor="middle">nó novo</text>
+<rect class="sc-task" x="370" y="74" width="50" height="22" rx="5"/><rect class="sc-task" x="430" y="74" width="50" height="22" rx="5"/>
+<rect class="sc-box-acc" x="350" y="170" width="150" height="90" rx="8"/><text class="sc-num" x="425" y="188" text-anchor="middle">nó novo</text>
+<rect class="sc-task" x="370" y="204" width="50" height="22" rx="5"/><rect class="sc-task" x="430" y="204" width="50" height="22" rx="5"/>
+<line class="sc-arrow sc-dash" x1="270.0" y1="150.0" x2="344.4" y2="94.2"/><path class="sc-ah" d="M350,90 L340.4,92.2 L345.2,98.6 Z"/>
+<line class="sc-arrow sc-dash" x1="270.0" y1="180.0" x2="343.4" y2="207.5"/><path class="sc-ah" d="M350,210 L343.0,203.1 L340.2,210.6 Z"/>
+<text class="sc-num" x="260" y="288" text-anchor="middle">Pods pendentes viram nós novos; nós ociosos são removidos.</text>
+</svg>
+        </figure>
+      </div>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html" target="_blank" rel="noopener">Karpenter and Cluster Autoscaler</a> · <a href="https://karpenter.sh/" target="_blank" rel="noopener">karpenter.sh</a> v1.15.</p>
+    </div>
+    <div class="slide">
+      <h3>A rede dos Pods no EKS: VPC CNI</h3>
+      <ul>
+        <li>No kind, os Pods tinham IPs de uma rede interna (<code>10.244.x.x</code>, kindnet). No EKS, o add-on <b>Amazon VPC CNI</b> (Pods <code>aws-node</code>) dá a cada Pod um <b>IP da própria VPC</b>.</li>
+        <li>Os Pods falam direto com outros serviços da VPC (RDS, outros clusters) sem tradução de endereço.</li>
+        <li>Consequência: o número de Pods por nó depende de quantos IPs a instância comporta, e as sub-redes precisam de IPs livres.</li>
+      </ul>
+      <p class="note">Referência: <a href="https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html" target="_blank" rel="noopener">Amazon VPC CNI</a>.</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 5.3.1</span><h3>Explorando e escalando o managed node group</h3><span class="lab-time">~15 min</span></div>
+    <p class="lab-goal">Ver o que o EKS registrou nos nós do managed node group, confirmar que os Pods recebem IPs da VPC e adicionar um nó com um único comando.</p>
+    <div class="warn"><b>Antes de começar</b><p>Usa o cluster <code>aula5</code> do exercício 5.1.1. Trabalhe em <code>~/eks/aula-5</code>.</p></div>
+    <ol class="steps">
+      <li><div><p>Veja o node group pelo eksctl:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl get nodegroup --cluster aula5</code></pre></div>
+<p>Veja os nós com os labels que o EKS e você colocaram:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get nodes -L eks.amazonaws.com/nodegroup,eks.amazonaws.com/capacityType,node.kubernetes.io/instance-type,topology.kubernetes.io/zone,role</code></pre></div>
+<p>E o que roda por baixo de cada nó (SO, kubelet, runtime):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get nodes -o custom-columns=NODE:.metadata.name,OS:.status.nodeInfo.osImage,KUBELET:.status.nodeInfo.kubeletVersion,RUNTIME:.status.nodeInfo.containerRuntimeVersion</code></pre></div>
+      </div></li>
+      <li><div><p>Compare os IPs dos nós e dos Pods do <code>kube-system</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get nodes -o wide | awk '{print $1, $6}'; kubectl get pods -n kube-system -o wide | awk '{print $1, $6, $7}'</code></pre></div>
+<p>Confirme na AWS que esses IPs são da VPC padrão:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].CidrBlock' --output text</code></pre></div>
+      </div></li>
+      <li><div><p>Veja o Auto Scaling group que o EKS criou para o node group:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws eks describe-nodegroup --cluster-name aula5 --nodegroup-name ng-loja --query 'nodegroup.{status:status,ami:amiType,escala:scalingConfig,asg:resources.autoScalingGroups[0].name}' --output json</code></pre></div>
+<p>Aumente o node group para 3 nós:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl scale nodegroup --cluster aula5 --name ng-loja --nodes 3</code></pre></div>
+<p>Acompanhe o nó novo entrar no cluster (2 a 4 minutos, Ctrl+C sai):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get nodes -L topology.kubernetes.io/zone -w</code></pre></div>
+<p>Volte para 2 nós e veja um deles ser drenado e sair:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl scale nodegroup --cluster aula5 --name ng-loja --nodes 2 &amp;&amp; kubectl get nodes -w</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li>O node group <code>ng-loja</code> aparece com <code>MIN 2</code>, <code>MAX 3</code>, <code>DESIRED 2</code> e instâncias <code>t3.medium</code>.</li>
+      <li>Os nós têm <code>eks.amazonaws.com/nodegroup=ng-loja</code>, <code>capacityType=ON_DEMAND</code>, <code>role=app</code> e zonas diferentes; o kubelet está na <code>v1.37</code> e o runtime é o containerd.</li>
+      <li>Os IPs dos nós e dos Pods do <code>kube-system</code> estão dentro do CIDR da VPC padrão (por exemplo, <code>172.31.0.0/16</code>).</li>
+      <li>O <code>describe-nodegroup</code> mostra o ASG <code>eks-ng-loja-…</code>; um terceiro nó fica <code>Ready</code> depois do scale e é removido ao voltar para 2 (passa por <code>SchedulingDisabled</code> antes de sair).</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>Num managed node group, o EKS cria e opera o Auto Scaling group na sua conta: escalar é um comando.</li>
+      <li>Ao remover um nó, o EKS drena antes, respeitando os PDBs que você viu na Aula 04.</li>
+      <li>Com o VPC CNI, cada Pod recebe um IP da VPC, diferente da rede interna do kind.</li>
+      <li>Os labels de nó (zona, tipo, node group) são a base para espalhar e posicionar workloads.</li>
+    </ul></div>
+    <label class="done"><input type="checkbox" id="ex-4-7"> Exercício 5.3.1 concluído</label>
+  </div>
+</article>
+
+<!-- 5.4 -->
+<article class="topico" id="a5-t4">
+  <div class="topico-head"><span class="topico-num">5.4</span><h2>A Loja no EKS: deploy, Service e operação</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide divider">
+      <div class="dv-eyebrow">Capítulo 4 · Os mesmos manifestos, outra nuvem</div>
+      <h3>O YAML da Aula 04 roda aqui?</h3>
+      <p>Chegou a hora das duas últimas etapas do workflow: implantar o workload e expor o serviço. A Loja reaproveita o que aprendeu no kind: namespace, Deployment, Service, rollout e rollback. O que muda é quem atende o <code>type: LoadBalancer</code>: agora é um load balancer de verdade da AWS.</p>
+    </div>
+    <div class="slide">
+      <h3>Service LoadBalancer no EKS</h3>
+      <div class="scl">
+        <div>
+          <ul>
+            <li>Sem nenhum controller extra, o <b>controller de load balancer do provedor AWS</b>, embutido no control plane do EKS, cria um <b>Classic Load Balancer</b> para cada Service <code>LoadBalancer</code>.</li>
+            <li>É o Service controller do cloud-controller-manager da Aula 04, agora com uma nuvem de verdade por trás (no kind, era o cloud-provider-kind).</li>
+            <li>Esse controller só recebe correções críticas. A AWS recomenda o <b>AWS Load Balancer Controller</b>, que cria NLB para Services e ALB para Ingress e Gateway API.</li>
+          </ul>
+        </div>
+        <figure class="sc-fig">
+<svg viewBox="0 0 520 300" role="img" aria-label="Clientes na internet acessam o DNS de um Classic Load Balancer criado pela AWS. O load balancer encaminha para uma porta NodePort em cada nó, e o kube-proxy leva o tráfego até os Pods da Loja, que têm IPs da VPC.">
+<rect class="sc-box" x="14" y="120" width="90" height="56" rx="6"/><text class="sc-tag" x="59" y="142" text-anchor="middle">clientes</text><text class="sc-num" x="59" y="160" text-anchor="middle">internet</text>
+<rect class="sc-box-warn" x="140" y="110" width="120" height="76" rx="8"/><text class="sc-tag" x="200" y="134" text-anchor="middle">Classic LB</text><text class="sc-num" x="200" y="152" text-anchor="middle">a1b2….elb</text><text class="sc-num" x="200" y="168" text-anchor="middle">amazonaws.com:80</text>
+<line class="sc-arrow" x1="104.0" y1="148.0" x2="133.0" y2="148.0"/><path class="sc-ah" d="M140,148 L131.0,144.0 L131.0,152.0 Z"/>
+<rect class="sc-box-acc" x="300" y="30" width="206" height="110" rx="8"/><text class="sc-num" x="312" y="48">nó · us-east-1a</text><text class="sc-st" x="403" y="70" text-anchor="middle">NodePort 3xxxx</text>
+<rect class="sc-task" x="316" y="90" width="80" height="34" rx="5"/><text class="sc-st" x="356" y="111" text-anchor="middle">loja</text>
+<rect class="sc-task" x="410" y="90" width="80" height="34" rx="5"/><text class="sc-st" x="450" y="111" text-anchor="middle">loja</text>
+<rect class="sc-box-acc" x="300" y="160" width="206" height="110" rx="8"/><text class="sc-num" x="312" y="178">nó · us-east-1b</text><text class="sc-st" x="403" y="200" text-anchor="middle">NodePort 3xxxx</text>
+<rect class="sc-task" x="316" y="220" width="80" height="34" rx="5"/><text class="sc-st" x="356" y="241" text-anchor="middle">loja</text>
+<line class="sc-arrow" x1="260.0" y1="135.0" x2="295.9" y2="85.7"/><path class="sc-ah" d="M300,80 L291.5,84.9 L297.9,89.6 Z"/>
+<line class="sc-arrow" x1="260.0" y1="160.0" x2="295.6" y2="204.5"/><path class="sc-ah" d="M300,210 L297.5,200.5 L291.3,205.5 Z"/>
+<text class="sc-num" x="200" y="230" text-anchor="middle">IPs dos Pods = IPs da VPC</text>
+<text class="sc-num" x="260" y="290" text-anchor="middle">LoadBalancer = NodePort + ClusterIP + um load balancer na nuvem.</text>
+</svg>
+        </figure>
+      </div>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/network-load-balancing.html" target="_blank" rel="noopener">Route TCP and UDP traffic with Network Load Balancers</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html" target="_blank" rel="noopener">AWS Load Balancer Controller</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>O que é igual e o que muda em relação ao kind</h3>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>kind (Aula 04)</th><th>EKS (hoje)</th></tr></thead>
+        <tbody>
+          <tr><td><b>Manifestos</b></td><td colspan="2">Os mesmos: <code>apps/v1</code>, <code>v1</code>, probes, HPA, PDB</td></tr>
+          <tr><td><b>kubectl</b></td><td colspan="2">Os mesmos comandos: <code>apply</code>, <code>rollout</code>, <code>scale</code>, <code>logs</code>, <code>debug</code></td></tr>
+          <tr><td><b>Service LoadBalancer</b></td><td>cloud-provider-kind (container Envoy)</td><td>Classic Load Balancer da AWS, com DNS público</td></tr>
+          <tr><td><b>IPs dos Pods</b></td><td>Rede interna (kindnet)</td><td>IPs da VPC (VPC CNI)</td></tr>
+          <tr><td><b>Métricas para o HPA</b></td><td>metrics-server instalado à mão</td><td>metrics-server como EKS add-on</td></tr>
+          <tr><td><b>Imagens</b></td><td><code>kind load</code> ou registry</td><td>Registry: Docker Hub ou Amazon ECR</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html" target="_blank" rel="noopener">Metrics Server no EKS</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html" target="_blank" rel="noopener">Amazon VPC CNI</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>Observabilidade: Container Insights</h3>
+      <ul>
+        <li>O add-on <b>Amazon CloudWatch Observability</b> instala o agente do CloudWatch e o Fluent Bit nos nós.</li>
+        <li>O <b>Container Insights</b> mostra CPU, memória, rede e reinícios por cluster, nó, namespace e Pod, e os logs dos containers vão para o CloudWatch Logs.</li>
+        <li>Junto com os logs do control plane ligados no <code>cluster.yaml</code> (API, audit, scheduler…), dá para investigar desde o Pod até as decisões do control plane.</li>
+      </ul>
+      <p class="note">Referência: <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-setup-EKS-addon.html" target="_blank" rel="noopener">Container Insights com o add-on CloudWatch Observability</a>.</p>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 5.4.1</span><h3>Deploy, exposição, escala e rollback da Loja no EKS</h3><span class="lab-time">~25 min</span></div>
+    <p class="lab-goal">Implantar a Loja num namespace, expor com um Service <code>LoadBalancer</code> da AWS, escalar, trocar de versão e fazer rollback para uma revisão específica.</p>
+    <div class="warn"><b>Antes de começar</b><p>Usa o cluster <code>aula5</code> do exercício 5.1.1. Trabalhe em <code>~/eks/aula-5</code>. O load balancer criado aqui é removido no exercício 5.5.1.</p></div>
+    <ol class="steps">
+      <li><div><p>Crie o namespace da Loja e use-o como padrão:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/eks/aula-5 &amp;&amp; kubectl create namespace loja &amp;&amp; kubectl config set-context --current --namespace=loja</code></pre></div>
+<p>Crie o manifesto do Deployment, com a página <code>Deploy V1!</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; deployment.yaml &lt;&lt;'EOF'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loja
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: loja
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: loja
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.30.6-alpine
+          command: ["sh", "-c"]
+          args: ["echo '&lt;h1&gt;Deploy V1!&lt;/h1&gt;' &gt; /usr/share/nginx/html/index.html &amp;&amp; exec nginx -g 'daemon off;'"]
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            periodSeconds: 3
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { memory: 128Mi }
+EOF</code></pre></div>
+<p>Aplique e confira onde os Pods foram parar (repare nos IPs da VPC):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl apply -f deployment.yaml &amp;&amp; kubectl rollout status deployment/loja &amp;&amp; kubectl get pods -o wide</code></pre></div>
+      </div></li>
+      <li><div><p>Crie o Service do tipo <code>LoadBalancer</code>:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cat &gt; service.yaml &lt;&lt;'EOF'
+apiVersion: v1
+kind: Service
+metadata:
+  name: loja
+spec:
+  type: LoadBalancer
+  selector:
+    app: loja
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+EOF
+kubectl apply -f service.yaml</code></pre></div>
+<p>Aguarde o <code>EXTERNAL-IP</code> virar um nome <code>….elb.amazonaws.com</code> (Ctrl+C sai):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl get svc loja -w</code></pre></div>
+<p>Veja o load balancer pelo lado da AWS:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws elb describe-load-balancers --query 'LoadBalancerDescriptions[].[DNSName,Scheme,length(Instances)]' --output table</code></pre></div>
+<p>Chame a Loja pelo DNS do load balancer (o DNS pode levar de 1 a 3 minutos para responder):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>LB=$(kubectl get svc loja -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'); until curl -s --max-time 5 http://$LB; do echo "aguardando o load balancer..."; sleep 10; done</code></pre></div>
+<p>Abra o mesmo endereço no navegador:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>echo "http://$LB"</code></pre></div>
+      </div></li>
+      <li><div><p>Escale para 8 réplicas e veja onde elas foram parar:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl scale deployment loja --replicas=8 &amp;&amp; kubectl rollout status deployment/loja &amp;&amp; kubectl get pods -o wide</code></pre></div>
+<p>Veja o consumo pelo metrics-server (add-on do EKS):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl top nodes; kubectl top pods</code></pre></div>
+<p>Volte para 3 réplicas:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl scale deployment loja --replicas=3</code></pre></div>
+      </div></li>
+      <li><div><p>Publique a versão 2 trocando só o texto da página, e anote o motivo:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sed 's/Deploy V1!/Deploy V2!/' deployment.yaml &gt; deployment-v2.yaml &amp;&amp; kubectl apply -f deployment-v2.yaml &amp;&amp; kubectl annotate deployment loja kubernetes.io/change-cause="pagina V2" --overwrite &amp;&amp; kubectl rollout status deployment/loja</code></pre></div>
+<p>Confira a página nova:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>curl -s http://$LB</code></pre></div>
+<p>Veja o histórico de revisões:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl rollout history deployment/loja</code></pre></div>
+<p>Volte para a revisão 1:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl rollout undo deployment/loja --to-revision=1 &amp;&amp; kubectl rollout status deployment/loja &amp;&amp; curl -s http://$LB</code></pre></div>
+      </div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li>Os 3 Pods ficam <code>Running</code> nos 2 nós, com IPs <code>172.31.x.x</code> da VPC.</li>
+      <li>O Service ganha um <code>EXTERNAL-IP</code> como <code>a1b2….us-east-1.elb.amazonaws.com</code>, e o <code>describe-load-balancers</code> mostra um Classic Load Balancer <code>internet-facing</code> com os 2 nós registrados.</li>
+      <li>O <code>curl</code> e o navegador mostram <code>Deploy V1!</code>; com 8 réplicas, os Pods se dividem entre os nós; o <code>kubectl top</code> mostra CPU e memória.</li>
+      <li>Depois do v2, a página mostra <code>Deploy V2!</code>; o histórico tem as revisões 1 e 2 e, depois do <code>undo --to-revision=1</code>, a página volta a <code>Deploy V1!</code> (e a revisão 1 vira a 3).</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>Os mesmos manifestos e comandos da Aula 04 funcionam no EKS: é a portabilidade do Kubernetes na prática.</li>
+      <li>Um Service <code>LoadBalancer</code> no EKS cria um load balancer real da AWS, com DNS público, sem nenhum passo no console.</li>
+      <li>O rollback pode voltar para qualquer revisão guardada, não só para a anterior.</li>
+      <li>Com o VPC CNI, os Pods recebem IPs da VPC e o load balancer alcança os nós pela NodePort.</li>
+    </ul></div>
+    <div class="tip"><b>O <code>curl</code> não responde depois de 5 minutos?</b><p>Veja os eventos com <code>kubectl describe svc loja</code>. Se o load balancer estiver criado mas sem instâncias saudáveis (<code>aws elb describe-instance-health --load-balancer-name ${LB%%-*}</code>), libere as NodePorts para o security group do load balancer no security group do cluster:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>ELB_SG=$(aws elb describe-load-balancers --load-balancer-names ${LB%%-*} --query 'LoadBalancerDescriptions[0].SecurityGroups[0]' --output text)
+CLUSTER_SG=$(aws eks describe-cluster --name aula5 --query cluster.resourcesVpcConfig.clusterSecurityGroupId --output text)
+aws ec2 authorize-security-group-ingress --group-id $CLUSTER_SG --protocol tcp --port 30000-32767 --source-group $ELB_SG</code></pre></div></div>
+    <div class="challenge"><b>Desafio</b><p>Aplique um HPA (o mesmo YAML do exercício 4.8.1, apontando para <code>loja</code>, com alvo de 50% de CPU) e confira com <code>kubectl get hpa</code> que as métricas chegam pelo add-on metrics-server do EKS.</p></div>
+    <label class="done"><input type="checkbox" id="ex-4-8"> Exercício 5.4.1 concluído</label>
+  </div>
+</article>
+
+<!-- 5.5 -->
+<article class="topico" id="a5-t5">
+  <div class="topico-head"><span class="topico-num">5.5</span><h2>Boas práticas e encerramento</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides">
+    <div class="slide divider">
+      <div class="dv-eyebrow">Capítulo 5 · Do laboratório à produção</div>
+      <h3>O cluster funciona. E agora, como operar?</h3>
+      <p>A Loja está no EKS, atrás de um load balancer da AWS. Para chegar à produção, falta transformar o que foi feito no terminal em processo: código versionado, upgrades planejados, segurança e custo sob controle. E, no laboratório, não deixar nada ligado.</p>
+    </div>
+    <div class="slide">
+      <h3>Práticas recomendadas</h3>
+      <div class="cols">
+        <div class="card-mini"><h4>Infra como código</h4><p>eksctl, Terraform ou CloudFormation para o cluster; GitOps (Argo CD, Flux) para os workloads. Nada manual no console: evita drift.</p></div>
+        <div class="card-mini"><h4>Upgrades</h4><p>Uma minor por vez, dentro dos 14 meses de suporte padrão. Leia as APIs removidas (tópico 4.11 da Aula 04), comece por dev/staging e atualize control plane, add-ons e nós, nessa ordem.</p></div>
+        <div class="card-mini"><h4>Segurança</h4><p>Endpoint privado ou restrito, access entries com mínimo privilégio, Pod Identity para os Pods, Pod Security Standards, imagens escaneadas (Trivy, Aula 01).</p></div>
+        <div class="card-mini"><h4>Custo e tamanho</h4><p>Requests calibrados (VPA em <code>Off</code>), Karpenter ou CAS para os nós, spot onde couber, e limite de Pods por nó do VPC CNI.</p></div>
+      </div>
+      <p class="note">Referências: <a href="https://docs.aws.amazon.com/eks/latest/best-practices/introduction.html" target="_blank" rel="noopener">EKS Best Practices Guide</a> · <a href="https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html" target="_blank" rel="noopener">Update existing cluster</a>.</p>
+    </div>
+    <div class="slide">
+      <h3>A jornada da Loja na disciplina</h3>
+      <div class="flow">
+        <div class="node"><b>Aula 01</b><span>imagem</span></div><div class="arrow">→</div>
+        <div class="node"><b>Aula 02</b><span>containers, redes, Compose</span></div><div class="arrow">→</div>
+        <div class="node"><b>Aula 03</b><span>ECS na AWS</span></div><div class="arrow">→</div>
+        <div class="node"><b>Aula 04</b><span>Kubernetes no kind</span></div><div class="arrow">→</div>
+        <div class="node hl"><b>Aula 05</b><span>Kubernetes gerenciado no EKS</span></div>
+      </div>
+      <div class="story"><b>Fim da história</b>A mesma aplicação passou por um container, um orquestrador gerenciado da AWS, um cluster Kubernetes local e, agora, um Kubernetes gerenciado. Você viu, em cada etapa, o que a ferramenta assume e o que continua com você.</div>
+    </div>
+  </div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 5.5.1</span><h3>Encerrando o laboratório sem deixar custo</h3><span class="lab-time">~15 min</span></div>
+    <p class="lab-goal">Remover o load balancer, apagar o cluster e o node group com eksctl e conferir na AWS que não sobrou nada.</p>
+    <div class="warn"><b>Antes de começar</b><p>Usa o cluster <code>aula5</code> e os recursos dos exercícios 5.1.1 a 5.4.1. Se a sessão do Learner Lab expirou, inicie de novo e atualize as credenciais como no passo 1 do exercício 5.1.1.</p></div>
+    <ol class="steps">
+      <li><div><p>Apague o namespace da Loja. O Service <code>LoadBalancer</code> vai junto, e o EKS remove o Classic Load Balancer:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>cd ~/eks/aula-5 &amp;&amp; kubectl delete namespace loja</code></pre></div>
+<p>Confira que o load balancer sumiu (pode levar 1 ou 2 minutos):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>sleep 60; aws elb describe-load-balancers --query 'LoadBalancerDescriptions[].DNSName' --output text</code></pre></div>
+      </div></li>
+      <li><div><p>Apague o cluster, o node group e os add-ons. O <code>--wait</code> espera as pilhas do CloudFormation terminarem (10 a 15 minutos):</p>
+<div class="code"><span class="lang">terminal</span><pre><code>eksctl delete cluster -f cluster.yaml --wait</code></pre></div>
+      </div></li>
+      <li><div><p>Confira que não sobrou cluster, pilha, instância nem interface do EKS:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>aws eks list-clusters --output text
+aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE DELETE_FAILED --query 'StackSummaries[?contains(StackName,`aula5`)].StackName' --output text
+aws ec2 describe-instances --filters Name=tag:eks:cluster-name,Values=aula5 Name=instance-state-name,Values=pending,running --query 'Reservations[].Instances[].InstanceId' --output text
+aws ec2 describe-network-interfaces --filters Name=description,Values="Amazon EKS aula5*" --query 'NetworkInterfaces[].NetworkInterfaceId' --output text</code></pre></div>
+<p>Remova o contexto do cluster apagado do seu kubeconfig:</p>
+<div class="code"><span class="lang">terminal</span><pre><code>kubectl config delete-context $(kubectl config current-context)</code></pre></div>
+      </div></li>
+      <li><div><p>No AWS Academy, clique em <b>End Lab</b>. Em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, pare o codespace (<b>… → Stop codespace</b>).</p></div></li>
+    </ol>
+    <div class="expect"><b>Resultado esperado</b><ul>
+      <li>Depois do <code>delete namespace</code>, o <code>describe-load-balancers</code> não lista mais o load balancer da Loja.</li>
+      <li>O <code>eksctl delete cluster</code> apaga as pilhas <code>eksctl-aula5-nodegroup-ng-loja</code> e <code>eksctl-aula5-cluster</code> e termina sem erro.</li>
+      <li>Os quatro comandos de conferência não imprimem nada: nenhum cluster, pilha, instância ou ENI do <code>aula5</code>.</li>
+    </ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul>
+      <li>A ordem importa: apagar o Service primeiro deixa o próprio EKS remover o load balancer que criou.</li>
+      <li>O eksctl desfaz o que criou pelas mesmas pilhas do CloudFormation: o cluster como código também é apagado como código.</li>
+      <li>Na nuvem, encerrar e conferir faz parte do exercício: recurso esquecido é custo.</li>
+    </ul></div>
+    <label class="done"><input type="checkbox" id="ex-4-9"> Exercício 5.5.1 concluído</label>
+  </div>
+</article>
+
+</div>
+</div>
+</section>
