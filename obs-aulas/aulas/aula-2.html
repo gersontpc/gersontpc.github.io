@@ -1,0 +1,257 @@
+<!-- Aula 02: fragmento carregado por ../index.html (assets/obs.js). Gerado a partir do código testado do lab. -->
+<section class="panel" id="aula-2" data-panel="aula-2" hidden>
+<div class="aula-head">
+  <div>
+    <div class="eyebrow">Aula 02 · Telemetria de agentes</div>
+    <h1>Instrumentação, multi-agentes e privacidade</h1>
+    <p class="lead">Instrumentar à mão ensinou o padrão; agora ele vem pronto. Você troca os spans manuais do LLM pela auto-instrumentação do OpenTelemetry, separa o atendimento em dois agentes e propaga o contexto entre eles num único trace, mascara dados pessoais no Collector e decide quais traces guardar com tail sampling.</p>
+    <div class="meta"><span class="chip">4 tópicos</span><span class="chip">4 exercícios</span><span class="chip">openai-v2 instrumentation</span><span class="chip">Collector: transform · tail_sampling</span><span class="chip chip-gh">GitHub Codespaces</span></div>
+  </div>
+</div>
+<div class="aula-intro">
+  <div class="section-label">Roteiro da aula</div>
+  <div class="slides"><div class="slide"><h3>Do agente único ao sistema de agentes</h3><div class="flow"><div class="node"><b>Automatizar</b><span>2.1 · auto-instrumentação do cliente OpenAI</span></div><div class="arrow">→</div><div class="node"><b>Distribuir</b><span>2.2 · triagem → atendimento no mesmo trace</span></div><div class="arrow">→</div><div class="node"><b>Proteger</b><span>2.3 · PII mascarada no Collector</span></div><div class="arrow">→</div><div class="node hl"><b>Economizar</b><span>2.4 · tail sampling</span></div></div><div class="cols"><div class="card-mini"><h4>Ao final da aula você vai saber</h4><ul><li>Usar a auto-instrumentação GenAI e o que ela captura</li><li>Propagar contexto entre agentes (W3C traceparent)</li><li>Mascarar dados pessoais antes de sair do ambiente</li><li>Amostrar traces sem perder os importantes</li></ul></div><div class="card-mini"><h4>Por que isso importa</h4><ul><li>Agentes em produção conversam entre si (A2A, MCP, HTTP)</li><li>Prompts carregam dados pessoais: LGPD</li><li>Guardar tudo custa caro</li></ul></div></div></div></div>
+</div>
+<div class="aula-body">
+<nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
+<div class="topicos">
+
+<!-- 2.1 -->
+<article class="topico" id="a2-t1">
+  <div class="topico-head"><span class="topico-num">2.1</span><h2>Auto-instrumentação de LLMs</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 1 · Menos código, mais padrão</div><h3>Por que escrever spans que a biblioteca já sabe gerar?</h3><p>O pacote <code>opentelemetry-instrumentation-openai-v2</code> intercepta o cliente da OpenAI e gera spans <code>chat</code> e as métricas <code>gen_ai.client.*</code> automaticamente.</p></div><div class="slide"><h3>Manual × automático</h3><div class="tbl"><table><thead><tr><th></th><th>Spans à mão (Aula 01)</th><th>Auto-instrumentação</th></tr></thead><tbody><tr><td>Spans <code>chat</code></td><td>você escreve</td><td>gerados pelo instrumentador</td></tr><tr><td>Métricas de tokens e duração</td><td>você cria</td><td><code>gen_ai.client.token.usage</code>, <code>gen_ai.client.operation.duration</code></td></tr><tr><td>Conteúdo (prompts, respostas)</td><td>você decide</td><td>opt-in: <code>OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT</code></td></tr><tr><td>Spans do agente e ferramentas</td><td>você escreve</td><td>continuam seus (é a sua lógica)</td></tr></tbody></table></div><p class="note">Referências: <a href="https://pypi.org/project/opentelemetry-instrumentation-openai-v2/" target="_blank" rel="noopener">opentelemetry-instrumentation-openai-v2</a>.</p></div><div class="slide"><h3>Ecossistema de instrumentação para IA</h3><div class="cols"><div class="card-mini"><h4>OpenTelemetry oficial</h4><ul><li>openai-v2, vertexai, google-genai</li><li>Convenções GenAI</li></ul></div><div class="card-mini"><h4>Comunidade</h4><ul><li>OpenLLMetry (Traceloop)</li><li>OpenInference (Arize)</li><li>Instrumentação de LangChain, LlamaIndex, CrewAI</li></ul></div><div class="card-mini"><h4>Plataformas de LLM</h4><ul><li>Langfuse, Phoenix, LangSmith</li><li>Bedrock AgentCore, Azure AI Foundry</li><li>A maioria aceita OTLP</li></ul></div></div></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.1</span><h3>Auto-instrumentação do cliente OpenAI</h3><span class="lab-time">~25 min</span></div>
+    <p class="lab-goal">Substituir os spans manuais do LLM pela auto-instrumentação e comparar o resultado.</p>
+    <ol class="steps"><li><div><p>Instale o instrumentador (o pacote de utilitários GenAI fica fixado na versão compatível):</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; source ~/obs/.env
+pip install -q opentelemetry-instrumentation-openai-v2==2.4b0 opentelemetry-util-genai==1.1b0</code></pre></div></div></li><li><div><p>Nova versão do agente: sem <code>chamar_llm</code>, com <code>OpenAIInstrumentor().instrument()</code> e um log da pergunta recebida:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; agente.py &lt;&lt;&#x27;EOF&#x27;
+&quot;&quot;&quot;Agente de atendimento da Loja: spans do LLM pela auto-instrumentação, spans do agente e das ferramentas à mão.&quot;&quot;&quot;
+import json, logging, os
+from fastapi import FastAPI
+from pydantic import BaseModel
+from openai import OpenAI
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
+from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
+from telemetria import configurar
+from ferramentas import FERRAMENTAS, executar
+
+configurar(&quot;atendimento&quot;)
+OpenAIInstrumentor().instrument()
+tracer = trace.get_tracer(&quot;loja.agente&quot;)
+log = logging.getLogger(&quot;agente&quot;)
+
+MODELO = os.getenv(&quot;LLM_MODEL&quot;, &quot;openai/gpt-4.1-mini&quot;)
+llm = OpenAI(base_url=os.getenv(&quot;LLM_BASE_URL&quot;), api_key=os.getenv(&quot;LLM_API_KEY&quot;))
+SISTEMA = (&quot;Você é o agente de atendimento da Loja. Responda em português, em no máximo 3 frases. &quot;
+           &quot;Use consultar_pedido para pedidos e buscar_politica para trocas, devoluções, frete e garantia. &quot;
+           &quot;Nunca invente prazos ou valores: use só o que as ferramentas retornarem. &quot;
+           &quot;Se não conseguir resolver, use abrir_chamado.&quot;)
+
+app = FastAPI()
+
+
+class Pergunta(BaseModel):
+    texto: str
+
+
+def chamar_ferramenta(chamada):
+    nome = chamada.function.name
+    with tracer.start_as_current_span(f&quot;execute_tool {nome}&quot;) as s:
+        s.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;execute_tool&quot;)
+        s.set_attribute(&quot;gen_ai.tool.name&quot;, nome)
+        s.set_attribute(&quot;gen_ai.tool.call.id&quot;, chamada.id)
+        try:
+            return executar(nome, json.loads(chamada.function.arguments or &quot;{}&quot;))
+        except Exception as e:
+            s.record_exception(e)
+            s.set_status(Status(StatusCode.ERROR, str(e)))
+            return f&quot;erro: {e}&quot;
+
+
+@app.post(&quot;/chat&quot;)
+def chat(p: Pergunta):
+    with tracer.start_as_current_span(&quot;invoke_agent atendimento&quot;) as span:
+        span.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;invoke_agent&quot;)
+        span.set_attribute(&quot;gen_ai.agent.name&quot;, &quot;atendimento&quot;)
+        log.info(&quot;pergunta recebida: %s&quot;, p.texto)
+        msgs = [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: SISTEMA}, {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: p.texto}]
+        usadas = []
+        for passo in range(1, 6):
+            # o span &quot;chat &lt;modelo&gt;&quot; agora vem da auto-instrumentação
+            m = llm.chat.completions.create(model=MODELO, messages=msgs, tools=FERRAMENTAS,
+                                            temperature=0).choices[0].message
+            if not m.tool_calls:
+                span.set_attribute(&quot;agente.passos&quot;, passo)
+                log.info(&quot;resposta em %d passos, ferramentas=%s&quot;, passo, usadas)
+                return {&quot;resposta&quot;: m.content, &quot;ferramentas&quot;: usadas,
+                        &quot;trace_id&quot;: format(span.get_span_context().trace_id, &quot;032x&quot;)}
+            msgs.append(m.model_dump(exclude_none=True))
+            for chamada in m.tool_calls:
+                usadas.append(chamada.function.name)
+                msgs.append({&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: chamada.id, &quot;content&quot;: chamar_ferramenta(chamada)})
+        span.set_status(Status(StatusCode.ERROR, &quot;limite de passos&quot;))
+        log.warning(&quot;limite de passos atingido, ferramentas=%s&quot;, usadas)
+        return {&quot;resposta&quot;: &quot;Não consegui concluir. Vou abrir um chamado.&quot;, &quot;ferramentas&quot;: usadas}
+EOF</code></pre></div></div></li><li><div><p>Suba com captura de conteúdo ligada e repita as perguntas:</p><div class="code"><span class="lang">terminal</span><pre><code>OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true uvicorn agente:app --port 8000</code></pre></div></div></li><li><div><p>No Tempo, compare um span <code>chat</code> com os da Aula 01. No Prometheus (Explore → Prometheus), procure as métricas novas:</p><div class="code"><span class="lang">promql</span><pre><code>gen_ai_client_token_usage_sum
+gen_ai_client_operation_duration_seconds_count</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Os spans <code>chat …</code> continuam aparecendo, agora com escopo <code>opentelemetry.instrumentation.openai_v2</code>.</li><li>As métricas <code>gen_ai_client_*</code> aparecem no Prometheus sem nenhuma linha de código de métrica.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Use a auto-instrumentação para o que é padrão e spans manuais para a lógica do seu agente.</li><li>Capturar conteúdo é opt-in porque tem custo e risco de privacidade.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-2-1"> Exercício 2.1 concluído</label>
+  </div>
+</article>
+<!-- 2.2 -->
+<article class="topico" id="a2-t2">
+  <div class="topico-head"><span class="topico-num">2.2</span><h2>Multi-agentes e propagação de contexto</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 2 · Um agente chama outro</div><h3>Dois serviços, um único trace</h3><p>A Loja coloca um agente de triagem na frente: ele classifica a intenção e delega ao agente de atendimento. Sem propagação de contexto, seriam dois traces sem relação.</p></div><div class="slide"><h3>W3C Trace Context</h3><div class="code"><span class="lang">http</span><pre><code>POST /chat
+traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+               │  └ trace_id                         └ span pai       └ amostrado</code></pre></div><ul><li><code>inject()</code> escreve o cabeçalho na saída; o servidor faz <code>extract()</code> na entrada (o FastAPI já faz).</li><li>Vale para HTTP, filas, A2A e MCP: o contexto viaja junto da mensagem.</li><li>Resultado: o mapa de serviços do Tempo mostra triagem → atendimento.</li></ul><p class="note">Referências: <a href="https://www.w3.org/TR/trace-context/" target="_blank" rel="noopener">W3C Trace Context</a>.</p></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.2</span><h3>Triagem e atendimento no mesmo trace</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Criar o agente de triagem, delegar ao atendimento propagando o traceparent e ver os dois serviços num trace.</p>
+    <ol class="steps"><li><div><p>Instale o cliente HTTP e crie o agente de triagem:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; source ~/obs/.env</code></pre></div><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; triagem.py &lt;&lt;&#x27;EOF&#x27;
+&quot;&quot;&quot;Agente de triagem: classifica a intenção com o LLM e delega ao agente de atendimento por HTTP.&quot;&quot;&quot;
+import logging, os
+import httpx
+from fastapi import FastAPI
+from pydantic import BaseModel
+from openai import OpenAI
+from opentelemetry import trace
+from opentelemetry.propagate import inject
+from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
+from telemetria import configurar
+
+configurar(&quot;triagem&quot;)
+OpenAIInstrumentor().instrument()
+tracer = trace.get_tracer(&quot;loja.triagem&quot;)
+log = logging.getLogger(&quot;triagem&quot;)
+MODELO = os.getenv(&quot;LLM_MODEL&quot;, &quot;openai/gpt-4.1-mini&quot;)
+llm = OpenAI(base_url=os.getenv(&quot;LLM_BASE_URL&quot;), api_key=os.getenv(&quot;LLM_API_KEY&quot;))
+app = FastAPI()
+
+
+class Pergunta(BaseModel):
+    texto: str
+
+
+@app.post(&quot;/chat&quot;)
+def chat(p: Pergunta):
+    with tracer.start_as_current_span(&quot;invoke_agent triagem&quot;) as span:
+        span.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;invoke_agent&quot;)
+        span.set_attribute(&quot;gen_ai.agent.name&quot;, &quot;triagem&quot;)
+        intencao = llm.chat.completions.create(model=MODELO, temperature=0, messages=[
+            {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;Classifique a mensagem em uma palavra: atendimento (pedidos, trocas, &quot;
+                                          &quot;frete, garantia) ou outro. Responda só a palavra.&quot;},
+            {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: p.texto}]).choices[0].message.content.strip().lower()
+        span.set_attribute(&quot;triagem.intencao&quot;, intencao)
+        if &quot;atendimento&quot; not in intencao:
+            log.info(&quot;fora do escopo: %s&quot;, intencao)
+            return {&quot;resposta&quot;: &quot;Posso ajudar com pedidos, trocas, frete e garantia.&quot;, &quot;agente&quot;: &quot;triagem&quot;}
+        cabecalhos = {}
+        inject(cabecalhos)  # escreve o traceparent: o próximo serviço continua o mesmo trace
+        log.info(&quot;delegando ao atendimento com traceparent=%s&quot;, cabecalhos.get(&quot;traceparent&quot;))
+        r = httpx.post(&quot;http://localhost:8000/chat&quot;, json={&quot;texto&quot;: p.texto}, headers=cabecalhos, timeout=120)
+        return {**r.json(), &quot;agente&quot;: &quot;triagem → atendimento&quot;}
+EOF</code></pre></div></div></li><li><div><p>Com o atendimento rodando na porta 8000, suba a triagem num terceiro terminal:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; source ~/obs/.env
+uvicorn triagem:app --port 8100</code></pre></div></div></li><li><div><p>Pergunte pela triagem:</p><div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8100/chat -H &#x27;content-type: application/json&#x27; -d &#x27;{&quot;texto&quot;:&quot;Qual o status do pedido 1002?&quot;}&#x27; | python3 -m json.tool
+curl -s localhost:8100/chat -H &#x27;content-type: application/json&#x27; -d &#x27;{&quot;texto&quot;:&quot;Me conta uma piada&quot;}&#x27; | python3 -m json.tool</code></pre></div></div></li><li><div><p>No Tempo, busque por Service Name <code>triagem</code> e abra o trace. Depois abra a aba <b>Service Graph</b>.</p></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Um único trace contém <code>invoke_agent triagem</code>, o <code>chat</code> de classificação e, abaixo, <code>POST /chat</code> e <code>invoke_agent atendimento</code>.</li><li>O log da triagem mostra o <code>traceparent</code> enviado.</li><li>A pergunta fora do escopo para na triagem.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Propagação de contexto é o que dá visão ponta a ponta num sistema multi-agente.</li><li>Atributos como <code>triagem.intencao</code> mostram a decisão de roteamento.</li></ul></div><div class="challenge"><b>Desafio</b><p>Comente a linha <code>inject(cabecalhos)</code>, reinicie a triagem e repita. Quantos traces aparecem agora?</p></div>
+    <label class="done"><input type="checkbox" id="ex-2-2"> Exercício 2.2 concluído</label>
+  </div>
+</article>
+<!-- 2.3 -->
+<article class="topico" id="a2-t3">
+  <div class="topico-head"><span class="topico-num">2.3</span><h2>Privacidade: dados pessoais na telemetria</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 3 · O cliente digitou o CPF</div><h3>Telemetria também é dado pessoal</h3><p>Clientes escrevem CPF, e-mail e endereço na conversa. Se o prompt vai para logs e spans, a telemetria passa a ser dado pessoal sob a LGPD.</p></div><div class="slide"><h3>Onde proteger</h3><div class="cols"><div class="card-mini"><h4>Na aplicação</h4><ul><li>Não capturar conteúdo por padrão</li><li>Logar IDs, não textos</li></ul></div><div class="card-mini"><h4>No Collector</h4><ul><li>Processador <code>transform</code> / <code>redaction</code></li><li>Uma regra vale para todos os serviços</li></ul></div><div class="card-mini"><h4>No backend</h4><ul><li>Retenção curta</li><li>Controle de acesso por time</li></ul></div></div><p class="note">Referências: <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor" target="_blank" rel="noopener">transform processor</a>.</p></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.3</span><h3>Mascarando CPF e e-mail no Collector</h3><span class="lab-time">~20 min</span></div>
+    <p class="lab-goal">Adicionar regras de mascaramento no Collector e provar que o dado pessoal não chega ao Loki.</p>
+    <ol class="steps"><li><div><p>Mande uma pergunta com dados pessoais e encontre-a no Loki (<code>{service_name="atendimento"} |= "pergunta"</code>):</p><div class="code"><span class="lang">terminal</span><pre><code>pergunta &quot;Meu CPF é 123.456.789-09 e meu e-mail ana@exemplo.com, qual o status do pedido 1002?&quot;</code></pre></div></div></li><li><div><p>Reescreva o <code>otelcol.yaml</code> com o mascaramento e o tail sampling (usado no próximo exercício):</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; ~/obs/otelcol.yaml &lt;&lt;&#x27;EOF&#x27;
+receivers:
+  otlp:
+    protocols:
+      grpc: { endpoint: 0.0.0.0:4317 }
+      http: { endpoint: 0.0.0.0:4318 }
+processors:
+  batch: {}
+  # Mascara CPF e e-mail antes de qualquer dado sair do Collector
+  transform/pii:
+    log_statements:
+      - replace_pattern(log.body, &quot;\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}&quot;, &quot;***.***.***-**&quot;)
+      - replace_pattern(log.body, &quot;[\\w.+-]+@[\\w-]+\\.[\\w.]+&quot;, &quot;&lt;email&gt;&quot;)
+    trace_statements:
+      - replace_all_patterns(span.attributes, &quot;value&quot;, &quot;\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}&quot;, &quot;***.***.***-**&quot;)
+  # Guarda 100% dos traces com erro ou lentos e só 25% do resto
+  tail_sampling:
+    decision_wait: 10s
+    policies:
+      - { name: erros, type: status_code, status_code: { status_codes: [ERROR] } }
+      - { name: lentos, type: latency, latency: { threshold_ms: 8000 } }
+      - { name: amostra, type: probabilistic, probabilistic: { sampling_percentage: 25 } }
+exporters:
+  otlphttp/lgtm:
+    endpoint: http://lgtm:4318
+  debug:
+    verbosity: basic
+service:
+  pipelines:
+    traces:  { receivers: [otlp], processors: [transform/pii, tail_sampling, batch], exporters: [otlphttp/lgtm, debug] }
+    metrics: { receivers: [otlp], processors: [batch], exporters: [otlphttp/lgtm] }
+    logs:    { receivers: [otlp], processors: [transform/pii, batch], exporters: [otlphttp/lgtm] }
+EOF</code></pre></div></div></li><li><div><p>Reinicie o Collector e repita a pergunta:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs &amp;&amp; docker compose restart otelcol &amp;&amp; docker compose logs otelcol --tail 5</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Antes: o log mostra CPF e e-mail em claro.</li><li>Depois: o log mostra <code>***.***.***-**</code> e <code>&lt;email&gt;</code>.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Mascarar no Collector protege todos os serviços com uma regra só.</li><li>O ideal é não coletar; mascarar é a segunda linha de defesa.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-2-3"> Exercício 2.3 concluído</label>
+  </div>
+</article>
+<!-- 2.4 -->
+<article class="topico" id="a2-t4">
+  <div class="topico-head"><span class="topico-num">2.4</span><h2>Amostragem: guardar o que importa</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 4 · A conta da observabilidade</div><h3>100% dos traces, 100% do custo</h3><p>Com milhares de conversas por hora, guardar tudo custa caro. Mas jogar fora o trace do erro é pior.</p></div><div class="slide"><h3>Head × tail sampling</h3><div class="tbl"><table><thead><tr><th></th><th>Head sampling</th><th>Tail sampling</th></tr></thead><tbody><tr><td>Onde decide</td><td>no início, na aplicação</td><td>no Collector, com o trace completo</td></tr><tr><td>Sabe se deu erro?</td><td>não</td><td>sim</td></tr><tr><td>Custo</td><td>baixo</td><td>memória no Collector</td></tr><tr><td>Uso típico</td><td>volume altíssimo, tráfego homogêneo</td><td>guardar erros, lentos e uma amostra do resto</td></tr></tbody></table></div></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 2.4</span><h3>Tail sampling: erros e lentos sempre, o resto por amostra</h3><span class="lab-time">~20 min</span></div>
+    <p class="lab-goal">Ver a política de tail sampling configurada no exercício anterior funcionando.</p>
+    <ol class="steps"><li><div><p>Gere várias conversas (o script respeita o limite do GitHub Models):</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; carga.py &lt;&lt;&#x27;EOF&#x27;
+&quot;&quot;&quot;Gera conversas no agente em ritmo controlado (respeita o limite do GitHub Models).&quot;&quot;&quot;
+import random, sys, time
+import httpx
+
+PERGUNTAS = [
+    &quot;Qual o status do pedido 1002?&quot;, &quot;Meu pedido 1001 já foi entregue?&quot;, &quot;Por que o pedido 1003 foi cancelado?&quot;,
+    &quot;Posso trocar um produto depois de 20 dias?&quot;, &quot;Qual o prazo para devolução?&quot;, &quot;O frete é grátis?&quot;,
+    &quot;Quanto tempo de garantia tem?&quot;, &quot;Cadê meu pedido 9999?&quot;, &quot;Quero falar com um humano sobre cobrança duplicada&quot;,
+    &quot;Paguei o pedido 1004 e ainda aparece aguardando pagamento&quot;,
+]
+total = int(sys.argv[1]) if len(sys.argv) &gt; 1 else 20
+intervalo = float(sys.argv[2]) if len(sys.argv) &gt; 2 else 12
+for i in range(1, total + 1):
+    pergunta = random.choice(PERGUNTAS)
+    inicio = time.time()
+    try:
+        r = httpx.post(&quot;http://localhost:8000/chat&quot;, json={&quot;texto&quot;: pergunta}, timeout=120).json()
+        print(f&quot;{i:&gt;3} {time.time() - inicio:5.1f}s {r.get(&#x27;ferramentas&#x27;)} {pergunta}&quot;)
+        if random.random() &lt; 0.5 and r.get(&quot;trace_id&quot;):
+            httpx.post(&quot;http://localhost:8000/feedback&quot;, json={&quot;trace_id&quot;: r[&quot;trace_id&quot;],
+                                                               &quot;util&quot;: random.random() &lt; 0.8})
+    except Exception as e:
+        print(f&quot;{i:&gt;3} erro: {e}&quot;)
+    time.sleep(intervalo)
+EOF</code></pre></div><div class="code"><span class="lang">terminal</span><pre><code>python carga.py 10 6</code></pre></div></div></li><li><div><p>Compare o número de conversas com o número de traces no Tempo (últimos 15 minutos) e procure os lentos:</p><div class="code"><span class="lang">traceql</span><pre><code>{name=&quot;invoke_agent atendimento&quot; &amp;&amp; duration &gt; 8s}
+{status=error}</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Chegam ao Tempo cerca de 25% dos traces normais.</li><li>Todo trace com erro ou acima de 8 s é guardado.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Tail sampling decide com o trace inteiro: dá para guardar o que é útil.</li><li>As métricas continuam com 100% dos dados; a amostragem afeta só traces.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-2-4"> Exercício 2.4 concluído</label>
+  </div>
+</article>
+</div>
+</div>
+</section>

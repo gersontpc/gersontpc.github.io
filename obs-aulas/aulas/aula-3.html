@@ -1,0 +1,185 @@
+<!-- Aula 03: fragmento carregado por ../index.html (assets/obs.js). Gerado a partir do código testado do lab. -->
+<section class="panel" id="aula-3" data-panel="aula-3" hidden>
+<div class="aula-head">
+  <div>
+    <div class="eyebrow">Aula 03 · Métricas e KPIs</div>
+    <h1>Métricas técnicas e KPIs de negócio para agentes</h1>
+    <p class="lead">Traces explicam uma conversa; métricas mostram todas. Você lê as métricas GenAI do OpenTelemetry (tokens e latência), cria métricas próprias do agente (resultado da conversa, passos, custo, ferramentas), gera carga controlada e calcula com PromQL os KPIs que a diretoria pergunta: taxa de resolução, custo por conversa resolvida e escalonamento para humanos.</p>
+    <div class="meta"><span class="chip">3 tópicos</span><span class="chip">3 exercícios</span><span class="chip">Prometheus · PromQL</span><span class="chip">métricas gen_ai.client.*</span><span class="chip chip-gh">GitHub Codespaces</span></div>
+  </div>
+</div>
+<div class="aula-intro">
+  <div class="section-label">Roteiro da aula</div>
+  <div class="slides"><div class="slide"><h3>Das métricas técnicas aos KPIs</h3><div class="flow"><div class="node"><b>Técnicas</b><span>3.1 · golden signals de LLM: latência, tokens, erros</span></div><div class="arrow">→</div><div class="node"><b>Do agente</b><span>3.2 · resultado, passos, custo, ferramentas</span></div><div class="arrow">→</div><div class="node hl"><b>KPIs</b><span>3.3 · resolução, custo por resolução, escalonamento</span></div></div><div class="cols"><div class="card-mini"><h4>Ao final da aula você vai saber</h4><ul><li>Escolher métricas técnicas e de negócio para um agente</li><li>Criar counters e histogramas com OpenTelemetry</li><li>Calcular percentis, taxas e custo com PromQL</li><li>Evitar explosão de cardinalidade</li></ul></div><div class="card-mini"><h4>Por que isso importa</h4><ul><li>“Quanto custa cada atendimento?” precisa de resposta em segundos</li><li>KPIs ligam a operação de IA ao valor de negócio</li></ul></div></div></div></div>
+</div>
+<div class="aula-body">
+<nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
+<div class="topicos">
+
+<!-- 3.1 -->
+<article class="topico" id="a3-t1">
+  <div class="topico-head"><span class="topico-num">3.1</span><h2>Golden signals de LLM</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 1 · A diretoria quer números</div><h3>Está rápido? Está caro? Está funcionando?</h3><p>Uma semana depois, a diretoria pede um relatório do agente. Traces não respondem “quanto”: para isso existem métricas.</p></div><div class="slide"><h3>Sinais técnicos de um serviço com LLM</h3><div class="tbl"><table><thead><tr><th>Sinal</th><th>Métrica</th><th>Observação</th></tr></thead><tbody><tr><td>Latência</td><td><code>gen_ai.client.operation.duration</code> (histograma)</td><td>p50/p95/p99; TTFT em streaming</td></tr><tr><td>Tráfego</td><td>requisições, conversas por minuto</td><td>base de capacidade e limites (rate limit)</td></tr><tr><td>Erros</td><td>HTTP 429/5xx, falhas de ferramenta, limite de passos</td><td>429 = cota do provedor</td></tr><tr><td>Saturação / consumo</td><td><code>gen_ai.client.token.usage</code> (histograma)</td><td>tokens de entrada × saída, janela de contexto</td></tr></tbody></table></div><p class="note">Referências: <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-metrics/" target="_blank" rel="noopener">GenAI metrics</a>.</p></div><div class="slide"><h3>Histogramas e percentis</h3><ul><li>Média esconde a cauda: 95% das chamadas em 1 s e 5% em 20 s dá média ~2 s.</li><li>Histograma guarda contagens por faixa (<code>_bucket</code>); <code>histogram_quantile</code> estima o percentil.</li><li>Sempre por janela: <code>rate(...[5m])</code>.</li></ul><div class="code"><span class="lang">promql</span><pre><code>histogram_quantile(0.95, sum by (le) (rate(gen_ai_client_operation_duration_seconds_bucket[5m])))</code></pre></div></div></div>
+  
+</article>
+<!-- 3.2 -->
+<article class="topico" id="a3-t2">
+  <div class="topico-head"><span class="topico-num">3.2</span><h2>Métricas do agente e custo</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 2 · O que o provedor não mede</div><h3>Resolver o problema do cliente é a métrica que importa</h3><p>Tokens e latência vêm prontos. Mas “o cliente foi atendido?” e “quanto custou cada atendimento?” só o seu código sabe.</p></div><div class="slide"><h3>Métricas que vamos criar</h3><div class="tbl"><table><thead><tr><th>Métrica</th><th>Tipo</th><th>Atributos</th></tr></thead><tbody><tr><td><code>agente.conversas</code></td><td>counter</td><td>resultado (resolvido, escalado, falha), modelo, prompt.versao</td></tr><tr><td><code>agente.passos</code></td><td>histograma</td><td>modelo, prompt.versao</td></tr><tr><td><code>agente.custo</code> (USD)</td><td>counter</td><td>modelo, prompt.versao</td></tr><tr><td><code>agente.ferramenta.chamadas</code></td><td>counter</td><td>gen_ai.tool.name, status</td></tr></tbody></table></div></div><div class="slide"><h3>Cardinalidade</h3><div class="cols"><div class="card-mini"><h4>Boa</h4><ul><li>resultado, modelo, ferramenta, versão do prompt</li><li>poucos valores possíveis</li></ul></div><div class="card-mini"><h4>Perigosa</h4><ul><li>user_id, trace_id, texto da pergunta</li><li>cada valor cria uma série nova</li></ul></div><div class="card-mini"><h4>Regra</h4><ul><li>ID vai para trace e log</li><li>Métrica agrega; trace detalha</li></ul></div></div></div><div class="slide"><h3>Custo de LLM</h3><ul><li>custo = tokens_entrada × preço_entrada + tokens_saída × preço_saída</li><li>Saída costuma custar 4× a entrada; contexto longo pesa na entrada.</li><li>No lab, o GitHub Models é gratuito: calculamos o <b>custo equivalente</b> pelo preço de lista (variáveis <code>PRECO_ENTRADA_1M</code> e <code>PRECO_SAIDA_1M</code>).</li><li>KPI que importa: <b>custo por conversa resolvida</b>, não custo por token.</li></ul></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 3.1</span><h3>Métricas de negócio, custo e chaos no agente</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Adicionar ao agente as métricas de resultado, passos, custo e ferramentas, mais as chaves de chaos usadas na Aula 05.</p>
+    <ol class="steps"><li><div><p>Nova versão do agente:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; source ~/obs/.env</code></pre></div><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; agente.py &lt;&lt;&#x27;EOF&#x27;
+&quot;&quot;&quot;Agente de atendimento da Loja: loop de LLM com ferramentas, traces, métricas de negócio e chaos.&quot;&quot;&quot;
+import json, logging, os, random, threading, time
+from fastapi import FastAPI
+from pydantic import BaseModel
+from openai import OpenAI
+from opentelemetry import trace, metrics
+from opentelemetry.trace import Status, StatusCode
+from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
+from telemetria import configurar
+from ferramentas import FERRAMENTAS, executar
+
+configurar(&quot;atendimento&quot;)
+OpenAIInstrumentor().instrument()
+tracer = trace.get_tracer(&quot;loja.agente&quot;)
+meter = metrics.get_meter(&quot;loja.agente&quot;)
+log = logging.getLogger(&quot;agente&quot;)
+
+MODELO = os.getenv(&quot;LLM_MODEL&quot;, &quot;openai/gpt-4.1-mini&quot;)
+llm = OpenAI(base_url=os.getenv(&quot;LLM_BASE_URL&quot;), api_key=os.getenv(&quot;LLM_API_KEY&quot;))
+PRECO_ENTRADA = float(os.getenv(&quot;PRECO_ENTRADA_1M&quot;, &quot;0.40&quot;)) / 1e6   # USD por token
+PRECO_SAIDA = float(os.getenv(&quot;PRECO_SAIDA_1M&quot;, &quot;1.60&quot;)) / 1e6
+PROMPTS = {
+    &quot;v1&quot;: (&quot;Você é o agente de atendimento da Loja. Responda em português, em no máximo 3 frases. &quot;
+           &quot;Use consultar_pedido para pedidos e buscar_politica para trocas, devoluções, frete e garantia. &quot;
+           &quot;Nunca invente prazos ou valores: use só o que as ferramentas retornarem. &quot;
+           &quot;Se não conseguir resolver, use abrir_chamado.&quot;),
+    &quot;v2&quot;: &quot;Você é um atendente simpático. Responda rápido, sem enrolar.&quot;,
+}
+PROMPT_VERSAO = os.getenv(&quot;PROMPT_VERSAO&quot;, &quot;v1&quot;)
+CHAOS_LATENCIA = float(os.getenv(&quot;CHAOS_LATENCIA_S&quot;, &quot;0&quot;))
+CHAOS_FALHA = float(os.getenv(&quot;CHAOS_FALHA_FERRAMENTA&quot;, &quot;0&quot;))
+
+conversas = meter.create_counter(&quot;agente.conversas&quot;, unit=&quot;{conversa}&quot;, description=&quot;Conversas por resultado&quot;)
+passos_h = meter.create_histogram(&quot;agente.passos&quot;, unit=&quot;{passo}&quot;, description=&quot;Chamadas ao LLM por conversa&quot;)
+custo_c = meter.create_counter(&quot;agente.custo&quot;, unit=&quot;USD&quot;, description=&quot;Custo estimado em tokens&quot;)
+ferr_c = meter.create_counter(&quot;agente.ferramenta.chamadas&quot;, unit=&quot;{chamada}&quot;, description=&quot;Chamadas de ferramenta&quot;)
+
+app = FastAPI()
+
+
+class Pergunta(BaseModel):
+    texto: str
+
+
+
+def chamar_llm(msgs, attrs):
+    if CHAOS_LATENCIA:
+        time.sleep(CHAOS_LATENCIA)
+    r = llm.chat.completions.create(model=MODELO, messages=msgs, tools=FERRAMENTAS, temperature=0)
+    custo_c.add(r.usage.prompt_tokens * PRECO_ENTRADA + r.usage.completion_tokens * PRECO_SAIDA, attrs)
+    return r.choices[0].message
+
+
+def chamar_ferramenta(chamada):
+    nome = chamada.function.name
+    with tracer.start_as_current_span(f&quot;execute_tool {nome}&quot;) as s:
+        s.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;execute_tool&quot;)
+        s.set_attribute(&quot;gen_ai.tool.name&quot;, nome)
+        s.set_attribute(&quot;gen_ai.tool.call.id&quot;, chamada.id)
+        try:
+            if random.random() &lt; CHAOS_FALHA:
+                raise TimeoutError(&quot;sistema de pedidos não respondeu&quot;)
+            resultado = executar(nome, json.loads(chamada.function.arguments or &quot;{}&quot;))
+            ferr_c.add(1, {&quot;gen_ai.tool.name&quot;: nome, &quot;status&quot;: &quot;ok&quot;})
+        except Exception as e:
+            s.record_exception(e)
+            s.set_status(Status(StatusCode.ERROR, str(e)))
+            ferr_c.add(1, {&quot;gen_ai.tool.name&quot;: nome, &quot;status&quot;: &quot;erro&quot;})
+            log.error(&quot;ferramenta %s falhou: %s&quot;, nome, e)
+            resultado = f&quot;erro: {e}&quot;
+        return resultado
+
+
+@app.post(&quot;/chat&quot;)
+def chat(p: Pergunta):
+    attrs = {&quot;gen_ai.request.model&quot;: MODELO, &quot;prompt.versao&quot;: PROMPT_VERSAO}
+    with tracer.start_as_current_span(&quot;invoke_agent atendimento&quot;) as span:
+        span.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;invoke_agent&quot;)
+        span.set_attribute(&quot;gen_ai.agent.name&quot;, &quot;atendimento&quot;)
+        span.set_attribute(&quot;prompt.versao&quot;, PROMPT_VERSAO)
+        trace_id = format(span.get_span_context().trace_id, &quot;032x&quot;)
+        log.info(&quot;pergunta recebida: %s&quot;, p.texto)
+        msgs = [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: PROMPTS[PROMPT_VERSAO]}, {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: p.texto}]
+        usadas, observacoes = [], []
+        try:
+            for passo in range(1, 6):
+                m = chamar_llm(msgs, attrs)
+                if not m.tool_calls:
+                    break
+                msgs.append(m.model_dump(exclude_none=True))
+                for chamada in m.tool_calls:
+                    usadas.append(chamada.function.name)
+                    saida = chamar_ferramenta(chamada)
+                    observacoes.append(f&quot;{chamada.function.name}: {saida}&quot;)
+                    msgs.append({&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: chamada.id, &quot;content&quot;: saida})
+            else:
+                raise RuntimeError(&quot;limite de 5 passos atingido&quot;)
+        except Exception as e:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
+            conversas.add(1, {**attrs, &quot;resultado&quot;: &quot;falha&quot;})
+            log.error(&quot;conversa falhou: %s&quot;, e)
+            return {&quot;resposta&quot;: &quot;Tive um problema agora. Tente de novo em instantes.&quot;, &quot;ferramentas&quot;: usadas,
+                    &quot;trace_id&quot;: trace_id}
+        resultado = &quot;escalado&quot; if &quot;abrir_chamado&quot; in usadas else &quot;resolvido&quot;
+        span.set_attribute(&quot;agente.resultado&quot;, resultado)
+        span.set_attribute(&quot;agente.passos&quot;, passo)
+        conversas.add(1, {**attrs, &quot;resultado&quot;: resultado})
+        passos_h.record(passo, attrs)
+        log.info(&quot;conversa %s em %d passos, ferramentas=%s&quot;, resultado, passo, usadas)
+        return {&quot;resposta&quot;: m.content, &quot;ferramentas&quot;: usadas, &quot;trace_id&quot;: trace_id}
+EOF</code></pre></div></div></li><li><div><p>Suba e faça algumas perguntas:</p><div class="code"><span class="lang">terminal</span><pre><code>uvicorn agente:app --port 8000</code></pre></div></div></li><li><div><p>Em até 10 s (intervalo de exportação), procure no Prometheus:</p><div class="code"><span class="lang">promql</span><pre><code>agente_conversas_total
+agente_custo_USD_total
+agente_ferramenta_chamadas_total</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>As quatro métricas do agente aparecem, com os atributos viram labels (<code>resultado</code>, <code>gen_ai_tool_name</code>…).</li><li><code>agente_custo_USD_total</code> cresce a cada conversa.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Métricas de negócio vêm do código do agente, não do provedor.</li><li>Pontos no nome viram sublinhado no Prometheus; a unidade vira sufixo.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-3-1"> Exercício 3.1 concluído</label>
+  </div>
+</article>
+<!-- 3.3 -->
+<article class="topico" id="a3-t3">
+  <div class="topico-head"><span class="topico-num">3.3</span><h2>KPIs com PromQL</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 3 · O relatório</div><h3>Cinco números para a reunião de segunda</h3><p>Taxa de resolução, escalonamento, custo por conversa resolvida, latência p95 e satisfação. Todos sai do que já está sendo coletado.</p></div><div class="slide"><h3>KPIs de um agente de atendimento</h3><div class="tbl"><table><thead><tr><th>KPI</th><th>Fórmula</th><th>Quem usa</th></tr></thead><tbody><tr><td>Taxa de resolução</td><td>resolvidas / total</td><td>negócio</td></tr><tr><td>Taxa de escalonamento</td><td>escaladas / total</td><td>operações (fila humana)</td></tr><tr><td>Custo por conversa resolvida</td><td>custo / resolvidas</td><td>finanças, FinOps</td></tr><tr><td>Latência p95</td><td>histogram_quantile(0.95, …)</td><td>engenharia, experiência</td></tr><tr><td>Passos por conversa</td><td>soma passos / conversas</td><td>engenharia (loops)</td></tr><tr><td>Satisfação</td><td>feedback útil / total (Aula 04)</td><td>produto</td></tr></tbody></table></div></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 3.2</span><h3>Carga controlada e KPIs em PromQL</h3><span class="lab-time">~35 min</span></div>
+    <p class="lab-goal">Gerar conversas variadas e calcular os KPIs no Grafana.</p>
+    <ol class="steps"><li><div><p>Rode a carga (20 conversas, uma a cada 12 s ≈ 4 min). Se ainda não criou o <code>carga.py</code>, veja o exercício 2.4:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; python carga.py 20 12</code></pre></div></div></li><li><div><p>No Explore → Prometheus, rode cada consulta:</p><div class="code"><span class="lang">promql</span><pre><code># latência p95 das chamadas ao LLM
+histogram_quantile(0.95, sum by (le) (rate(gen_ai_client_operation_duration_seconds_bucket[5m])))
+# tokens por minuto, entrada × saída
+sum by (gen_ai_token_type) (rate(gen_ai_client_token_usage_sum[5m])) * 60
+# taxa de resolução e de escalonamento
+sum by (resultado) (rate(agente_conversas_total[15m])) / ignoring(resultado) group_left sum(rate(agente_conversas_total[15m]))
+# custo por conversa (USD)
+sum(rate(agente_custo_USD_total[15m])) / sum(rate(agente_conversas_total[15m]))
+# custo por conversa RESOLVIDA
+sum(rate(agente_custo_USD_total[15m])) / sum(rate(agente_conversas_total{resultado=&quot;resolvido&quot;}[15m]))
+# passos médios por conversa
+sum(rate(agente_passos_sum[15m])) / sum(rate(agente_passos_count[15m]))
+# taxa de erro das ferramentas
+sum by (gen_ai_tool_name) (rate(agente_ferramenta_chamadas_total{status=&quot;erro&quot;}[5m]))</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Taxa de resolução entre 60% e 90%; escalonamento nas perguntas de cobrança e produto quebrado.</li><li>Custo por conversa na casa de frações de centavo de dólar; custo por resolvida maior que por conversa.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>KPI é uma razão entre métricas: numerador e denominador precisam da mesma janela.</li><li>Custo por resolução expõe o custo das conversas que não resolvem.</li></ul></div><div class="challenge"><b>Desafio</b><p>Rode o agente com <code>LLM_MODEL=openai/gpt-4.1-nano</code> (e o preço desse modelo), gere carga e compare custo por resolução e taxa de resolução por <code>gen_ai_request_model</code>.</p></div>
+    <label class="done"><input type="checkbox" id="ex-3-2"> Exercício 3.2 concluído</label>
+  </div>
+</article>
+</div>
+</div>
+</section>

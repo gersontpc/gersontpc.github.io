@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Observability — Aulas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="assets/obs.css">
+<script>try{var t=localStorage.getItem('obs-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="#inicio" data-go="inicio" aria-label="Início">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="30" height="24" rx="1.5" stroke-width="2.2"/><path d="M6 20h5l3-8 4 12 3-7h3" stroke-width="1.8"/><path class="acc" d="M26 17h4" stroke-width="2.2"/></svg>
+      <b>Observability</b>
+    </a>
+    <nav class="tabs" role="tablist" aria-label="Aulas">
+      <button class="tab" role="tab" data-tab="inicio">Início</button>
+      <div class="dd" id="aulasDd">
+        <button class="dd-btn" id="aulasBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="aulasMenu">Aulas<span class="dd-cur" id="aulasCur"></span><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></button>
+        <div class="dd-menu" id="aulasMenu" hidden>
+          <button class="tab" role="tab" data-tab="aula-1">Aula 01 <span class="prog"></span></button>
+          <button class="tab" role="tab" data-tab="aula-2">Aula 02 <span class="prog"></span></button>
+          <button class="tab" role="tab" data-tab="aula-3">Aula 03 <span class="prog"></span></button>
+          <button class="tab" role="tab" data-tab="aula-4">Aula 04 <span class="prog"></span></button>
+          <button class="tab" role="tab" data-tab="aula-5">Aula 05 <span class="prog"></span></button>
+        </div>
+      </div>
+    </nav>
+    <button class="btn" id="presentBtn" type="button" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="9" rx="1"/><path d="M5 14.5h6M8 11.5v3"/></svg>Apresentar aula</button>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Alternar tema">Tema</button>
+  </div>
+</header>
+
+<main>
+<!-- ============ INÍCIO ============ -->
+<section class="panel" id="inicio" data-panel="inicio">
+  <div class="hero">
+    <div class="eyebrow">MBA AI Engineering &amp; Multi-agents · Módulo 4 · AI Operation · Prof. Gerson Carneiro · <span class="social"><a href="https://www.linkedin.com/in/gerson-carneiro/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a><a href="https://github.com/gersontpc" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a><a href="https://x.com/gersontpc" target="_blank" rel="noopener" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a></span></div>
+    <h1>Observability</h1>
+    <p>Como saber se um agente de IA está rápido, barato e certo. Em 5 aulas de 4 horas, o agente de atendimento da Loja sai da caixa-preta: traces com as convenções GenAI do OpenTelemetry, métricas e KPIs, avaliações (evals) offline e online, dashboards e alertas. Cada tópico traz os slides do conceito e, logo abaixo, um exercício para fazer no GitHub Codespaces.</p>
+  </div>
+
+  <div class="section-label">Trilha da disciplina · 20h</div>
+  <div class="roadmap">
+    <button data-go="aula-1"><span class="n">AULA 01</span><h3>Observabilidade para agentes de IA</h3><p>Monitoramento × observabilidade, o que muda com LLMs, OpenTelemetry e Collector, stack Grafana LGTM, traces do agente com convenções GenAI e logs correlacionados.</p></button>
+    <button data-go="aula-2"><span class="n">AULA 02</span><h3>Instrumentação, multi-agentes e privacidade</h3><p>Auto-instrumentação do cliente OpenAI, propagação de contexto entre agentes, PII mascarada no Collector e tail sampling.</p></button>
+    <button data-go="aula-3"><span class="n">AULA 03</span><h3>Métricas e KPIs</h3><p>Golden signals de LLM, métricas GenAI, métricas do agente, custo por token, cardinalidade e KPIs em PromQL: resolução, escalonamento, custo por conversa resolvida.</p></button>
+    <button data-go="aula-4"><span class="n">AULA 04</span><h3>Eval-driven</h3><p>Dataset dourado, eval offline como gate de CI, LLM-as-judge calibrado, eval online por amostragem ligado ao trace e feedback do usuário.</p></button>
+    <button data-go="aula-5"><span class="n">AULA 05</span><h3>Alertas e dashboards</h3><p>Dashboards por público como código, alertas acionáveis com runbook, contact point e game day com chaos no agente.</p></button>
+  </div>
+  <div class="section-label">Como praticar nesta disciplina</div>
+  <div class="learn">
+    <div class="learn-pyr">
+      <h3>Pirâmide de aprendizagem</h3>
+      <div class="pr-grp"><div class="pr-tag pr-pas"><small>Método</small>Passivo</div><div class="pr-rows"><div class="pr-row"><div class="pr-bar-w"><div class="pr-bar" style="width:10%;background:#8E8E96">10%</div></div><div class="pr-lab">Ler</div></div><div class="pr-row"><div class="pr-bar-w"><div class="pr-bar" style="width:20%;background:#E5484D">20%</div></div><div class="pr-lab">Escutar</div></div><div class="pr-row"><div class="pr-bar-w"><div class="pr-bar" style="width:30%;background:#F2994A">30%</div></div><div class="pr-lab">Ver</div></div><div class="pr-row"><div class="pr-bar-w"><div class="pr-bar" style="width:50%;background:#E2B93B">50%</div></div><div class="pr-lab">Ver e escutar</div></div></div></div>
+      <div class="pr-grp"><div class="pr-tag pr-at"><small>Método</small>Ativo</div><div class="pr-rows"><div class="pr-row"><div class="pr-bar-w"><div class="pr-bar" style="width:70%;background:#3FB068">70%</div></div><div class="pr-lab">Conversar, perguntar, repetir, reproduzir, definir e debater</div></div><div class="pr-row"><div class="pr-bar-w"><div class="pr-bar" style="width:80%;background:#3A9BDC">80%</div></div><div class="pr-lab">Praticar</div></div><div class="pr-row"><div class="pr-bar-w"><div class="pr-bar" style="width:95%;background:#6A5ACD">95%</div></div><div class="pr-lab">Ensinar aos outros</div></div></div></div>
+      <p class="pr-note">Por isso cada tópico termina num exercício: <b>praticar</b> no Codespaces e <b>explicar</b> para o colega fixam muito mais do que só assistir aos slides. Os percentuais são ilustrativos, popularizados a partir do modelo de William Glasser; o que vale é a ideia de que aprendizado ativo retém mais.</p>
+    </div>
+    <div class="learn-src">
+      <h3>Fontes de aprendizado</h3>
+      <div class="src"><b>Especificações</b><span><a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener">OTel GenAI semantic conventions</a> · <a href="https://opentelemetry.io/docs/" target="_blank" rel="noopener">OpenTelemetry docs</a> · <a href="https://www.w3.org/TR/trace-context/" target="_blank" rel="noopener">W3C Trace Context</a></span></div>
+      <div class="src"><b>Blogs</b><span><a href="https://opentelemetry.io/blog/" target="_blank" rel="noopener">OpenTelemetry</a> · <a href="https://grafana.com/blog/" target="_blank" rel="noopener">Grafana Labs</a> · <a href="https://www.honeycomb.io/blog" target="_blank" rel="noopener">Honeycomb</a> · <a href="https://hamel.dev/" target="_blank" rel="noopener">Hamel Husain (evals)</a> · <a href="https://eugeneyan.com/" target="_blank" rel="noopener">Eugene Yan</a></span></div>
+      <div class="src"><b>Livros</b><span><a href="https://sre.google/books/" target="_blank" rel="noopener">Google SRE Book</a> · Observability Engineering (Majors, Fong-Jones, Miranda) · Learning OpenTelemetry (Young, Parker)</span></div>
+      <div class="src"><b>Ferramentas de LLM</b><span><a href="https://langfuse.com/" target="_blank" rel="noopener">Langfuse</a> · <a href="https://phoenix.arize.com/" target="_blank" rel="noopener">Arize Phoenix</a> · <a href="https://github.com/traceloop/openllmetry" target="_blank" rel="noopener">OpenLLMetry</a> · <a href="https://mlflow.org/" target="_blank" rel="noopener">MLflow</a></span></div>
+      <div class="src"><b>Eventos</b><span><a href="https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/" target="_blank" rel="noopener">KubeCon + CloudNativeCon</a> · <a href="https://grafana.com/events/" target="_blank" rel="noopener">GrafanaCON</a> · <a href="https://devopsdays.org/" target="_blank" rel="noopener">DevOpsDays</a> · <a href="https://www.ai.engineer/" target="_blank" rel="noopener">AI Engineer</a></span></div>
+      <div class="src"><b>Comunidades</b><span><a href="https://slack.cncf.io/" target="_blank" rel="noopener">Slack da CNCF (#opentelemetry)</a> · <a href="https://community.grafana.com/" target="_blank" rel="noopener">Grafana Community</a></span></div>
+    </div>
+  </div>
+
+  <div class="section-label">Antes da primeira aula · GitHub Codespaces e GitHub Models</div>
+  <p class="home-lead">Os exercícios rodam no navegador, num ambiente Linux com Docker e Python. O LLM vem do GitHub Models, gratuito para quem tem conta no GitHub. Não é preciso instalar nada.</p>
+  <div class="cs-steps">
+    <div class="cs">
+      <span class="cs-n">1</span><h3>Crie o codespace</h3>
+      <p>Em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, clique em <b>New codespace</b> (… → New with options) e escolha a máquina de <b>4 cores</b>.</p>
+    </div>
+    <div class="cs">
+      <span class="cs-n">2</span><h3>Valide o ambiente</h3>
+      <p>Em <b>Terminal → New Terminal</b>:</p>
+      <div class="code"><span class="lang">terminal</span><pre><code>docker version
+python3 --version</code></pre></div>
+    </div>
+    <div class="cs">
+      <span class="cs-n">3</span><h3>Acesso ao LLM</h3>
+      <p>O GitHub Models usa a API da OpenAI. No Codespaces, o <code>GITHUB_TOKEN</code> costuma bastar; se não, crie um token fine-grained com <b>Models: read</b>. O plano gratuito tem limite de requisições por minuto e por dia: os scripts de carga já respeitam esse ritmo.</p>
+      <p class="cs-tip">Alternativas: Ollama local (sem conta, mais lento) ou qualquer chave compatível com a API da OpenAI.</p>
+    </div>
+    <div class="cs">
+      <span class="cs-n">4</span><h3>Pare ao terminar</h3>
+      <p>Ao fim de cada aula, em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, use <b>… → Stop codespace</b>. A pasta <code>~/obs</code> continua lá entre uma aula e outra.</p>
+    </div>
+  </div>
+
+  <div class="two home-two">
+    <div class="block">
+      <h2>Como usar esta página</h2>
+      <div class="howto">
+        <div><b>Uma aba por aula</b><span>Cada tópico traz primeiro os slides do conceito e, logo abaixo, o exercício daquele tópico.</span></div>
+        <div><b>Apresentar aula</b><span>Projeta os slides em tela cheia. Setas ← → navegam, Esc sai. Antes de cada exercício aparece o slide “Hora de praticar”.</span></div>
+        <div><b>Copiar comandos</b><span>Cada bloco de terminal tem o ícone de copiar no canto superior direito.</span></div>
+        <div><b>Um lab contínuo</b><span>Os exercícios evoluem o mesmo agente em <code>~/obs</code>, da Aula 01 à 05. Faça-os em ordem.</span></div>
+      </div>
+    </div>
+    <div class="block">
+      <h2>Ferramentas usadas</h2>
+      <div class="tbl"><table>
+        <thead><tr><th>Ferramenta</th><th>Aula</th><th>Para quê</th></tr></thead>
+        <tbody>
+          <tr><td>OpenTelemetry SDK (Python)</td><td>01–05</td><td>Traces, métricas e logs do agente</td></tr>
+          <tr><td>OpenTelemetry Collector</td><td>01–02</td><td>Receber, mascarar, amostrar e rotear</td></tr>
+          <tr><td>Grafana LGTM (Tempo, Loki, Prometheus)</td><td>01–05</td><td>Armazenar e consultar os sinais</td></tr>
+          <tr><td>GitHub Models / Ollama</td><td>01–05</td><td>LLM do agente e do juiz</td></tr>
+          <tr><td>openai-v2 instrumentation</td><td>02–05</td><td>Spans e métricas GenAI automáticos</td></tr>
+          <tr><td>LLM-as-judge</td><td>04–05</td><td>Evals offline e online</td></tr>
+          <tr><td>Grafana Alerting</td><td>05</td><td>Regras de alerta e notificação</td></tr>
+        </tbody>
+      </table></div>
+      <p class="home-note">Versões fixadas: otel-lgtm 0.41.0, Collector contrib 0.165.0, OpenTelemetry SDK 1.45.2, openai 3.55.1.</p>
+    </div>
+  </div>
+
+  <div class="combinados"><b>Combinados</b><span>5 aulas de 4 horas</span><span>Materiais, links e gravações no mural da turma</span><span>Notas lançadas em até 15 dias</span></div>
+</section>
+
+<!--AULA-1-->
+<div data-aula="aulas/aula-1.html" hidden></div>
+<!--/AULA-1-->
+<!--AULA-2-->
+<div data-aula="aulas/aula-2.html" hidden></div>
+<!--/AULA-2-->
+<!--AULA-3-->
+<div data-aula="aulas/aula-3.html" hidden></div>
+<!--/AULA-3-->
+<!--AULA-4-->
+<div data-aula="aulas/aula-4.html" hidden></div>
+<!--/AULA-4-->
+<!--AULA-5-->
+<div data-aula="aulas/aula-5.html" hidden></div>
+<!--/AULA-5-->
+</main>
+
+<div class="pres" id="pres" hidden role="dialog" aria-modal="true" aria-label="Modo apresentação">
+  <div class="pres-top"><span class="t" id="presTitle"></span><span id="presCount"></span><button class="btn ghost" id="presFs" type="button">Tela cheia</button><button class="btn ghost" id="presClose" type="button">Sair (Esc)</button></div>
+  <div class="pres-stage"><div class="pres-frame" id="presFrame"></div></div>
+  <div class="pres-bottom"><button class="btn ghost" id="presPrev" type="button">← Anterior</button><div class="pbar"><i id="presBar"></i></div><button class="btn" id="presNext" type="button">Próximo →</button></div>
+</div>
+
+<script src="assets/obs.js"></script>
+</body>
+</html>

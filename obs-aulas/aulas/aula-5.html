@@ -1,0 +1,110 @@
+<!-- Aula 05: fragmento carregado por ../index.html (assets/obs.js). Gerado a partir do código testado do lab. -->
+<section class="panel" id="aula-5" data-panel="aula-5" hidden>
+<div class="aula-head">
+  <div>
+    <div class="eyebrow">Aula 05 · Alertas e dashboards</div>
+    <h1>Dashboards, alertas e o game day do agente</h1>
+    <p class="lead">Os sinais existem; falta transformá-los em operação. Você constrói o dashboard do agente como código, separado por público, cria alertas acionáveis para latência, custo, falhas de ferramenta e queda de qualidade, conecta um canal de notificação e encerra a disciplina com um game day: falhas injetadas no agente, alertas disparando e a investigação do sintoma até a causa com métricas, traces e logs.</p>
+    <div class="meta"><span class="chip">4 tópicos</span><span class="chip">4 exercícios</span><span class="chip">Grafana dashboards · Grafana Alerting</span><span class="chip">game day</span><span class="chip chip-gh">GitHub Codespaces</span></div>
+  </div>
+</div>
+<div class="aula-intro">
+  <div class="section-label">Roteiro da aula</div>
+  <div class="slides"><div class="slide"><h3>Da telemetria à operação</h3><div class="flow"><div class="node"><b>Ver</b><span>5.1 · dashboards por público, como código</span></div><div class="arrow">→</div><div class="node"><b>Avisar</b><span>5.2 · alertas acionáveis e runbooks</span></div><div class="arrow">→</div><div class="node"><b>Treinar</b><span>5.3 · game day com chaos</span></div><div class="arrow">→</div><div class="node hl"><b>Levar</b><span>5.4 · checklist de produção</span></div></div><div class="cols"><div class="card-mini"><h4>Ao final da aula você vai saber</h4><ul><li>Desenhar dashboards para negócio, operação e qualidade</li><li>Escrever alertas por sintoma, com limiar, janela e runbook</li><li>Conduzir uma investigação guiada por alertas</li><li>Montar o checklist de observabilidade de um agente</li></ul></div><div class="card-mini"><h4>Por que isso importa</h4><ul><li>Ninguém olha dashboard às 3h da manhã</li><li>Alerta demais é igual a nenhum alerta</li></ul></div></div></div></div>
+</div>
+<div class="aula-body">
+<nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
+<div class="topicos">
+
+<!-- 5.1 -->
+<article class="topico" id="a5-t1">
+  <div class="topico-head"><span class="topico-num">5.1</span><h2>Dashboards que respondem perguntas</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 1 · Um painel para cada pergunta</div><h3>Quem vai olhar, e para decidir o quê?</h3><p>A diretoria quer custo e resolução; o plantão quer latência e erros; o time de IA quer nota do juiz e passos. Um painel com 40 gráficos não serve a ninguém.</p></div><div class="slide"><h3>Camadas de um dashboard de agente</h3><div class="tbl"><table><thead><tr><th>Camada</th><th>Painéis</th><th>Público</th></tr></thead><tbody><tr><td>Negócio</td><td>taxa de resolução, custo por resolução, satisfação</td><td>produto, diretoria</td></tr><tr><td>Operação</td><td>latência p50/p95, erros, 429, tokens por minuto</td><td>plantão, SRE</td></tr><tr><td>Qualidade</td><td>nota do juiz, feedback, passos por conversa, por versão do prompt</td><td>time de IA</td></tr></tbody></table></div><ul><li>Linha de cima: os números (stat); embaixo: tendências (timeseries).</li><li>Dashboard como código: versionado, revisado, reproduzível.</li></ul></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 5.1</span><h3>Dashboard do agente como código</h3><span class="lab-time">~25 min</span></div>
+    <p class="lab-goal">Criar o dashboard do agente via API do Grafana a partir de um JSON versionável.</p>
+    <ol class="steps"><li><div><p>Com o agente da Aula 04 rodando e carga leve (<code>python carga.py 30 12</code> num terminal), crie e envie o dashboard:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; ~/obs/dashboard.json &lt;&lt;&#x27;EOF&#x27;
+{&quot;dashboard&quot;: {&quot;uid&quot;: &quot;agente&quot;, &quot;title&quot;: &quot;Agente de atendimento&quot;, &quot;refresh&quot;: &quot;30s&quot;,
+  &quot;time&quot;: {&quot;from&quot;: &quot;now-1h&quot;, &quot;to&quot;: &quot;now&quot;},
+  &quot;panels&quot;: [
+    {&quot;type&quot;: &quot;stat&quot;, &quot;title&quot;: &quot;Taxa de resolução&quot;, &quot;gridPos&quot;: {&quot;x&quot;: 0, &quot;y&quot;: 0, &quot;w&quot;: 6, &quot;h&quot;: 5},
+     &quot;fieldConfig&quot;: {&quot;defaults&quot;: {&quot;unit&quot;: &quot;percentunit&quot;}},
+     &quot;targets&quot;: [{&quot;expr&quot;: &quot;sum(rate(agente_conversas_total{resultado=\&quot;resolvido\&quot;}[15m])) / sum(rate(agente_conversas_total[15m]))&quot;}]},
+    {&quot;type&quot;: &quot;stat&quot;, &quot;title&quot;: &quot;Custo por conversa resolvida&quot;, &quot;gridPos&quot;: {&quot;x&quot;: 6, &quot;y&quot;: 0, &quot;w&quot;: 6, &quot;h&quot;: 5},
+     &quot;fieldConfig&quot;: {&quot;defaults&quot;: {&quot;unit&quot;: &quot;currencyUSD&quot;, &quot;decimals&quot;: 5}},
+     &quot;targets&quot;: [{&quot;expr&quot;: &quot;sum(rate(agente_custo_USD_total[15m])) / sum(rate(agente_conversas_total{resultado=\&quot;resolvido\&quot;}[15m]))&quot;}]},
+    {&quot;type&quot;: &quot;stat&quot;, &quot;title&quot;: &quot;Nota do juiz (média)&quot;, &quot;gridPos&quot;: {&quot;x&quot;: 12, &quot;y&quot;: 0, &quot;w&quot;: 6, &quot;h&quot;: 5},
+     &quot;fieldConfig&quot;: {&quot;defaults&quot;: {&quot;min&quot;: 0, &quot;max&quot;: 1}},
+     &quot;targets&quot;: [{&quot;expr&quot;: &quot;sum(rate(agente_eval_nota_sum[15m])) / sum(rate(agente_eval_nota_count[15m]))&quot;}]},
+    {&quot;type&quot;: &quot;stat&quot;, &quot;title&quot;: &quot;Satisfação&quot;, &quot;gridPos&quot;: {&quot;x&quot;: 18, &quot;y&quot;: 0, &quot;w&quot;: 6, &quot;h&quot;: 5},
+     &quot;fieldConfig&quot;: {&quot;defaults&quot;: {&quot;unit&quot;: &quot;percentunit&quot;}},
+     &quot;targets&quot;: [{&quot;expr&quot;: &quot;sum(rate(agente_feedback_total{util=\&quot;true\&quot;}[15m])) / sum(rate(agente_feedback_total[15m]))&quot;}]},
+    {&quot;type&quot;: &quot;timeseries&quot;, &quot;title&quot;: &quot;Latência do LLM p50 / p95&quot;, &quot;gridPos&quot;: {&quot;x&quot;: 0, &quot;y&quot;: 5, &quot;w&quot;: 12, &quot;h&quot;: 8},
+     &quot;fieldConfig&quot;: {&quot;defaults&quot;: {&quot;unit&quot;: &quot;s&quot;}},
+     &quot;targets&quot;: [{&quot;expr&quot;: &quot;histogram_quantile(0.5, sum by (le) (rate(gen_ai_client_operation_duration_seconds_bucket[5m])))&quot;, &quot;legendFormat&quot;: &quot;p50&quot;},
+                 {&quot;expr&quot;: &quot;histogram_quantile(0.95, sum by (le) (rate(gen_ai_client_operation_duration_seconds_bucket[5m])))&quot;, &quot;legendFormat&quot;: &quot;p95&quot;}]},
+    {&quot;type&quot;: &quot;timeseries&quot;, &quot;title&quot;: &quot;Conversas por resultado&quot;, &quot;gridPos&quot;: {&quot;x&quot;: 12, &quot;y&quot;: 5, &quot;w&quot;: 12, &quot;h&quot;: 8},
+     &quot;targets&quot;: [{&quot;expr&quot;: &quot;sum by (resultado) (rate(agente_conversas_total[5m])) * 60&quot;, &quot;legendFormat&quot;: &quot;{{resultado}}&quot;}]},
+    {&quot;type&quot;: &quot;timeseries&quot;, &quot;title&quot;: &quot;Tokens por minuto&quot;, &quot;gridPos&quot;: {&quot;x&quot;: 0, &quot;y&quot;: 13, &quot;w&quot;: 12, &quot;h&quot;: 8},
+     &quot;targets&quot;: [{&quot;expr&quot;: &quot;sum by (gen_ai_token_type) (rate(gen_ai_client_token_usage_sum[5m])) * 60&quot;, &quot;legendFormat&quot;: &quot;{{gen_ai_token_type}}&quot;}]},
+    {&quot;type&quot;: &quot;timeseries&quot;, &quot;title&quot;: &quot;Erros de ferramenta por minuto&quot;, &quot;gridPos&quot;: {&quot;x&quot;: 12, &quot;y&quot;: 13, &quot;w&quot;: 12, &quot;h&quot;: 8},
+     &quot;targets&quot;: [{&quot;expr&quot;: &quot;sum by (gen_ai_tool_name) (rate(agente_ferramenta_chamadas_total{status=\&quot;erro\&quot;}[5m])) * 60&quot;, &quot;legendFormat&quot;: &quot;{{gen_ai_tool_name}}&quot;}]}
+  ]}, &quot;overwrite&quot;: true}
+EOF
+curl -s -X POST localhost:3000/api/dashboards/db -H &#x27;Content-Type: application/json&#x27; -d @$HOME/obs/dashboard.json</code></pre></div></div></li><li><div><p>Abra <b>Dashboards → Agente de atendimento</b>.</p></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>A API devolve <code>"status":"success"</code>.</li><li>O dashboard mostra 4 números no topo e 4 gráficos de tendência.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>O JSON do dashboard vai para o Git como qualquer código.</li><li>Cada painel responde uma pergunta de um público.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-5-1"> Exercício 5.1 concluído</label>
+  </div>
+</article>
+<!-- 5.2 -->
+<article class="topico" id="a5-t2">
+  <div class="topico-head"><span class="topico-num">5.2</span><h2>Alertas acionáveis</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 2 · O plantão</div><h3>Todo alerta precisa de uma ação</h3><p>Se o alerta toca e ninguém precisa fazer nada, ele vai ser silenciado — e o próximo, importante, também.</p></div><div class="slide"><h3>Alertas para um agente</h3><div class="tbl"><table><thead><tr><th>Alerta</th><th>Condição</th><th>Por quê</th></tr></thead><tbody><tr><td>Latência alta</td><td>p95 do LLM &gt; 8 s por 5 min</td><td>experiência do cliente</td></tr><tr><td>Ferramenta falhando</td><td>erros de ferramenta &gt; 0,1/s por 5 min</td><td>o agente responde sem dados</td></tr><tr><td>Qualidade caiu</td><td>nota média do juiz &lt; 0,7 por 15 min</td><td>alucinação não gera erro HTTP</td></tr><tr><td>Custo disparou</td><td>custo por hora &gt; orçamento</td><td>loop de agente, prompt inchado</td></tr><tr><td>Escalonamento alto</td><td>escaladas / total &gt; 40%</td><td>fila humana vai lotar</td></tr></tbody></table></div><ul><li>Alerte por <b>sintoma</b> (o que o cliente sente), investigue a causa com traces.</li><li>Toda regra tem dono, severidade e <b>runbook</b>.</li><li>SLOs e burn rate ficam com a disciplina de AIOps & Governance.</li></ul></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 5.2</span><h3>Regras de alerta e canal de notificação</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Criar um receptor de webhook, um contact point e três regras de alerta no Grafana.</p>
+    <ol class="steps"><li><div><p>Suba um receptor de webhook que imprime as notificações:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs &amp;&amp; docker run -d --name eco --network obs_default mendhak/http-https-echo:37 &amp;&amp; docker logs -f eco</code></pre></div></div></li><li><div><p>No Grafana: <b>Alerting → Contact points → + Add contact point</b>. Nome <code>plantao</code>, integração <b>Webhook</b>, URL <code>http://eco:8080/alerta</code>. Clique em <b>Test</b> e veja a chamada nos logs do <code>eco</code>. Depois, em <b>Notification policies</b>, defina <code>plantao</code> como contact point padrão.</p></div></li><li><div><p>Em <b>Alerting → Alert rules → + New alert rule</b>, crie três regras (data source Prometheus, avaliação a cada 1 min, pasta <code>agente</code>):</p><div class="tbl"><table><thead><tr><th>Nome</th><th>Consulta</th><th>Condição</th><th>Pendência</th></tr></thead><tbody><tr><td>Latência do LLM alta</td><td><code>histogram_quantile(0.95, sum by (le) (rate(gen_ai_client_operation_duration_seconds_bucket[5m])))</code></td><td>&gt; 8</td><td>2m</td></tr><tr><td>Ferramenta falhando</td><td><code>sum(rate(agente_ferramenta_chamadas_total{status="erro"}[5m]))</code></td><td>&gt; 0.01</td><td>2m</td></tr><tr><td>Qualidade do agente caiu</td><td><code>sum(rate(agente_eval_nota_sum[15m])) / sum(rate(agente_eval_nota_count[15m]))</code></td><td>&lt; 0.7</td><td>5m</td></tr></tbody></table></div><p>Em cada regra, preencha <b>Summary</b> e um <b>Runbook URL</b> (pode ser um link para o seu README).</p></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>O teste do contact point aparece nos logs do <code>eco</code>.</li><li>As três regras ficam em <b>Normal</b> com o agente saudável.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Uma regra = consulta + condição + janela + pendência + destino.</li><li>A pendência (<i>pending period</i>) evita alerta por um pico isolado.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-5-2"> Exercício 5.2 concluído</label>
+  </div>
+</article>
+<!-- 5.3 -->
+<article class="topico" id="a5-t3">
+  <div class="topico-head"><span class="topico-num">5.3</span><h2>Game day: do alerta à causa</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 3 · Sexta-feira, 18h</div><h3>Três coisas vão quebrar. Você vai descobrir quais.</h3><p>O agente tem chaves de chaos desde a Aula 03: latência extra, falha de ferramenta e um prompt ruim (<code>v2</code>). Hoje elas viram o incidente simulado.</p></div><div class="slide"><h3>Roteiro de investigação</h3><div class="flow"><div class="node"><b>Alerta</b><span>o que o cliente sente?</span></div><div class="arrow">→</div><div class="node"><b>Dashboard</b><span>desde quando? qual versão/modelo?</span></div><div class="arrow">→</div><div class="node"><b>Trace</b><span>qual passo? qual ferramenta?</span></div><div class="arrow">→</div><div class="node"><b>Log</b><span>qual erro? qual argumento?</span></div><div class="arrow">→</div><div class="node hl"><b>Ação</b><span>rollback, flag, correção + novo caso no dataset</span></div></div><ul><li>Registre a linha do tempo: detecção, diagnóstico, mitigação.</li><li>Pós-incidente sem culpados: o que faltou de sinal?</li></ul></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 5.3</span><h3>Game day com chaos no agente</h3><span class="lab-time">~45 min</span></div>
+    <p class="lab-goal">Injetar três falhas, ver os alertas disparando e chegar à causa usando dashboard, traces e logs.</p>
+    <ol class="steps"><li><div><p><b>Rodada 1, latência.</b> Reinicie o agente com 9 s extras por chamada ao LLM e mantenha a carga rodando:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; source ~/obs/.env
+CHAOS_LATENCIA_S=9 uvicorn agente:app --port 8000</code></pre></div><p>Aguarde o alerta <i>Latência do LLM alta</i>. No trace, ache onde está o tempo.</p></div></li><li><div><p><b>Rodada 2, ferramenta.</b> 60% das chamadas de ferramenta falham:</p><div class="code"><span class="lang">terminal</span><pre><code>CHAOS_FALHA_FERRAMENTA=0.6 uvicorn agente:app --port 8000</code></pre></div><p>Investigue com <code>{status=error}</code> no Tempo e <code>|= "falhou"</code> no Loki. O que o agente respondeu ao cliente nesses casos?</p></div></li><li><div><p><b>Rodada 3, qualidade.</b> Prompt ruim, sem instruções de ferramentas, com o juiz avaliando todas as conversas:</p><div class="code"><span class="lang">terminal</span><pre><code>PROMPT_VERSAO=v2 EVAL_AMOSTRA=1 uvicorn agente:app --port 8000</code></pre></div><p>Aguarde <i>Qualidade do agente caiu</i>. No dashboard, compare por <code>prompt_versao</code>. Rode o eval offline (<code>python eval_offline.py</code>): ele teria bloqueado essa versão?</p></div></li><li><div><p>Volte ao normal (<code>uvicorn agente:app --port 8000</code>) e escreva a linha do tempo de cada rodada.</p></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Cada rodada dispara o alerta correspondente e a notificação chega ao <code>eco</code>.</li><li>Rodada 2: spans <code>execute_tool</code> com erro e respostas evasivas, sem erro HTTP.</li><li>Rodada 3: nenhuma métrica técnica muda, só a nota do juiz e o eval offline.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Latência e erros aparecem nas métricas técnicas; qualidade só aparece com evals.</li><li>O trace encurta o diagnóstico de horas para minutos.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-5-3"> Exercício 5.3 concluído</label>
+  </div>
+</article>
+<!-- 5.4 -->
+<article class="topico" id="a5-t4">
+  <div class="topico-head"><span class="topico-num">5.4</span><h2>Checklist de produção e encerramento</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide"><h3>Checklist de observabilidade de um agente</h3><div class="cols"><div class="card-mini"><h4>Instrumentação</h4><ul><li>OpenTelemetry + convenções GenAI</li><li>Spans de agente, LLM e ferramentas</li><li>Contexto propagado entre agentes</li></ul></div><div class="card-mini"><h4>Dados</h4><ul><li>PII mascarada no Collector</li><li>Conteúdo de prompt só com opt-in</li><li>Tail sampling e retenção definidos</li></ul></div><div class="card-mini"><h4>Métricas e KPIs</h4><ul><li>Latência, tokens, erros, 429</li><li>Resolução, escalonamento, custo por resolução</li></ul></div><div class="card-mini"><h4>Qualidade</h4><ul><li>Dataset dourado versionado</li><li>Eval offline como gate</li><li>Eval online + feedback</li></ul></div><div class="card-mini"><h4>Operação</h4><ul><li>Dashboards por público, como código</li><li>Alertas por sintoma com runbook</li><li>Game days periódicos</li></ul></div></div></div><div class="slide"><h3>A trilha da disciplina</h3><div class="flow"><div class="node"><b>Aula 01</b><span>traces e logs do agente</span></div><div class="arrow">→</div><div class="node"><b>Aula 02</b><span>auto-instrumentação, multi-agentes, PII, amostragem</span></div><div class="arrow">→</div><div class="node"><b>Aula 03</b><span>métricas e KPIs</span></div><div class="arrow">→</div><div class="node"><b>Aula 04</b><span>evals offline e online</span></div><div class="arrow">→</div><div class="node hl"><b>Aula 05</b><span>dashboards, alertas e game day</span></div></div><div class="story"><b>Fim da história</b>O agente da Loja saiu da caixa-preta: cada conversa tem trace, custo e nota; cada regressão tem um alerta e um caso de teste. Os próximos passos — SLOs, resposta a incidentes e FinOps — continuam em AIOps &amp; Governance.</div></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 5.4</span><h3>Encerrando o laboratório</h3><span class="lab-time">~10 min</span></div>
+    <p class="lab-goal">Exportar o que vale guardar e liberar os recursos do Codespaces.</p>
+    <ol class="steps"><li><div><p>Guarde o dashboard, o dataset e o código num repositório seu:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs &amp;&amp; curl -s localhost:3000/api/dashboards/uid/agente &gt; dashboard-exportado.json &amp;&amp; ls</code></pre></div></div></li><li><div><p>Pare tudo:</p><div class="code"><span class="lang">terminal</span><pre><code>docker rm -f eco; docker compose down -v</code></pre></div></div></li><li><div><p>Em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, pare ou exclua o codespace.</p></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li><code>docker ps</code> não lista nenhum container do lab.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>A stack inteira é descartável e reproduzível: o que importa é o código, o dataset e o dashboard versionados.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-5-4"> Exercício 5.4 concluído</label>
+  </div>
+</article>
+</div>
+</div>
+</section>

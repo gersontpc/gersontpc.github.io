@@ -1,0 +1,290 @@
+<!-- Aula 04: fragmento carregado por ../index.html (assets/obs.js). Gerado a partir do código testado do lab. -->
+<section class="panel" id="aula-4" data-panel="aula-4" hidden>
+<div class="aula-head">
+  <div>
+    <div class="eyebrow">Aula 04 · Eval-driven</div>
+    <h1>Observabilidade orientada a avaliações</h1>
+    <p class="lead">Latência e custo estão sob controle, mas o agente ainda inventa a política de troca. Hoje a qualidade vira número: você monta um dataset dourado, roda avaliações offline com verificações determinísticas e LLM como juiz, transforma o resultado num gate de CI, e leva a avaliação para produção com eval online por amostragem e feedback do usuário — tudo ligado aos traces.</p>
+    <div class="meta"><span class="chip">4 tópicos</span><span class="chip">4 exercícios</span><span class="chip">LLM-as-judge</span><span class="chip">dataset dourado</span><span class="chip chip-gh">GitHub Codespaces</span></div>
+  </div>
+</div>
+<div class="aula-intro">
+  <div class="section-label">Roteiro da aula</div>
+  <div class="slides"><div class="slide"><h3>O ciclo eval-driven</h3><div class="flow"><div class="node"><b>Dataset</b><span>4.1 · casos reais e esperados</span></div><div class="arrow">→</div><div class="node"><b>Eval offline</b><span>4.1 · antes do deploy, gate de CI</span></div><div class="arrow">→</div><div class="node"><b>Juiz</b><span>4.2 · LLM-as-judge calibrado</span></div><div class="arrow">→</div><div class="node"><b>Eval online</b><span>4.3 · amostra em produção + feedback</span></div><div class="arrow">→</div><div class="node hl"><b>Melhoria</b><span>4.4 · falhas viram novos casos</span></div></div><div class="cols"><div class="card-mini"><h4>Ao final da aula você vai saber</h4><ul><li>Montar um dataset dourado a partir de traces</li><li>Combinar avaliações determinísticas e LLM-as-judge</li><li>Bloquear regressões de qualidade no CI</li><li>Medir qualidade em produção sem travar a resposta</li></ul></div><div class="card-mini"><h4>Por que isso importa</h4><ul><li>Alucinação não gera erro HTTP</li><li>Trocar modelo ou prompt sem eval é deploy às cegas</li></ul></div></div></div></div>
+</div>
+<div class="aula-body">
+<nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
+<div class="topicos">
+
+<!-- 4.1 -->
+<article class="topico" id="a4-t1">
+  <div class="topico-head"><span class="topico-num">4.1</span><h2>Dataset dourado e eval offline</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 1 · A política inventada</div><h3>Como provar que a nova versão é melhor?</h3><p>O agente disse que a troca é em 15 dias; a política é 30. A equipe corrige o prompt, mas como saber se não quebrou outra coisa?</p></div><div class="slide"><h3>Tipos de avaliação</h3><div class="tbl"><table><thead><tr><th>Tipo</th><th>Exemplo</th><th>Prós / contras</th></tr></thead><tbody><tr><td>Determinística</td><td>chamou consultar_pedido? resposta contém “30 dias”?</td><td>barata e estável / rígida</td></tr><tr><td>Trajetória</td><td>ferramentas certas, na ordem certa, sem loops</td><td>pega erro de raciocínio do agente</td></tr><tr><td>LLM-as-judge</td><td>a resposta é fiel às ferramentas?</td><td>flexível / custa e precisa calibrar</td></tr><tr><td>Humana</td><td>especialista revisa amostra</td><td>padrão-ouro / lenta e cara</td></tr></tbody></table></div></div><div class="slide"><h3>Dataset dourado</h3><ul><li>Casos representativos: perguntas reais (de traces!), com o resultado esperado.</li><li>Cubra o caminho feliz, os casos difíceis e os que já falharam.</li><li>Versione junto com o código; cresça a cada incidente.</li><li>Comece pequeno (dezenas) e bem rotulado.</li></ul></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 4.1</span><h3>Eval offline como gate de qualidade</h3><span class="lab-time">~35 min</span></div>
+    <p class="lab-goal">Criar o dataset dourado e um script de avaliação que reprova a versão se a nota média ficar abaixo do limite.</p>
+    <ol class="steps"><li><div><p>Com o agente da Aula 03 rodando, crie o dataset:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; source ~/obs/.env</code></pre></div><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; dataset.jsonl &lt;&lt;&#x27;EOF&#x27;
+{&quot;id&quot;: &quot;p1&quot;, &quot;pergunta&quot;: &quot;Qual o status do pedido 1002?&quot;, &quot;ferramenta&quot;: &quot;consultar_pedido&quot;, &quot;contem&quot;: [&quot;transporte&quot;]}
+{&quot;id&quot;: &quot;p2&quot;, &quot;pergunta&quot;: &quot;Meu pedido 1001 já chegou?&quot;, &quot;ferramenta&quot;: &quot;consultar_pedido&quot;, &quot;contem&quot;: [&quot;entregue&quot;]}
+{&quot;id&quot;: &quot;p3&quot;, &quot;pergunta&quot;: &quot;Por que meu pedido 1003 foi cancelado?&quot;, &quot;ferramenta&quot;: &quot;consultar_pedido&quot;, &quot;contem&quot;: [&quot;pagamento&quot;]}
+{&quot;id&quot;: &quot;p4&quot;, &quot;pergunta&quot;: &quot;Cadê meu pedido 9999?&quot;, &quot;ferramenta&quot;: &quot;consultar_pedido&quot;, &quot;contem&quot;: [&quot;não&quot;]}
+{&quot;id&quot;: &quot;t1&quot;, &quot;pergunta&quot;: &quot;Posso trocar um produto depois de 20 dias?&quot;, &quot;ferramenta&quot;: &quot;buscar_politica&quot;, &quot;contem&quot;: [&quot;30 dias&quot;]}
+{&quot;id&quot;: &quot;t2&quot;, &quot;pergunta&quot;: &quot;Qual o prazo para devolver por arrependimento?&quot;, &quot;ferramenta&quot;: &quot;buscar_politica&quot;, &quot;contem&quot;: [&quot;7 dias&quot;]}
+{&quot;id&quot;: &quot;t3&quot;, &quot;pergunta&quot;: &quot;A partir de quanto o frete é grátis?&quot;, &quot;ferramenta&quot;: &quot;buscar_politica&quot;, &quot;contem&quot;: [&quot;199&quot;]}
+{&quot;id&quot;: &quot;t4&quot;, &quot;pergunta&quot;: &quot;Quanto tempo de garantia vocês dão?&quot;, &quot;ferramenta&quot;: &quot;buscar_politica&quot;, &quot;contem&quot;: [&quot;12 meses&quot;]}
+{&quot;id&quot;: &quot;h1&quot;, &quot;pergunta&quot;: &quot;Fui cobrado duas vezes, quero falar com uma pessoa&quot;, &quot;ferramenta&quot;: &quot;abrir_chamado&quot;, &quot;contem&quot;: [&quot;CH-4821&quot;]}
+{&quot;id&quot;: &quot;h2&quot;, &quot;pergunta&quot;: &quot;Meu produto chegou quebrado e quero um atendente&quot;, &quot;ferramenta&quot;: &quot;abrir_chamado&quot;, &quot;contem&quot;: [&quot;chamado&quot;]}
+EOF</code></pre></div></div></li><li><div><p>O juiz (usado aqui e no exercício 4.2):</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; juiz.py &lt;&lt;&#x27;EOF&#x27;
+&quot;&quot;&quot;LLM como juiz: dá nota de 0 a 1 para a resposta do agente, com base no que as ferramentas retornaram.&quot;&quot;&quot;
+import json, os
+from openai import OpenAI
+
+juiz = OpenAI(base_url=os.getenv(&quot;LLM_BASE_URL&quot;), api_key=os.getenv(&quot;LLM_API_KEY&quot;))
+MODELO_JUIZ = os.getenv(&quot;JUIZ_MODEL&quot;, os.getenv(&quot;LLM_MODEL&quot;, &quot;openai/gpt-4.1-mini&quot;))
+RUBRICA = &quot;&quot;&quot;Você avalia respostas de um agente de atendimento de loja.
+Critérios: (1) a resposta atende à pergunta; (2) não inventa fatos: prazos, valores e status devem vir das observações das ferramentas;
+(3) se não havia como resolver, encaminhou para um humano.
+Responda só com JSON: {&quot;nota&quot;: número de 0 a 1, &quot;motivo&quot;: &quot;uma frase&quot;}&quot;&quot;&quot;
+
+
+def avaliar(pergunta, resposta, observacoes):
+    conteudo = (f&quot;Pergunta: {pergunta}\nObservações das ferramentas: {observacoes or &#x27;nenhuma&#x27;}\n&quot;
+                f&quot;Resposta do agente: {resposta}&quot;)
+    r = juiz.chat.completions.create(model=MODELO_JUIZ, temperature=0,
+                                     messages=[{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: RUBRICA},
+                                               {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: conteudo}])
+    texto = r.choices[0].message.content.strip().removeprefix(&quot;```json&quot;).strip(&quot;` \n&quot;)
+    try:
+        d = json.loads(texto)
+        return max(0.0, min(1.0, float(d[&quot;nota&quot;]))), str(d.get(&quot;motivo&quot;, &quot;&quot;))
+    except (ValueError, KeyError):
+        return 0.0, f&quot;juiz respondeu fora do formato: {texto[:80]}&quot;
+EOF</code></pre></div></div></li><li><div><p>O avaliador: para cada caso, checa a ferramenta, o conteúdo e a nota do juiz:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; eval_offline.py &lt;&lt;&#x27;EOF&#x27;
+&quot;&quot;&quot;Eval offline: roda o dataset dourado contra o agente e reprova se a qualidade cair abaixo do limite.&quot;&quot;&quot;
+import json, sys
+import httpx
+from juiz import avaliar
+
+LIMITE = float(sys.argv[1]) if len(sys.argv) &gt; 1 else 0.8
+casos = [json.loads(l) for l in open(&quot;dataset.jsonl&quot;)]
+linhas, notas = [], []
+for c in casos:
+    r = httpx.post(&quot;http://localhost:8000/chat&quot;, json={&quot;texto&quot;: c[&quot;pergunta&quot;]}, timeout=120).json()
+    resposta = r.get(&quot;resposta&quot;) or &quot;&quot;
+    ferramenta_ok = c[&quot;ferramenta&quot;] in r.get(&quot;ferramentas&quot;, [])
+    conteudo_ok = all(t.lower() in resposta.lower() for t in c[&quot;contem&quot;])
+    nota_juiz, motivo = avaliar(c[&quot;pergunta&quot;], resposta, r.get(&quot;ferramentas&quot;))
+    nota = (ferramenta_ok + conteudo_ok + nota_juiz) / 3
+    notas.append(nota)
+    linhas.append(f&quot;{c[&#x27;id&#x27;]:&lt;4} ferramenta={&#x27;ok &#x27; if ferramenta_ok else &#x27;ERR&#x27;} conteudo={&#x27;ok &#x27; if conteudo_ok else &#x27;ERR&#x27;}&quot;
+                  f&quot; juiz={nota_juiz:.2f} nota={nota:.2f}  {motivo[:60]}&quot;)
+print(&quot;\n&quot;.join(linhas))
+media = sum(notas) / len(notas)
+print(f&quot;\nmédia={media:.2f} limite={LIMITE}&quot;)
+sys.exit(0 if media &gt;= LIMITE else 1)
+EOF</code></pre></div></div></li><li><div><p>Rode e veja o código de saída (é o que o CI usaria):</p><div class="code"><span class="lang">terminal</span><pre><code>python eval_offline.py 0.8; echo &quot;exit=$?&quot;</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Uma linha por caso com <code>ferramenta</code>, <code>conteudo</code>, <code>juiz</code> e <code>nota</code>.</li><li>A média final e <code>exit=0</code> (aprovado) ou <code>exit=1</code> (reprovado).</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Eval offline é teste de regressão para comportamento não determinístico.</li><li>O código de saída permite bloquear o deploy no pipeline (disciplina de Deploy e CI/CD).</li></ul></div><div class="challenge"><b>Desafio</b><p>Suba o agente com <code>PROMPT_VERSAO=v2</code> (prompt sem instruções de ferramentas) e rode o eval de novo. A versão seria bloqueada?</p></div>
+    <label class="done"><input type="checkbox" id="ex-4-1"> Exercício 4.1 concluído</label>
+  </div>
+</article>
+<!-- 4.2 -->
+<article class="topico" id="a4-t2">
+  <div class="topico-head"><span class="topico-num">4.2</span><h2>LLM como juiz</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 2 · Quem avalia o avaliador?</div><h3>O juiz também erra</h3><p>Um LLM avaliando outro é rápido e escala, mas tem vieses: prefere respostas longas, a própria família de modelos e a primeira opção.</p></div><div class="slide"><h3>Boas práticas de LLM-as-judge</h3><div class="cols"><div class="card-mini"><h4>Rubrica</h4><ul><li>Critérios explícitos e binários quando possível</li><li>Saída estruturada (JSON)</li></ul></div><div class="card-mini"><h4>Contexto</h4><ul><li>Dê ao juiz as observações das ferramentas</li><li>Fidelidade = comparar resposta com fatos</li></ul></div><div class="card-mini"><h4>Calibração</h4><ul><li>Compare com rótulos humanos</li><li>Meça concordância antes de confiar</li></ul></div></div></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 4.2</span><h3>Calibrando o juiz</h3><span class="lab-time">~20 min</span></div>
+    <p class="lab-goal">Testar o juiz contra casos com rótulo conhecido.</p>
+    <ol class="steps"><li><div><p>Rode o juiz em três respostas, uma correta, uma inventada e uma evasiva:</p><div class="code"><span class="lang">terminal</span><pre><code>python - &lt;&lt;&#x27;EOF&#x27;
+from juiz import avaliar
+obs = [&quot;buscar_politica: Trocas em até 30 dias após a entrega, com o produto sem uso e na embalagem original.&quot;]
+for resposta in [&quot;Você pode trocar em até 30 dias após a entrega, sem uso e na embalagem.&quot;,
+                 &quot;A troca só é aceita em até 15 dias após a compra.&quot;,
+                 &quot;Não sei, procure a loja.&quot;]:
+    print(avaliar(&quot;Posso trocar depois de 20 dias?&quot;, resposta, obs), &quot;&lt;-&quot;, resposta)
+EOF</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Nota alta para a correta, baixa para a inventada (15 dias) e baixa ou média para a evasiva.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>O juiz só detecta alucinação se receber os fatos (observações).</li><li>Calibrar com poucos exemplos rotulados já mostra se dá para confiar.</li></ul></div><div class="challenge"><b>Desafio</b><p>Troque o modelo do juiz (<code>JUIZ_MODEL</code>) e veja se as notas mudam.</p></div>
+    <label class="done"><input type="checkbox" id="ex-4-2"> Exercício 4.2 concluído</label>
+  </div>
+</article>
+<!-- 4.3 -->
+<article class="topico" id="a4-t3">
+  <div class="topico-head"><span class="topico-num">4.3</span><h2>Eval online e feedback</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 3 · Produção é o dataset real</div><h3>Avaliar sem atrasar o cliente</h3><p>Em produção, o juiz roda fora do caminho da resposta, numa amostra das conversas. A nota vira métrica, e o span do juiz aponta para o trace avaliado.</p></div><div class="slide"><h3>Eval online ligado ao trace</h3><div class="flow"><div class="node"><b>Conversa</b><span>trace invoke_agent</span></div><div class="arrow">→</div><div class="node"><b>Amostra 30%</b><span>thread em segundo plano</span></div><div class="arrow">→</div><div class="node"><b>Juiz</b><span>span evaluate com link ao trace</span></div><div class="arrow">→</div><div class="node hl"><b>Sinais</b><span>métrica agente.eval.nota + log com trace avaliado</span></div></div><ul><li>Atributos <code>gen_ai.evaluation.name</code> e <code>gen_ai.evaluation.score.value</code> (convenções GenAI).</li><li>Feedback do usuário (👍/👎) com o <code>trace_id</code>: o mais barato dos sinais de qualidade.</li></ul><p class="note">Referências: <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener">OpenTelemetry · GenAI semantic conventions</a>.</p></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 4.3</span><h3>Eval online por amostragem e feedback</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Adicionar ao agente o juiz em segundo plano e o endpoint de feedback.</p>
+    <ol class="steps"><li><div><p>Versão final do agente:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; source ~/obs/.env</code></pre></div><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; agente.py &lt;&lt;&#x27;EOF&#x27;
+&quot;&quot;&quot;Agente de atendimento da Loja: loop de LLM com ferramentas, traces, métricas, chaos e eval online.&quot;&quot;&quot;
+import json, logging, os, random, threading, time
+from fastapi import FastAPI
+from pydantic import BaseModel
+from openai import OpenAI
+from opentelemetry import trace, metrics
+from opentelemetry.trace import Status, StatusCode
+from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
+from telemetria import configurar
+from ferramentas import FERRAMENTAS, executar
+from juiz import avaliar
+
+configurar(&quot;atendimento&quot;)
+OpenAIInstrumentor().instrument()
+tracer = trace.get_tracer(&quot;loja.agente&quot;)
+meter = metrics.get_meter(&quot;loja.agente&quot;)
+log = logging.getLogger(&quot;agente&quot;)
+
+MODELO = os.getenv(&quot;LLM_MODEL&quot;, &quot;openai/gpt-4.1-mini&quot;)
+llm = OpenAI(base_url=os.getenv(&quot;LLM_BASE_URL&quot;), api_key=os.getenv(&quot;LLM_API_KEY&quot;))
+PRECO_ENTRADA = float(os.getenv(&quot;PRECO_ENTRADA_1M&quot;, &quot;0.40&quot;)) / 1e6   # USD por token
+PRECO_SAIDA = float(os.getenv(&quot;PRECO_SAIDA_1M&quot;, &quot;1.60&quot;)) / 1e6
+PROMPTS = {
+    &quot;v1&quot;: (&quot;Você é o agente de atendimento da Loja. Responda em português, em no máximo 3 frases. &quot;
+           &quot;Use consultar_pedido para pedidos e buscar_politica para trocas, devoluções, frete e garantia. &quot;
+           &quot;Nunca invente prazos ou valores: use só o que as ferramentas retornarem. &quot;
+           &quot;Se não conseguir resolver, use abrir_chamado.&quot;),
+    &quot;v2&quot;: &quot;Você é um atendente simpático. Responda rápido, sem enrolar.&quot;,
+}
+PROMPT_VERSAO = os.getenv(&quot;PROMPT_VERSAO&quot;, &quot;v1&quot;)
+CHAOS_LATENCIA = float(os.getenv(&quot;CHAOS_LATENCIA_S&quot;, &quot;0&quot;))
+CHAOS_FALHA = float(os.getenv(&quot;CHAOS_FALHA_FERRAMENTA&quot;, &quot;0&quot;))
+AMOSTRA_EVAL = float(os.getenv(&quot;EVAL_AMOSTRA&quot;, &quot;0.3&quot;))
+
+conversas = meter.create_counter(&quot;agente.conversas&quot;, unit=&quot;{conversa}&quot;, description=&quot;Conversas por resultado&quot;)
+passos_h = meter.create_histogram(&quot;agente.passos&quot;, unit=&quot;{passo}&quot;, description=&quot;Chamadas ao LLM por conversa&quot;)
+custo_c = meter.create_counter(&quot;agente.custo&quot;, unit=&quot;USD&quot;, description=&quot;Custo estimado em tokens&quot;)
+ferr_c = meter.create_counter(&quot;agente.ferramenta.chamadas&quot;, unit=&quot;{chamada}&quot;, description=&quot;Chamadas de ferramenta&quot;)
+nota_h = meter.create_histogram(&quot;agente.eval.nota&quot;, unit=&quot;1&quot;, description=&quot;Nota do juiz (0 a 1)&quot;)
+feedback_c = meter.create_counter(&quot;agente.feedback&quot;, unit=&quot;{voto}&quot;, description=&quot;Feedback do usuário&quot;)
+
+app = FastAPI()
+
+
+class Pergunta(BaseModel):
+    texto: str
+
+
+class Feedback(BaseModel):
+    trace_id: str
+    util: bool
+
+
+def chamar_llm(msgs, attrs):
+    if CHAOS_LATENCIA:
+        time.sleep(CHAOS_LATENCIA)
+    r = llm.chat.completions.create(model=MODELO, messages=msgs, tools=FERRAMENTAS, temperature=0)
+    custo_c.add(r.usage.prompt_tokens * PRECO_ENTRADA + r.usage.completion_tokens * PRECO_SAIDA, attrs)
+    return r.choices[0].message
+
+
+def chamar_ferramenta(chamada):
+    nome = chamada.function.name
+    with tracer.start_as_current_span(f&quot;execute_tool {nome}&quot;) as s:
+        s.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;execute_tool&quot;)
+        s.set_attribute(&quot;gen_ai.tool.name&quot;, nome)
+        s.set_attribute(&quot;gen_ai.tool.call.id&quot;, chamada.id)
+        try:
+            if random.random() &lt; CHAOS_FALHA:
+                raise TimeoutError(&quot;sistema de pedidos não respondeu&quot;)
+            resultado = executar(nome, json.loads(chamada.function.arguments or &quot;{}&quot;))
+            ferr_c.add(1, {&quot;gen_ai.tool.name&quot;: nome, &quot;status&quot;: &quot;ok&quot;})
+        except Exception as e:
+            s.record_exception(e)
+            s.set_status(Status(StatusCode.ERROR, str(e)))
+            ferr_c.add(1, {&quot;gen_ai.tool.name&quot;: nome, &quot;status&quot;: &quot;erro&quot;})
+            log.error(&quot;ferramenta %s falhou: %s&quot;, nome, e)
+            resultado = f&quot;erro: {e}&quot;
+        return resultado
+
+
+def avaliar_em_segundo_plano(contexto, pergunta, resposta, observacoes):
+    # Roda fora do caminho da resposta; o span do juiz aponta (link) para o trace da conversa
+    with tracer.start_as_current_span(&quot;evaluate atendimento&quot;, links=[trace.Link(contexto)]) as s:
+        nota, motivo = avaliar(pergunta, resposta, observacoes)
+        s.set_attribute(&quot;gen_ai.evaluation.name&quot;, &quot;correcao&quot;)
+        s.set_attribute(&quot;gen_ai.evaluation.score.value&quot;, nota)
+        nota_h.record(nota, {&quot;prompt.versao&quot;: PROMPT_VERSAO})
+        log.info(&quot;eval correcao=%.2f motivo=%s trace_avaliado=%s&quot;, nota, motivo,
+                 format(contexto.trace_id, &quot;032x&quot;))
+
+
+@app.post(&quot;/chat&quot;)
+def chat(p: Pergunta):
+    attrs = {&quot;gen_ai.request.model&quot;: MODELO, &quot;prompt.versao&quot;: PROMPT_VERSAO}
+    with tracer.start_as_current_span(&quot;invoke_agent atendimento&quot;) as span:
+        span.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;invoke_agent&quot;)
+        span.set_attribute(&quot;gen_ai.agent.name&quot;, &quot;atendimento&quot;)
+        span.set_attribute(&quot;prompt.versao&quot;, PROMPT_VERSAO)
+        trace_id = format(span.get_span_context().trace_id, &quot;032x&quot;)
+        log.info(&quot;pergunta recebida: %s&quot;, p.texto)
+        msgs = [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: PROMPTS[PROMPT_VERSAO]}, {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: p.texto}]
+        usadas, observacoes = [], []
+        try:
+            for passo in range(1, 6):
+                m = chamar_llm(msgs, attrs)
+                if not m.tool_calls:
+                    break
+                msgs.append(m.model_dump(exclude_none=True))
+                for chamada in m.tool_calls:
+                    usadas.append(chamada.function.name)
+                    saida = chamar_ferramenta(chamada)
+                    observacoes.append(f&quot;{chamada.function.name}: {saida}&quot;)
+                    msgs.append({&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: chamada.id, &quot;content&quot;: saida})
+            else:
+                raise RuntimeError(&quot;limite de 5 passos atingido&quot;)
+        except Exception as e:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
+            conversas.add(1, {**attrs, &quot;resultado&quot;: &quot;falha&quot;})
+            log.error(&quot;conversa falhou: %s&quot;, e)
+            return {&quot;resposta&quot;: &quot;Tive um problema agora. Tente de novo em instantes.&quot;, &quot;ferramentas&quot;: usadas,
+                    &quot;trace_id&quot;: trace_id}
+        resultado = &quot;escalado&quot; if &quot;abrir_chamado&quot; in usadas else &quot;resolvido&quot;
+        span.set_attribute(&quot;agente.resultado&quot;, resultado)
+        span.set_attribute(&quot;agente.passos&quot;, passo)
+        conversas.add(1, {**attrs, &quot;resultado&quot;: resultado})
+        passos_h.record(passo, attrs)
+        log.info(&quot;conversa %s em %d passos, ferramentas=%s&quot;, resultado, passo, usadas)
+        if random.random() &lt; AMOSTRA_EVAL:
+            threading.Thread(target=avaliar_em_segundo_plano,
+                             args=(span.get_span_context(), p.texto, m.content, observacoes)).start()
+        return {&quot;resposta&quot;: m.content, &quot;ferramentas&quot;: usadas, &quot;trace_id&quot;: trace_id}
+
+
+@app.post(&quot;/feedback&quot;)
+def feedback(f: Feedback):
+    feedback_c.add(1, {&quot;util&quot;: str(f.util).lower(), &quot;prompt.versao&quot;: PROMPT_VERSAO})
+    log.info(&quot;feedback util=%s trace_avaliado=%s&quot;, f.util, f.trace_id)
+    return {&quot;ok&quot;: True}
+EOF</code></pre></div></div></li><li><div><p>Suba e gere carga (o <code>carga.py</code> também manda feedback):</p><div class="code"><span class="lang">terminal</span><pre><code>uvicorn agente:app --port 8000</code></pre></div><div class="code"><span class="lang">terminal</span><pre><code>python carga.py 15 12</code></pre></div></div></li><li><div><p>Investigue:</p><div class="code"><span class="lang">promql</span><pre><code># Prometheus: nota média do juiz e satisfação
+sum(rate(agente_eval_nota_sum[15m])) / sum(rate(agente_eval_nota_count[15m]))
+sum(rate(agente_feedback_total{util=&quot;true&quot;}[15m])) / sum(rate(agente_feedback_total[15m]))</code></pre></div><div class="code"><span class="lang">traceql</span><pre><code>{name=&quot;evaluate atendimento&quot; &amp;&amp; span.gen_ai.evaluation.score.value &lt; 0.5}</code></pre></div><p>No span do juiz, siga o <b>link</b> até o trace da conversa avaliada.</p></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Cerca de 30% das conversas geram um span <code>evaluate atendimento</code> separado, com link para a conversa.</li><li>As métricas <code>agente_eval_nota</code> e <code>agente_feedback_total</code> aparecem no Prometheus.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Qualidade vira um sinal de série temporal: dá para alertar sobre ela (Aula 05).</li><li>Notas baixas levam ao trace e viram novos casos do dataset.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-4-3"> Exercício 4.3 concluído</label>
+  </div>
+</article>
+<!-- 4.4 -->
+<article class="topico" id="a4-t4">
+  <div class="topico-head"><span class="topico-num">4.4</span><h2>Fechando o ciclo</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide"><h3>Eval-driven development</h3><div class="flow"><div class="node"><b>Incidente / nota baixa</b><span>trace com problema</span></div><div class="arrow">→</div><div class="node"><b>Novo caso</b><span>entra no dataset.jsonl</span></div><div class="arrow">→</div><div class="node"><b>Mudança</b><span>prompt, modelo, ferramenta</span></div><div class="arrow">→</div><div class="node"><b>Eval offline</b><span>gate no CI</span></div><div class="arrow">→</div><div class="node hl"><b>Rollout</b><span>canário + eval online</span></div></div><ul><li>Plataformas que fazem esse ciclo: Langfuse, Arize Phoenix, LangSmith, Braintrust, MLflow, AWS Bedrock Evaluations.</li><li>O conceito é o mesmo do lab: dataset, avaliadores, experimentos e scores ligados aos traces.</li></ul></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 4.4</span><h3>Da nota baixa ao novo caso de teste</h3><span class="lab-time">~15 min</span></div>
+    <p class="lab-goal">Transformar uma conversa mal avaliada em produção num caso do dataset.</p>
+    <ol class="steps"><li><div><p>Encontre no Loki os evals com nota baixa:</p><div class="code"><span class="lang">logql</span><pre><code>{service_name=&quot;atendimento&quot;} |= &quot;eval correcao=0&quot;</code></pre></div></div></li><li><div><p>Abra o trace avaliado, copie a pergunta e acrescente uma linha ao <code>dataset.jsonl</code> com a ferramenta e o conteúdo esperados. Rode o eval offline de novo.</p></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>O dataset passa a cobrir o caso que falhou em produção.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Observabilidade alimenta a avaliação, e a avaliação protege a próxima versão.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-4-4"> Exercício 4.4 concluído</label>
+  </div>
+</article>
+</div>
+</div>
+</section>
