@@ -3,14 +3,14 @@
 <div class="aula-head">
   <div>
     <div class="eyebrow">Aula 01 · Fundamentos</div>
-    <h1>Observabilidade para agentes de IA</h1>
-    <p class="lead">O agente de atendimento da Loja já responde clientes, mas ninguém sabe dizer por que ele demorou, quanto custou ou por que inventou uma resposta. Hoje você entende o que muda ao observar sistemas com LLM, monta a stack aberta (OpenTelemetry Collector, Grafana, Tempo, Loki e Prometheus), roda o agente como caixa-preta e o instrumenta com traces e logs seguindo as convenções GenAI do OpenTelemetry.</p>
-    <div class="meta"><span class="chip">4 tópicos</span><span class="chip">4 exercícios</span><span class="chip">OpenTelemetry · Grafana LGTM</span><span class="chip">GitHub Models</span><span class="chip chip-gh">GitHub Codespaces</span></div>
+    <h1>Fundamentos de observabilidade</h1>
+    <p class="lead">De onde vem a observabilidade e como medir a saúde de um serviço. Você percorre a evolução de SysAdmin a DevOps, SRE e Platform Engineering, entende SLA, SLO, SLI, error budget e os 4 golden signals, conhece os pilares e o OpenTelemetry, e coloca tudo em prática com Prometheus e Grafana: uma API instrumentada, consultas PromQL, o dashboard dos golden signals como código e um game day com falhas injetadas.</p>
+    <div class="meta"><span class="chip">6 tópicos</span><span class="chip">5 exercícios</span><span class="chip">OpenTelemetry · Prometheus · Grafana</span><span class="chip">Docker Compose</span><span class="chip chip-gh">GitHub Codespaces</span></div>
   </div>
 </div>
 <div class="aula-intro">
   <div class="section-label">Roteiro da aula</div>
-  <div class="slides"><div class="slide"><h3>Da caixa-preta ao trace do agente</h3><div class="flow"><div class="node"><b>Entender</b><span>1.1 · monitoramento × observabilidade, o que muda com LLMs</span></div><div class="arrow">→</div><div class="node"><b>Montar</b><span>1.2 · stack aberta: SDK → Collector → Grafana</span></div><div class="arrow">→</div><div class="node"><b>Ver</b><span>1.3 · traces do agente com GenAI semconv</span></div><div class="arrow">→</div><div class="node hl"><b>Correlacionar</b><span>1.4 · logs com trace_id e TraceQL</span></div></div><div class="cols"><div class="card-mini"><h4>Ao final da aula você vai saber</h4><ul><li>Explicar por que agentes exigem observabilidade própria</li><li>Subir a stack OpenTelemetry + Grafana LGTM</li><li>Instrumentar LLM, agente e ferramentas com spans</li><li>Ir de um log ao trace e do trace à causa</li></ul></div><div class="card-mini"><h4>Por que isso importa</h4><ul><li>Agente sem telemetria é uma caixa-preta cara</li><li>Custo, latência e qualidade variam a cada chamada</li><li>Tudo que vem depois (métricas, evals, alertas) usa esses sinais</li></ul></div></div></div></div>
+  <div class="slides"><div class="slide"><h3>>whoami_</h3><div class="cols"><div class="card-mini"><h4>Gerson Carneiro</h4><ul><li>Staff SRE no Itaú Unibanco</li><li>Professor de MBA</li><li>Pai da Heloísa</li><li>Há pelo menos 15 anos em tecnologia</li></ul></div><div class="card-mini"><h4>Contato</h4><ul><li><a href="https://www.linkedin.com/in/gerson-carneiro/" target="_blank" rel="noopener">LinkedIn</a> · <a href="https://github.com/gersontpc" target="_blank" rel="noopener">GitHub</a> · <a href="https://x.com/gersontpc" target="_blank" rel="noopener">X</a></li><li>Materiais em gersoncarneiro.dev/obs-aulas</li></ul></div></div></div><div class="slide"><h3>Combinados</h3><div class="cols"><div class="card-mini"><h4>Horário</h4><ul><li>Aulas de 4 horas, com intervalo de 15 minutos</li><li>Chamada no início e no fim da aula</li></ul></div><div class="card-mini"><h4>Avaliação</h4><ul><li>Participação</li><li>Laboratórios</li></ul></div><div class="card-mini"><h4>Durante a aula</h4><ul><li>Anote os pontos-chave</li><li>Câmera ligada sempre que possível</li></ul></div></div></div><div class="slide"><h3>Conhecendo a turma</h3><ul><li>Onde você trabalha e qual a sua área de atuação?</li><li>Qual o seu objetivo com o MBA?</li><li>Já usou Prometheus, Grafana, Datadog, New Relic ou outra ferramenta de monitoração?</li><li>Já colocou algum modelo ou agente de IA em produção?</li></ul><p>Responda no formulário publicado no mural da turma.</p></div><div class="slide"><h3>Dúvidas</h3><div class="cols"><div class="card-mini"><h4>Durante a aula</h4><ul><li>Levante a mão ou escreva no chat</li></ul></div><div class="card-mini"><h4>Problema no lab</h4><ul><li>Compartilhe a tela: resolvemos juntos</li></ul></div></div></div><div class="slide"><h3>Pirâmide de aprendizagem e fontes</h3><p>Ler e escutar fixam pouco; <b>praticar</b> e <b>ensinar</b> fixam muito mais. Por isso cada tópico termina num exercício. A pirâmide completa e as fontes de estudo estão na página <a href="#inicio" data-go="inicio">Início</a>.</p><div class="cols"><div class="card-mini"><h4>Blogs</h4><ul><li>OpenTelemetry, Grafana Labs, Prometheus, CNCF, Honeycomb</li></ul></div><div class="card-mini"><h4>Eventos</h4><ul><li>KubeCon, GrafanaCON, DevOpsDays, AWS re:Invent</li></ul></div><div class="card-mini"><h4>Livros</h4><ul><li>Google SRE Book</li><li>Observability Engineering</li><li>Learning OpenTelemetry</li></ul></div></div></div><div class="slide"><h3>Objetivo da disciplina</h3><div class="cols"><div class="card-mini"><h4>Fundamentos</h4><ul><li>De onde vem a observabilidade: DevOps e SRE</li><li>Golden signals, SLI, SLO e error budget</li><li>Métricas, logs e traces com OpenTelemetry</li></ul></div><div class="card-mini"><h4>Métricas e KPIs</h4><ul><li>Prometheus e PromQL</li><li>Métricas técnicas e de negócio</li><li>Métricas de sistemas com IA: tokens, custo, qualidade</li></ul></div><div class="card-mini"><h4>Eval-driven</h4><ul><li>Avaliar a qualidade de modelos e agentes</li><li>Evals offline e online</li></ul></div><div class="card-mini"><h4>Alertas e dashboards</h4><ul><li>Dashboards como código no Grafana</li><li>Alertas acionáveis</li></ul></div></div></div><div class="slide"><h3>Roteiro desta aula</h3><div class="flow"><div class="node"><b>Origem</b><span>1.1 · SysAdmin → DevOps → SRE → Platform Engineering</span></div><div class="arrow">→</div><div class="node"><b>SRE</b><span>1.2 · SLA, SLO, SLI, error budget e golden signals</span></div><div class="arrow">→</div><div class="node"><b>Observabilidade</b><span>1.3 · pilares e OpenTelemetry</span></div><div class="arrow">→</div><div class="node"><b>Métricas</b><span>1.4 · Prometheus e PromQL</span></div><div class="arrow">→</div><div class="node hl"><b>Dashboards</b><span>1.5 · Grafana e os 4 golden signals</span></div></div><div class="cols"><div class="card-mini"><h4>Ao final da aula você vai saber</h4><ul><li>Explicar o papel da observabilidade em DevOps e SRE</li><li>Definir SLA, SLO, SLI e error budget</li><li>Medir os 4 golden signals de uma API com OpenTelemetry e Prometheus</li><li>Montar e ler um dashboard de golden signals no Grafana</li></ul></div><div class="card-mini"><h4>No laboratório</h4><ul><li>Stack Prometheus + Grafana + API instrumentada com OpenTelemetry, via Docker Compose</li><li>Dashboard dos 4 golden signals como código (JSON)</li><li>Falhas injetadas para ver o dashboard reagir</li></ul></div></div></div></div>
 </div>
 <div class="aula-body">
 <nav class="toc" aria-label="Tópicos da aula"><b>Tópicos</b><ol></ol></nav>
@@ -18,313 +18,277 @@
 
 <!-- 1.1 -->
 <article class="topico" id="a1-t1">
-  <div class="topico-head"><span class="topico-num">1.1</span><h2>Por que observar agentes é diferente</h2></div>
+  <div class="topico-head"><span class="topico-num">1.1</span><h2>Onde tudo começou: de SysAdmin a Platform Engineering</h2></div>
   <div class="section-label">Conceito</div>
-  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 1 · Funciona na demo</div><h3>“O agente está estranho” não é um diagnóstico</h3><p>A Loja colocou um agente de atendimento no ar. Na primeira semana, chegam três reclamações: respostas lentas, uma política de troca inventada e uma fatura de API maior que o previsto. Os logs só dizem <code>200 OK</code>.</p></div><div class="slide"><h3>Monitoramento × observabilidade</h3><div class="tbl"><table><thead><tr><th></th><th>Monitoramento</th><th>Observabilidade</th></tr></thead><tbody><tr><td>Pergunta</td><td>Está funcionando?</td><td>Por que está se comportando assim?</td></tr><tr><td>Base</td><td>Perguntas conhecidas, painéis fixos</td><td>Perguntas novas sobre dados ricos</td></tr><tr><td>Sinais</td><td>Métricas agregadas, health checks</td><td>Traces, métricas, logs e eventos correlacionados</td></tr><tr><td>Em IA</td><td>API do modelo respondeu</td><td>Qual passo do agente errou, com qual prompt, a que custo</td></tr></tbody></table></div><p class="note">Referências: <a href="https://opentelemetry.io/docs/concepts/observability-primer/" target="_blank" rel="noopener">Observability primer</a>.</p></div><div class="slide"><h3>O que muda com LLMs e agentes</h3><div class="cols"><div class="card-mini"><h4>Não determinismo</h4><ul><li>Mesma entrada, saídas diferentes</li><li>“Funciona” deixa de ser binário: precisa de <b>qualidade</b></li></ul></div><div class="card-mini"><h4>Custo variável</h4><ul><li>Cobrança por token de entrada e saída</li><li>Um loop de agente pode multiplicar o custo de uma conversa</li></ul></div><div class="card-mini"><h4>Execução em vários passos</h4><ul><li>LLM → ferramenta → LLM → ferramenta…</li><li>O erro está num passo, não na requisição</li></ul></div><div class="card-mini"><h4>Falhas silenciosas</h4><ul><li>Alucinação responde com HTTP 200</li><li>Só evals e feedback mostram o problema</li></ul></div></div></div><div class="slide"><h3>Os sinais e o que cada um responde</h3><div class="tbl"><table><thead><tr><th>Sinal</th><th>Responde</th><th>No agente</th></tr></thead><tbody><tr><td><b>Traces</b></td><td>Onde o tempo foi gasto? Qual passo falhou?</td><td>invoke_agent → chat → execute_tool</td></tr><tr><td><b>Métricas</b></td><td>Quanto, com que frequência, qual tendência?</td><td>tokens, latência p95, custo, taxa de resolução</td></tr><tr><td><b>Logs</b></td><td>O que exatamente aconteceu?</td><td>argumentos de ferramenta, erros, decisões</td></tr><tr><td><b>Evals</b></td><td>A resposta foi boa?</td><td>nota do juiz, feedback do usuário</td></tr></tbody></table></div><p>Os três primeiros são os pilares clássicos. O quarto é o que a IA acrescenta: <b>qualidade</b> também precisa ser medida em produção.</p></div></div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 1 · A evolução</div><h3>Do trabalho manual à experiência do desenvolvedor</h3><p>Antes, um time escrevia o código e outro o colocava no ar. Quem operava não sabia o que tinha mudado; quem desenvolvia não sabia como o sistema se comportava em produção. A observabilidade nasce dessa distância.</p></div><div class="slide"><h3>A evolução</h3><div class="flow"><div class="node"><b>System Admin</b><span>trabalho manual: servidores configurados à mão</span></div><div class="arrow">→</div><div class="node"><b>DevOps</b><span>automação: pipelines e infraestrutura como código</span></div><div class="arrow">→</div><div class="node"><b>SRE</b><span>confiabilidade: SLOs, error budget, golden signals</span></div><div class="arrow">→</div><div class="node hl"><b>Platform Engineering</b><span>experiência do desenvolvedor: plataforma self-service</span></div></div></div><div class="slide"><h3>DevOps</h3><p>DevOps é uma cultura, metodologia e conjunto de práticas que unem desenvolvimento (Dev) e operações (Ops) para automatizar e integrar processos, com foco em entrega contínua, qualidade e colaboração.</p><div class="cols"><div class="card-mini"><h4>O problema: silos</h4><ul><li>Dev quer mudar rápido; Ops quer estabilidade</li><li>O “muro da confusão” entre os dois times</li><li>Culpa em vez de aprendizado</li></ul></div><div class="card-mini"><h4>A proposta</h4><ul><li>Quebrar os silos: times com responsabilidade de ponta a ponta</li><li>“You build it, you run it”</li><li>Feedback rápido da produção para o desenvolvimento</li></ul></div></div><p class="note">Referências: <a href="https://www.gartner.com/en/information-technology/glossary/devops" target="_blank" rel="noopener">Gartner · DevOps</a>.</p></div><div class="slide"><h3>Os pilares do DevOps</h3><div class="tbl"><table><thead><tr><th>Pilar</th><th>O que faz</th></tr></thead><tbody><tr><td>Controle de versão</td><td>Mantém versões do código e permite colaborar</td></tr><tr><td>Integração contínua</td><td>Compila, valida, revisa e testa a cada mudança</td></tr><tr><td>Entrega contínua</td><td>Commits frequentes, entregas menores e mais seguras</td></tr><tr><td>Implantação contínua</td><td>Deploy automático em produção, com menos risco</td></tr><tr><td><b>Monitoramento contínuo</b></td><td><b>Fecha o ciclo: mostra como cada mudança se comporta em produção</b></td></tr></tbody></table></div><div class="story"><b>Negócio</b>“DevOps, em certo sentido, é sobre a criação de uma fábrica de entrega de valor: um pipeline simplificado e sem desperdício, por meio do qual o valor pode ser entregue ao negócio com um tempo de ciclo previsivelmente rápido.” — Mark Schwartz, <i>The Art of Business Value</i></div></div><div class="slide"><h3>Platform Engineering</h3><p>A Engenharia de Plataforma constrói ferramentas, infraestrutura e serviços que dão suporte aos times de desenvolvimento, para que eles se concentrem em entregar valor ao cliente.</p><ul><li>Observabilidade vira um produto da plataforma: o time cria um serviço e já ganha métricas, logs, traces e dashboards padrão.</li><li>OpenTelemetry é a peça que permite esse padrão sem amarrar a empresa a um fornecedor.</li></ul><p class="note">Referências: <a href="https://platformengineering.org/platform-tooling/" target="_blank" rel="noopener">Platform Tooling Landscape</a> · <a href="https://landscape.cncf.io/guide#observability-and-analysis" target="_blank" rel="noopener">CNCF Landscape · Observability</a>.</p></div></div>
   <div class="section-label">Prática</div>
   <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 1.1</span><h3>Preparando o ambiente: stack de observabilidade e acesso ao LLM</h3><span class="lab-time">~25 min</span></div>
-    <p class="lab-goal">Subir Grafana LGTM e OpenTelemetry Collector no Codespaces e validar o acesso ao GitHub Models.</p>
-    <ol class="steps"><li><div><p>Crie um codespace (máquina de 4 cores) e a pasta do lab:</p><div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/obs/agente &amp;&amp; cd ~/obs</code></pre></div></div></li><li><div><p>Descreva a stack. O <code>otel-lgtm</code> traz Grafana, Tempo (traces), Loki (logs) e Prometheus (métricas) num só container; o Collector fica na frente e recebe tudo da aplicação:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; compose.yaml &lt;&lt;&#x27;EOF&#x27;
+    <div class="lab-head"><span class="lab-tag">Exercício 1.1</span><h3>Preparando o Codespaces e subindo a stack</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Criar a estrutura do laboratório e subir, com Docker Compose, a API da Loja instrumentada com OpenTelemetry, o Prometheus e o Grafana.</p>
+    <ol class="steps"><li><div><p>Crie um codespace (máquina de 4 cores) e a pasta do laboratório:</p><div class="code"><span class="lang">terminal</span><pre><code>mkdir -p ~/observability/aula-1/{app,prometheus,grafana/provisioning/datasources,grafana/provisioning/dashboards,grafana/dashboards}
+cd ~/observability/aula-1</code></pre></div></div></li><li><div><p>Descreva a stack: a API, um gerador de carga, o Prometheus e o Grafana:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; compose.yaml &lt;&lt;&#x27;EOF&#x27;
 services:
-  lgtm:
-    image: grafana/otel-lgtm:0.41.0
+  app:
+    build: ./app
+    ports: [&quot;8000:8000&quot;, &quot;9464:9464&quot;]
+  carga:
+    build: ./app
+    command: [&quot;python&quot;, &quot;carga.py&quot;]
+    depends_on: [app]
+  prometheus:
+    image: prom/prometheus:v3.15.1
+    ports: [&quot;9090:9090&quot;]
+    volumes: [&quot;./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro&quot;]
+  grafana:
+    image: grafana/grafana:13.1.10
     ports: [&quot;3000:3000&quot;]
-  otelcol:
-    image: otel/opentelemetry-collector-contrib:0.165.0
-    command: [&quot;--config=/etc/otelcol/config.yaml&quot;]
-    volumes: [&quot;./otelcol.yaml:/etc/otelcol/config.yaml:ro&quot;]
-    ports: [&quot;4317:4317&quot;, &quot;4318:4318&quot;]
-    depends_on: [lgtm]
-  ollama:
-    image: ollama/ollama:0.40.16
-    profiles: [&quot;ollama&quot;]
-    ports: [&quot;11434:11434&quot;]
-    volumes: [&quot;ollama:/root/.ollama&quot;]
-volumes:
-  ollama:
-EOF</code></pre></div></div></li><li><div><p>Configure o Collector: recebe OTLP e repassa ao LGTM. O exportador <code>debug</code> mostra os spans no log do Collector:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; otelcol.yaml &lt;&lt;&#x27;EOF&#x27;
-receivers:
-  otlp:
-    protocols:
-      grpc: { endpoint: 0.0.0.0:4317 }
-      http: { endpoint: 0.0.0.0:4318 }
-processors:
-  batch: {}
-exporters:
-  otlphttp/lgtm:
-    endpoint: http://lgtm:4318
-  debug:
-    verbosity: basic
-service:
-  pipelines:
-    traces:  { receivers: [otlp], processors: [batch], exporters: [otlphttp/lgtm, debug] }
-    metrics: { receivers: [otlp], processors: [batch], exporters: [otlphttp/lgtm] }
-    logs:    { receivers: [otlp], processors: [batch], exporters: [otlphttp/lgtm] }
-EOF</code></pre></div></div></li><li><div><p>Suba e confira:</p><div class="code"><span class="lang">terminal</span><pre><code>docker compose up -d
-docker compose ps</code></pre></div></div></li><li><div><p>Configure o acesso ao LLM. O Codespaces já traz <code>GITHUB_TOKEN</code>; se o teste der 401 ou 403, crie um token fine-grained em <b>Settings → Developer settings → Personal access tokens</b> com a permissão <b>Models: read</b> e troque <code>$GITHUB_TOKEN</code> por ele:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; ~/obs/.env &lt;&lt;&#x27;EOF&#x27;
-# GitHub Models (padrão): token do Codespaces ou PAT com permissão &quot;Models: read&quot;
-export LLM_BASE_URL=https://models.github.ai/inference
-export LLM_API_KEY=$GITHUB_TOKEN
-export LLM_MODEL=openai/gpt-4.1-mini
-export LLM_PROVIDER=github
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-EOF
-source ~/obs/.env</code></pre></div><p>Teste uma chamada direta:</p><div class="code"><span class="lang">terminal</span><pre><code>curl -s $LLM_BASE_URL/chat/completions -H &quot;Authorization: Bearer $LLM_API_KEY&quot; -H &quot;Content-Type: application/json&quot; \
-  -d &#x27;{&quot;model&quot;:&quot;openai/gpt-4.1-mini&quot;,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Diga oi em 3 palavras&quot;}]}&#x27; | python3 -m json.tool | head -30</code></pre></div></div></li><li><div><p>Abra o Grafana: aba <b>Ports</b> → porta <code>3000</code> → ícone de globo. Em <b>Connections → Data sources</b> aparecem Prometheus, Tempo e Loki.</p></div></li></ol>
-    <div class="expect"><b>Resultado esperado</b><ul><li><code>docker compose ps</code> mostra <code>lgtm</code> e <code>otelcol</code> em execução.</li><li>O <code>curl</code> devolve um JSON com <code>choices</code> e <code>usage</code> (prompt_tokens, completion_tokens).</li><li>O Grafana abre sem pedir senha, com os três data sources.</li></ul></div>
-    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>A aplicação fala só OTLP com o Collector; trocar o backend não muda o código.</li><li>Toda resposta de LLM traz <code>usage</code>: é a matéria-prima de custo.</li><li>O GitHub Models usa a API da OpenAI: o mesmo código serve para OpenAI, Azure, Ollama e outros.</li></ul></div><div class="tip"><b>Sem GitHub Models?</b><p>Use o Ollama local (mais lento, sem conta): <code>docker compose --profile ollama up -d</code>, <code>docker compose exec ollama ollama pull qwen2.5:3b</code> e, no <code>.env</code>, <code>LLM_BASE_URL=http://localhost:11434/v1</code>, <code>LLM_API_KEY=ollama</code>, <code>LLM_MODEL=qwen2.5:3b</code>, <code>LLM_PROVIDER=ollama</code>. Qualquer chave compatível com a API da OpenAI também funciona.</p></div>
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: &quot;true&quot;
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on: [prometheus]
+EOF</code></pre></div></div></li><li><div><p>Dependências e imagem da API. A variável <code>OTEL_SEMCONV_STABILITY_OPT_IN=http</code> liga as convenções HTTP estáveis do OpenTelemetry:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; app/requirements.txt &lt;&lt;&#x27;EOF&#x27;
+fastapi==0.164.0
+uvicorn==0.54.0
+httpx==0.28.1
+opentelemetry-sdk==1.45.2
+opentelemetry-exporter-prometheus==0.66b2
+opentelemetry-instrumentation-fastapi==0.66b2
+opentelemetry-instrumentation-system-metrics==0.66b2
+EOF</code></pre></div><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; app/Dockerfile &lt;&lt;&#x27;EOF&#x27;
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+ENV OTEL_SEMCONV_STABILITY_OPT_IN=http
+EXPOSE 8000 9464
+CMD [&quot;uvicorn&quot;, &quot;main:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]
+EOF</code></pre></div></div></li><li><div><p>A API da Loja. Leia os três blocos: provider de métricas, instrumentação automática e uma métrica de negócio criada à mão:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; app/main.py &lt;&lt;&#x27;EOF&#x27;
+&quot;&quot;&quot;API da Loja instrumentada com OpenTelemetry. As métricas ficam em :9464/metrics para o Prometheus.&quot;&quot;&quot;
+import asyncio, random
+from fastapi import FastAPI, HTTPException
+from opentelemetry import metrics
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.exporter.prometheus import PrometheusMetricReader
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from prometheus_client import start_http_server
+
+# 1. Provider de métricas: o leitor Prometheus expõe tudo em /metrics (porta 9464)
+start_http_server(9464)
+metrics.set_meter_provider(MeterProvider(
+    resource=Resource.create({&quot;service.name&quot;: &quot;loja-api&quot;, &quot;service.version&quot;: &quot;1.0.0&quot;}),
+    metric_readers=[PrometheusMetricReader()]))
+
+# 2. Instrumentação automática: duração e requisições HTTP, CPU e memória do processo
+app = FastAPI(title=&quot;Loja API&quot;)
+FastAPIInstrumentor.instrument_app(app)
+SystemMetricsInstrumentor(config={&quot;process.cpu.utilization&quot;: None, &quot;process.memory.usage&quot;: None}).instrument()
+
+# 3. Métrica de negócio criada à mão
+meter = metrics.get_meter(&quot;loja.api&quot;)
+pedidos = meter.create_counter(&quot;loja.pedidos&quot;, unit=&quot;{pedido}&quot;, description=&quot;Pedidos finalizados&quot;)
+
+# Chaos: latência extra e taxa de erro ajustáveis em tempo de execução
+chaos = {&quot;latencia&quot;: 0.0, &quot;erro&quot;: 0.0}
+PRODUTOS = {1: &quot;Camiseta&quot;, 2: &quot;Caneca&quot;, 3: &quot;Mochila&quot;, 4: &quot;Boné&quot;}
+
+
+async def simular(base):
+    await asyncio.sleep(random.uniform(*base) + chaos[&quot;latencia&quot;])
+    if random.random() &lt; chaos[&quot;erro&quot;]:
+        raise HTTPException(500, &quot;falha simulada&quot;)
+
+
+@app.get(&quot;/produtos&quot;)
+async def listar():
+    await simular((0.01, 0.05))
+    return PRODUTOS
+
+
+@app.get(&quot;/produtos/{pid}&quot;)
+async def detalhar(pid: int):
+    await simular((0.01, 0.08))
+    if pid not in PRODUTOS:
+        raise HTTPException(404, &quot;produto não encontrado&quot;)
+    return {&quot;id&quot;: pid, &quot;nome&quot;: PRODUTOS[pid]}
+
+
+@app.post(&quot;/checkout&quot;)
+async def checkout():
+    await simular((0.1, 0.6))
+    if random.random() &lt; 0.02:
+        raise HTTPException(503, &quot;gateway de pagamento indisponível&quot;)
+    pedidos.add(1, {&quot;pagamento&quot;: random.choice([&quot;pix&quot;, &quot;cartao&quot;])})
+    return {&quot;status&quot;: &quot;aprovado&quot;}
+
+
+@app.get(&quot;/relatorio&quot;)
+def relatorio():
+    # Rota pesada de CPU: usada para provocar saturação
+    total = sum(i * i for i in range(2_000_000))
+    return {&quot;linhas&quot;: total % 1000}
+
+
+@app.get(&quot;/health&quot;)
+async def health():
+    return {&quot;status&quot;: &quot;ok&quot;}
+
+
+@app.post(&quot;/chaos&quot;)
+async def ajustar_chaos(latencia: float = 0.0, erro: float = 0.0):
+    chaos.update(latencia=latencia, erro=erro)
+    return chaos
+EOF</code></pre></div></div></li><li><div><p>O gerador de carga, que simula clientes navegando e comprando:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; app/carga.py &lt;&lt;&#x27;EOF&#x27;
+&quot;&quot;&quot;Gera tráfego contínuo na API: navegação, produtos inexistentes e checkouts.&quot;&quot;&quot;
+import random, time
+import httpx
+
+c = httpx.Client(base_url=&quot;http://app:8000&quot;, timeout=30)
+time.sleep(5)
+while True:
+    try:
+        r = random.random()
+        if r &lt; 0.6:
+            c.get(&quot;/produtos&quot;)
+        elif r &lt; 0.85:
+            c.get(f&quot;/produtos/{random.randint(1, 6)}&quot;)
+        else:
+            c.post(&quot;/checkout&quot;)
+    except httpx.HTTPError as e:
+        print(&quot;erro:&quot;, e)
+    time.sleep(random.uniform(0.05, 0.3))
+EOF</code></pre></div></div></li><li><div><p>O Prometheus coleta (<i>scrape</i>) as métricas da API a cada 5 segundos:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; prometheus/prometheus.yml &lt;&lt;&#x27;EOF&#x27;
+global:
+  scrape_interval: 5s
+scrape_configs:
+  - job_name: loja-api
+    static_configs:
+      - targets: [&quot;app:9464&quot;]
+  - job_name: prometheus
+    static_configs:
+      - targets: [&quot;localhost:9090&quot;]
+EOF</code></pre></div></div></li><li><div><p>O Grafana já sobe com o Prometheus como data source e lê dashboards de uma pasta:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; grafana/provisioning/datasources/prometheus.yml &lt;&lt;&#x27;EOF&#x27;
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    url: http://prometheus:9090
+    isDefault: true
+EOF</code></pre></div><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; grafana/provisioning/dashboards/provider.yml &lt;&lt;&#x27;EOF&#x27;
+apiVersion: 1
+providers:
+  - name: aula-1
+    folder: Observability
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards
+EOF</code></pre></div></div></li><li><div><p>Suba tudo e confira:</p><div class="code"><span class="lang">terminal</span><pre><code>docker compose up -d --build
+docker compose ps</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li><code>docker compose ps</code> mostra <code>app</code>, <code>carga</code>, <code>prometheus</code> e <code>grafana</code> em execução.</li><li>Na aba <b>Ports</b> aparecem as portas 8000 (API), 9464 (métricas), 9090 (Prometheus) e 3000 (Grafana).</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>A stack inteira de observabilidade cabe num <code>compose.yaml</code> versionado.</li><li>A instrumentação automática mede HTTP sem mudar as rotas; métricas de negócio são criadas no código.</li></ul></div><div class="tip"><b>Acessando as portas</b><p>No Codespaces, abra a aba <b>Ports</b> e clique no globo da porta desejada. A URL também sai no terminal: <code>echo "https://${CODESPACE_NAME}-3000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"</code>.</p></div>
     <label class="done"><input type="checkbox" id="ex-1-1"> Exercício 1.1 concluído</label>
   </div>
 </article>
 <!-- 1.2 -->
 <article class="topico" id="a1-t2">
-  <div class="topico-head"><span class="topico-num">1.2</span><h2>OpenTelemetry: a stack aberta</h2></div>
+  <div class="topico-head"><span class="topico-num">1.2</span><h2>SRE: confiabilidade como engenharia</h2></div>
   <div class="section-label">Conceito</div>
-  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 2 · Um padrão para todos os sinais</div><h3>Instrumentar uma vez, enviar para qualquer lugar</h3><p>Cada fornecedor de observabilidade tinha seu agente e seu SDK. O OpenTelemetry (CNCF) padronizou API, SDK, protocolo (OTLP) e convenções de nomes, inclusive para IA generativa.</p></div><div class="slide"><h3>Arquitetura do lab</h3><div class="flow"><div class="node"><b>Agente (Python)</b><span>SDK OpenTelemetry gera spans, métricas e logs</span></div><div class="arrow">→</div><div class="node"><b>OTLP</b><span>HTTP :4318 / gRPC :4317</span></div><div class="arrow">→</div><div class="node"><b>Collector</b><span>recebe, processa, roteia</span></div><div class="arrow">→</div><div class="node hl"><b>Grafana LGTM</b><span>Tempo · Loki · Prometheus · Grafana</span></div></div><ul><li><b>API/SDK</b>: o código cria spans e métricas; o SDK agrupa e exporta.</li><li><b>Collector</b>: ponto central para mascarar dados, amostrar e mandar para vários backends.</li><li><b>Backends</b>: abertos (Grafana, Jaeger, Phoenix, Langfuse) ou comerciais (Datadog, New Relic, Dynatrace) — todos aceitam OTLP.</li></ul><p class="note">Referências: <a href="https://opentelemetry.io/docs/collector/" target="_blank" rel="noopener">OpenTelemetry Collector</a> · <a href="https://github.com/grafana/docker-otel-lgtm" target="_blank" rel="noopener">grafana/docker-otel-lgtm</a>.</p></div><div class="slide"><h3>Anatomia de um span</h3><div class="cols"><div class="card-mini"><h4>Identidade</h4><ul><li><code>trace_id</code>: a requisição inteira</li><li><code>span_id</code> e <code>parent_span_id</code>: a árvore</li></ul></div><div class="card-mini"><h4>Tempo e status</h4><ul><li>início, fim, duração</li><li><code>OK</code> / <code>ERROR</code> + exceção registrada</li></ul></div><div class="card-mini"><h4>Contexto</h4><ul><li><b>atributos</b>: chave/valor pesquisáveis</li><li><b>resource</b>: <code>service.name</code>, ambiente</li><li><b>eventos</b> e <b>links</b></li></ul></div></div></div></div>
-  <div class="section-label">Prática</div>
-  <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 1.2</span><h3>O agente caixa-preta</h3><span class="lab-time">~20 min</span></div>
-    <p class="lab-goal">Rodar o agente de atendimento sem telemetria e constatar o que não dá para responder.</p>
-    <ol class="steps"><li><div><p>Crie o ambiente Python:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; python3 -m venv .venv &amp;&amp; source .venv/bin/activate
-pip install -q openai==3.55.1 fastapi==0.164.0 uvicorn==0.54.0 httpx==0.28.1</code></pre></div></div></li><li><div><p>As ferramentas do agente, com dados fictícios da Loja:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; ferramentas.py &lt;&lt;&#x27;EOF&#x27;
-&quot;&quot;&quot;Ferramentas do agente de atendimento: dados fictícios da Loja.&quot;&quot;&quot;
-import json
-
-PEDIDOS = {
-    &quot;1001&quot;: {&quot;status&quot;: &quot;entregue&quot;, &quot;data&quot;: &quot;2026-11-10&quot;, &quot;total&quot;: 349.90},
-    &quot;1002&quot;: {&quot;status&quot;: &quot;em transporte&quot;, &quot;previsao&quot;: &quot;2026-11-21&quot;, &quot;total&quot;: 89.00},
-    &quot;1003&quot;: {&quot;status&quot;: &quot;cancelado&quot;, &quot;motivo&quot;: &quot;pagamento recusado&quot;, &quot;total&quot;: 1299.00},
-    &quot;1004&quot;: {&quot;status&quot;: &quot;aguardando pagamento&quot;, &quot;total&quot;: 59.90},
-}
-
-POLITICAS = {
-    &quot;troca&quot;: &quot;Trocas em até 30 dias após a entrega, com o produto sem uso e na embalagem original.&quot;,
-    &quot;devolucao&quot;: &quot;Devolução por arrependimento em até 7 dias após a entrega, com reembolso integral.&quot;,
-    &quot;frete&quot;: &quot;Frete grátis para compras acima de R$ 199. Prazo de 3 a 7 dias úteis.&quot;,
-    &quot;garantia&quot;: &quot;Garantia de 12 meses contra defeito de fabricação.&quot;,
-}
-
-FERRAMENTAS = [
-    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {
-        &quot;name&quot;: &quot;consultar_pedido&quot;,
-        &quot;description&quot;: &quot;Consulta status, data e valor de um pedido pelo número.&quot;,
-        &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;pedido_id&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;pedido_id&quot;]}}},
-    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {
-        &quot;name&quot;: &quot;buscar_politica&quot;,
-        &quot;description&quot;: &quot;Busca a política da Loja sobre um tema: troca, devolucao, frete ou garantia.&quot;,
-        &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;tema&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;tema&quot;]}}},
-    {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {
-        &quot;name&quot;: &quot;abrir_chamado&quot;,
-        &quot;description&quot;: &quot;Abre um chamado para um atendente humano quando o agente não consegue resolver.&quot;,
-        &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;resumo&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;resumo&quot;]}}},
-]
-
-
-def executar(nome, args):
-    if nome == &quot;consultar_pedido&quot;:
-        pedido = PEDIDOS.get(str(args.get(&quot;pedido_id&quot;, &quot;&quot;)).strip(&quot;# &quot;))
-        return json.dumps(pedido or {&quot;erro&quot;: &quot;pedido não encontrado&quot;}, ensure_ascii=False)
-    if nome == &quot;buscar_politica&quot;:
-        tema = str(args.get(&quot;tema&quot;, &quot;&quot;)).lower().replace(&quot;ç&quot;, &quot;c&quot;).replace(&quot;ã&quot;, &quot;a&quot;)
-        achou = [t for t in POLITICAS if t[:5] in tema or tema[:5] in t]
-        return POLITICAS[achou[0]] if achou else &quot;Nenhuma política encontrada para esse tema.&quot;
-    if nome == &quot;abrir_chamado&quot;:
-        return json.dumps({&quot;chamado&quot;: &quot;CH-4821&quot;, &quot;fila&quot;: &quot;atendimento humano&quot;})
-    raise ValueError(f&quot;ferramenta desconhecida: {nome}&quot;)
-EOF</code></pre></div></div></li><li><div><p>O agente: um loop que chama o LLM, executa as ferramentas pedidas e devolve a resposta:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; agente.py &lt;&lt;&#x27;EOF&#x27;
-&quot;&quot;&quot;Agente de atendimento da Loja, versão caixa-preta: funciona, mas não conta nada do que faz.&quot;&quot;&quot;
-import json, os
-from fastapi import FastAPI
-from pydantic import BaseModel
-from openai import OpenAI
-from ferramentas import FERRAMENTAS, executar
-
-MODELO = os.getenv(&quot;LLM_MODEL&quot;, &quot;openai/gpt-4.1-mini&quot;)
-llm = OpenAI(base_url=os.getenv(&quot;LLM_BASE_URL&quot;), api_key=os.getenv(&quot;LLM_API_KEY&quot;))
-SISTEMA = (&quot;Você é o agente de atendimento da Loja. Responda em português, em no máximo 3 frases. &quot;
-           &quot;Use consultar_pedido para pedidos e buscar_politica para trocas, devoluções, frete e garantia. &quot;
-           &quot;Se não conseguir resolver, use abrir_chamado.&quot;)
-
-app = FastAPI()
-
-
-class Pergunta(BaseModel):
-    texto: str
-
-
-@app.post(&quot;/chat&quot;)
-def chat(p: Pergunta):
-    msgs = [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: SISTEMA}, {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: p.texto}]
-    for _ in range(5):
-        m = llm.chat.completions.create(model=MODELO, messages=msgs, tools=FERRAMENTAS,
-                                        temperature=0).choices[0].message
-        if not m.tool_calls:
-            return {&quot;resposta&quot;: m.content}
-        msgs.append(m.model_dump(exclude_none=True))
-        for chamada in m.tool_calls:
-            saida = executar(chamada.function.name, json.loads(chamada.function.arguments or &quot;{}&quot;))
-            msgs.append({&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: chamada.id, &quot;content&quot;: saida})
-    return {&quot;resposta&quot;: &quot;Não consegui concluir.&quot;}
-EOF</code></pre></div></div></li><li><div><p>Suba o agente num terminal:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; source ~/obs/.env
-uvicorn agente:app --port 8000</code></pre></div></div></li><li><div><p>Em outro terminal, faça perguntas:</p><div class="code"><span class="lang">terminal</span><pre><code>pergunta() { curl -s localhost:8000/chat -H &#x27;content-type: application/json&#x27; -d &quot;{\&quot;texto\&quot;: \&quot;$1\&quot;}&quot; | python3 -m json.tool; }
-pergunta &quot;Qual o status do pedido 1002?&quot;
-pergunta &quot;Posso trocar um produto depois de 20 dias?&quot;
-pergunta &quot;Fui cobrado duas vezes, quero falar com uma pessoa&quot;
-pergunta &quot;Cadê meu pedido 9999?&quot;</code></pre></div></div></li></ol>
-    <div class="expect"><b>Resultado esperado</b><ul><li>As quatro perguntas recebem respostas em português.</li><li>Você não consegue dizer quantas chamadas ao LLM cada resposta fez, quais ferramentas usou, quanto tempo cada passo levou ou quantos tokens gastou.</li></ul></div>
-    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>“Funcionou” não basta: precisamos ver os passos internos do agente.</li><li>Sem dados, toda discussão sobre lentidão, custo ou alucinação vira opinião.</li></ul></div><div class="challenge"><b>Desafio</b><p>Pergunte duas vezes a mesma coisa e compare as respostas. O que muda? Como você provaria qual delas está correta?</p></div>
-    <label class="done"><input type="checkbox" id="ex-1-2"> Exercício 1.2 concluído</label>
-  </div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 2 · Google, 2003</div><h3>E se a operação fosse feita por engenheiros de software?</h3><p>O SRE (Site Reliability Engineering) surgiu no Google em 2003 para escalar a confiabilidade dos serviços: automatizar tarefas manuais, operar com código e equilibrar velocidade de inovação com estabilidade.</p></div><div class="slide"><h3>O que é SRE</h3><p>SRE é uma prática que aplica princípios de engenharia de software às operações de TI. O objetivo é garantir que os sistemas sejam confiáveis, escaláveis e eficientes, usando observabilidade para melhorar continuamente.</p><div class="cols"><div class="card-mini"><h4>Princípios</h4><ul><li>Confiabilidade é a funcionalidade mais importante</li><li>100% é a meta errada</li><li>Reduzir trabalho manual repetitivo (toil)</li></ul></div><div class="card-mini"><h4>Práticas</h4><ul><li>SLOs e error budget</li><li>Golden signals</li><li>Postmortems sem culpados</li></ul></div></div><p class="note">Referências: <a href="https://sre.google/books/" target="_blank" rel="noopener">Google · SRE books</a>.</p></div><div class="slide"><h3>Níveis de serviço: SLA, SLO, SLI</h3><div class="tbl"><table><thead><tr><th>Conceito</th><th>O que é</th><th>Exemplo</th></tr></thead><tbody><tr><td><b>SLI</b></td><td>Métrica que mede o desempenho do serviço</td><td>% de requisições com sucesso e abaixo de 300 ms</td></tr><tr><td><b>SLO</b></td><td>Meta interna para o SLI</td><td>99,95% de disponibilidade no mês</td></tr><tr><td><b>SLA</b></td><td>Compromisso com o cliente, com compensação</td><td>99,9% de disponibilidade, ou crédito na fatura</td></tr><tr><td><b>Error budget</b></td><td>Margem de erro permitida: 100% − SLO</td><td>SLO de 99,95% → 0,05% ≈ 21,6 min por mês</td></tr><tr><td><b>Burn rate</b></td><td>Velocidade de consumo do error budget</td><td>Burn rate 2 → orçamento acaba na metade do mês</td></tr></tbody></table></div><p>O error budget equilibra estabilidade e velocidade: com orçamento sobrando, o time arrisca mais; com orçamento no fim, prioriza confiabilidade.</p></div><div class="slide"><h3>Os 4 golden signals</h3><div class="tbl"><table><thead><tr><th>Sinal</th><th>Pergunta</th><th>Como medir</th></tr></thead><tbody><tr><td><b>Latência</b></td><td>Quanto tempo leva para responder?</td><td>Percentis (p50, p95, p99), separando sucesso de erro</td></tr><tr><td><b>Tráfego</b></td><td>Quanta demanda o sistema recebe?</td><td>Requisições por segundo (RPS), throughput</td></tr><tr><td><b>Erros</b></td><td>Quantas requisições falham?</td><td>Taxa de 5xx, timeouts, respostas erradas</td></tr><tr><td><b>Saturação</b></td><td>Quão perto do limite o sistema está?</td><td>CPU, memória, I/O, filas, requisições em andamento</td></tr></tbody></table></div><p>Criados no SRE do Google para detectar rápido o que afeta o usuário. Se você só puder medir quatro coisas, meça estas.</p><p class="note">Referências: <a href="https://sre.google/sre-book/monitoring-distributed-systems/" target="_blank" rel="noopener">Google SRE Book · Monitoring Distributed Systems</a>.</p></div><div class="slide"><h3>Outros métodos: RED e USE</h3><div class="cols"><div class="card-mini"><h4>RED (serviços)</h4><ul><li><b>R</b>ate: requisições por segundo</li><li><b>E</b>rrors: requisições com falha</li><li><b>D</b>uration: distribuição da latência</li></ul></div><div class="card-mini"><h4>USE (recursos)</h4><ul><li><b>U</b>tilization: % do tempo ocupado</li><li><b>S</b>aturation: trabalho na fila</li><li><b>E</b>rrors: falhas do recurso</li></ul></div><div class="card-mini"><h4>Quando usar</h4><ul><li>RED para APIs e microsserviços</li><li>USE para CPU, disco, rede, pools</li><li>Golden signals cobrem os dois</li></ul></div></div><p class="note">Referências: <a href="https://grafana.com/blog/2018/08/02/the-red-method-how-to-instrument-your-services/" target="_blank" rel="noopener">The RED Method</a> · <a href="https://www.brendangregg.com/usemethod.html" target="_blank" rel="noopener">The USE Method</a>.</p></div></div>
+  
 </article>
 <!-- 1.3 -->
 <article class="topico" id="a1-t3">
-  <div class="topico-head"><span class="topico-num">1.3</span><h2>Traces do agente com as convenções GenAI</h2></div>
+  <div class="topico-head"><span class="topico-num">1.3</span><h2>Observabilidade e OpenTelemetry</h2></div>
   <div class="section-label">Conceito</div>
-  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 3 · Abrindo a caixa</div><h3>Cada passo do agente vira um span</h3><p>A equipe decide instrumentar o agente seguindo as convenções semânticas GenAI do OpenTelemetry: nomes e atributos padronizados para que qualquer ferramenta entenda o trace.</p></div><div class="slide"><h3>A árvore de um agente</h3><div class="code"><span class="lang">trace</span><pre><code>invoke_agent atendimento                 2.8s
-├─ chat openai/gpt-4.1-mini              1.1s  in=412 out=18  finish=tool_calls
-├─ execute_tool consultar_pedido         2ms
-└─ chat openai/gpt-4.1-mini              1.6s  in=470 out=41  finish=stop</code></pre></div><ul><li><code>invoke_agent {agente}</code>: a conversa inteira</li><li><code>chat {modelo}</code>: cada chamada ao LLM (SpanKind CLIENT)</li><li><code>execute_tool {ferramenta}</code>: cada ferramenta executada</li></ul><p class="note">Referências: <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener">OpenTelemetry · GenAI semantic conventions</a>.</p></div><div class="slide"><h3>Atributos gen_ai.* que vamos usar</h3><div class="tbl"><table><thead><tr><th>Atributo</th><th>Exemplo</th><th>Para quê</th></tr></thead><tbody><tr><td><code>gen_ai.operation.name</code></td><td>chat, execute_tool, invoke_agent</td><td>tipo do passo</td></tr><tr><td><code>gen_ai.provider.name</code></td><td>openai, github, ollama</td><td>quem serviu o modelo</td></tr><tr><td><code>gen_ai.request.model</code> / <code>response.model</code></td><td>openai/gpt-4.1-mini</td><td>versão real usada</td></tr><tr><td><code>gen_ai.usage.input_tokens</code> / <code>output_tokens</code></td><td>412 / 18</td><td>custo e contexto</td></tr><tr><td><code>gen_ai.response.finish_reasons</code></td><td>[tool_calls]</td><td>por que o modelo parou</td></tr><tr><td><code>gen_ai.tool.name</code> / <code>tool.call.id</code></td><td>consultar_pedido</td><td>trajetória do agente</td></tr></tbody></table></div><p class="note">Referências: <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener">OpenTelemetry · GenAI semantic conventions</a>.</p></div></div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 3 · Saber o que está acontecendo</div><h3>Monitorar responde “está funcionando?”. Observar responde “por quê?”</h3><p>Com microsserviços, nuvem e, agora, modelos de IA, as falhas deixaram de ser previsíveis. Não dá para criar um painel para cada pergunta: é preciso dados ricos para responder perguntas novas.</p></div><div class="slide"><h3>Monitoramento × observabilidade</h3><div class="tbl"><table><thead><tr><th></th><th>Monitoramento</th><th>Observabilidade</th></tr></thead><tbody><tr><td>Pergunta</td><td>Está funcionando?</td><td>Por que está se comportando assim?</td></tr><tr><td>Abordagem</td><td>Verificações e painéis para falhas conhecidas</td><td>Explorar dados para entender falhas novas</td></tr><tr><td>Sinais</td><td>Métricas agregadas, health checks</td><td>Métricas, logs e traces correlacionados</td></tr></tbody></table></div><p class="note">Referências: <a href="https://opentelemetry.io/docs/concepts/observability-primer/" target="_blank" rel="noopener">Observability primer</a>.</p></div><div class="slide"><h3>Os pilares</h3><div class="cols"><div class="card-mini"><h4>Métricas</h4><ul><li>Números agregados no tempo</li><li>Baratas, ótimas para tendência e alerta</li><li><b>Foco desta aula</b></li></ul></div><div class="card-mini"><h4>Logs</h4><ul><li>Eventos com texto e contexto</li><li>Detalhe do que aconteceu</li></ul></div><div class="card-mini"><h4>Traces</h4><ul><li>O caminho de uma requisição entre serviços</li><li>Onde o tempo foi gasto</li></ul></div></div></div><div class="slide"><h3>OpenTelemetry</h3><p>Projeto da CNCF que padroniza como gerar, coletar e exportar telemetria. Instrumente uma vez, envie para qualquer backend.</p><div class="flow"><div class="node"><b>API</b><span>o código cria métricas, spans e logs</span></div><div class="arrow">→</div><div class="node"><b>SDK</b><span>agrega e processa</span></div><div class="arrow">→</div><div class="node"><b>Exportador</b><span>Prometheus, OTLP…</span></div><div class="arrow">→</div><div class="node hl"><b>Backend</b><span>Prometheus, Grafana, Datadog, New Relic…</span></div></div><ul><li><b>Instrumentação automática</b>: bibliotecas (FastAPI, HTTP, banco) já medidas.</li><li><b>Instrumentação manual</b>: métricas de negócio (pedidos, valor, uso de tokens).</li><li><b>Convenções semânticas</b>: nomes padronizados, como <code>http.server.request.duration</code>.</li></ul><p class="note">Referências: <a href="https://opentelemetry.io/docs/" target="_blank" rel="noopener">OpenTelemetry docs</a> · <a href="https://opentelemetry.io/docs/specs/semconv/http/http-metrics/" target="_blank" rel="noopener">HTTP metrics semconv</a>.</p></div></div>
   <div class="section-label">Prática</div>
   <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 1.3</span><h3>Instrumentando o agente com traces</h3><span class="lab-time">~35 min</span></div>
-    <p class="lab-goal">Configurar o SDK do OpenTelemetry e criar spans para o agente, o LLM e as ferramentas, com atributos gen_ai.*.</p>
-    <ol class="steps"><li><div><p>Pare o agente (Ctrl+C) e instale o SDK:</p><div class="code"><span class="lang">terminal</span><pre><code>pip install -q opentelemetry-sdk==1.45.2 opentelemetry-exporter-otlp-proto-http==1.45.2</code></pre></div></div></li><li><div><p>O módulo de telemetria liga traces, métricas e logs e exporta por OTLP para o Collector:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; telemetria.py &lt;&lt;&#x27;EOF&#x27;
-&quot;&quot;&quot;Liga os três sinais do OpenTelemetry (traces, métricas e logs) e exporta por OTLP para o Collector.&quot;&quot;&quot;
-import logging
-from opentelemetry import trace, metrics, _logs
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
-from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
-
-
-def configurar(servico):
-    # O endpoint vem de OTEL_EXPORTER_OTLP_ENDPOINT (padrão: http://localhost:4318)
-    recurso = Resource.create({&quot;service.name&quot;: servico, &quot;service.namespace&quot;: &quot;loja&quot;,
-                               &quot;deployment.environment.name&quot;: &quot;lab&quot;})
-    tp = TracerProvider(resource=recurso)
-    tp.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
-    trace.set_tracer_provider(tp)
-
-    leitor = PeriodicExportingMetricReader(OTLPMetricExporter(), export_interval_millis=10000)
-    metrics.set_meter_provider(MeterProvider(resource=recurso, metric_readers=[leitor]))
-
-    lp = LoggerProvider(resource=recurso)
-    lp.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter()))
-    _logs.set_logger_provider(lp)
-    logging.basicConfig(level=logging.INFO, format=&quot;%(asctime)s %(levelname)s %(name)s %(message)s&quot;)
-    logging.getLogger().addHandler(LoggingHandler(logger_provider=lp))
-EOF</code></pre></div></div></li><li><div><p>O agente instrumentado à mão:</p><div class="code"><span class="lang">terminal</span><pre><code>cat &gt; agente.py &lt;&lt;&#x27;EOF&#x27;
-&quot;&quot;&quot;Agente de atendimento da Loja: um loop de LLM com ferramentas, instrumentado à mão com OpenTelemetry.&quot;&quot;&quot;
-import json, logging, os
-from fastapi import FastAPI
-from pydantic import BaseModel
-from openai import OpenAI
-from opentelemetry import trace
-from opentelemetry.trace import Status, StatusCode
-from telemetria import configurar
-from ferramentas import FERRAMENTAS, executar
-
-configurar(&quot;atendimento&quot;)
-tracer = trace.get_tracer(&quot;loja.agente&quot;)
-log = logging.getLogger(&quot;agente&quot;)
-
-MODELO = os.getenv(&quot;LLM_MODEL&quot;, &quot;openai/gpt-4.1-mini&quot;)
-PROVEDOR = os.getenv(&quot;LLM_PROVIDER&quot;, &quot;github&quot;)
-llm = OpenAI(base_url=os.getenv(&quot;LLM_BASE_URL&quot;), api_key=os.getenv(&quot;LLM_API_KEY&quot;))
-SISTEMA = (&quot;Você é o agente de atendimento da Loja. Responda em português, em no máximo 3 frases. &quot;
-           &quot;Use consultar_pedido para pedidos e buscar_politica para trocas, devoluções, frete e garantia. &quot;
-           &quot;Se não conseguir resolver, use abrir_chamado.&quot;)
-
-app = FastAPI()
-
-
-class Pergunta(BaseModel):
-    texto: str
-
-
-def chamar_llm(msgs):
-    with tracer.start_as_current_span(f&quot;chat {MODELO}&quot;, kind=trace.SpanKind.CLIENT) as s:
-        s.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;chat&quot;)
-        s.set_attribute(&quot;gen_ai.provider.name&quot;, PROVEDOR)
-        s.set_attribute(&quot;gen_ai.request.model&quot;, MODELO)
-        s.set_attribute(&quot;gen_ai.request.temperature&quot;, 0)
-        r = llm.chat.completions.create(model=MODELO, messages=msgs, tools=FERRAMENTAS, temperature=0)
-        s.set_attribute(&quot;gen_ai.response.model&quot;, r.model)
-        s.set_attribute(&quot;gen_ai.response.finish_reasons&quot;, [r.choices[0].finish_reason])
-        s.set_attribute(&quot;gen_ai.usage.input_tokens&quot;, r.usage.prompt_tokens)
-        s.set_attribute(&quot;gen_ai.usage.output_tokens&quot;, r.usage.completion_tokens)
-        return r.choices[0].message
-
-
-def chamar_ferramenta(chamada):
-    nome = chamada.function.name
-    with tracer.start_as_current_span(f&quot;execute_tool {nome}&quot;) as s:
-        s.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;execute_tool&quot;)
-        s.set_attribute(&quot;gen_ai.tool.name&quot;, nome)
-        s.set_attribute(&quot;gen_ai.tool.call.id&quot;, chamada.id)
-        try:
-            resultado = executar(nome, json.loads(chamada.function.arguments or &quot;{}&quot;))
-        except Exception as e:
-            s.record_exception(e)
-            s.set_status(Status(StatusCode.ERROR, str(e)))
-            resultado = f&quot;erro: {e}&quot;
-        log.info(&quot;ferramenta %s chamada com %s&quot;, nome, chamada.function.arguments)
-        return resultado
-
-
-@app.post(&quot;/chat&quot;)
-def chat(p: Pergunta):
-    with tracer.start_as_current_span(&quot;invoke_agent atendimento&quot;) as span:
-        span.set_attribute(&quot;gen_ai.operation.name&quot;, &quot;invoke_agent&quot;)
-        span.set_attribute(&quot;gen_ai.agent.name&quot;, &quot;atendimento&quot;)
-        msgs = [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: SISTEMA}, {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: p.texto}]
-        usadas = []
-        for passo in range(1, 6):
-            m = chamar_llm(msgs)
-            if not m.tool_calls:
-                span.set_attribute(&quot;agente.passos&quot;, passo)
-                log.info(&quot;resposta em %d passos, ferramentas=%s&quot;, passo, usadas)
-                return {&quot;resposta&quot;: m.content, &quot;ferramentas&quot;: usadas,
-                        &quot;trace_id&quot;: format(span.get_span_context().trace_id, &quot;032x&quot;)}
-            msgs.append(m.model_dump(exclude_none=True))
-            for chamada in m.tool_calls:
-                usadas.append(chamada.function.name)
-                msgs.append({&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: chamada.id, &quot;content&quot;: chamar_ferramenta(chamada)})
-        span.set_status(Status(StatusCode.ERROR, &quot;limite de passos&quot;))
-        log.warning(&quot;limite de passos atingido, ferramentas=%s&quot;, usadas)
-        return {&quot;resposta&quot;: &quot;Não consegui concluir. Vou abrir um chamado.&quot;, &quot;ferramentas&quot;: usadas}
-EOF</code></pre></div></div></li><li><div><p>Suba de novo e repita as perguntas (a função <code>pergunta</code> do exercício anterior):</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs/agente &amp;&amp; source .venv/bin/activate &amp;&amp; source ~/obs/.env
-uvicorn agente:app --port 8000</code></pre></div><p>Veja os spans chegando no Collector:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/obs &amp;&amp; docker compose logs otelcol --tail 20</code></pre></div></div></li><li><div><p>No Grafana: <b>Explore → Tempo → Search</b>, Service Name <code>atendimento</code>. Abra um trace e expanda os atributos de um span <code>chat</code>. Depois rode, em <b>TraceQL</b>:</p><div class="code"><span class="lang">traceql</span><pre><code>{span.gen_ai.operation.name=&quot;execute_tool&quot;}
-{span.gen_ai.usage.input_tokens &gt; 400}
-{name=&quot;invoke_agent atendimento&quot;} | select(span.agente.passos)</code></pre></div></div></li></ol>
-    <div class="expect"><b>Resultado esperado</b><ul><li>Cada pergunta gera um trace com <code>POST /chat</code> (o FastAPI já se instrumenta), <code>invoke_agent</code>, um ou mais <code>chat</code> e os <code>execute_tool</code>.</li><li>Os spans <code>chat</code> mostram tokens de entrada e saída e o <code>finish_reason</code>.</li><li>A TraceQL filtra conversas por ferramenta e por volume de tokens.</li></ul></div>
-    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Seguir as convenções GenAI deixa o trace legível em qualquer backend.</li><li>O trace mostra a trajetória: quantos passos e quais ferramentas.</li><li>Tokens por passo explicam custo e latência.</li></ul></div><div class="challenge"><b>Desafio</b><p>Encontre o trace da pergunta sobre o pedido 9999. O agente chamou a ferramenta? O que ela devolveu? A resposta final foi fiel a isso?</p></div>
-    <label class="done"><input type="checkbox" id="ex-1-3"> Exercício 1.3 concluído</label>
+    <div class="lab-head"><span class="lab-tag">Exercício 1.2</span><h3>Lendo as métricas que a aplicação expõe</h3><span class="lab-time">~20 min</span></div>
+    <p class="lab-goal">Gerar requisições na API e ler, no formato de texto do Prometheus, as métricas criadas pelo OpenTelemetry.</p>
+    <ol class="steps"><li><div><p>Chame a API:</p><div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:8000/produtos; echo
+curl -s localhost:8000/produtos/9; echo
+curl -s -X POST localhost:8000/checkout; echo</code></pre></div></div></li><li><div><p>Veja as métricas no endpoint <code>/metrics</code>:</p><div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:9464/metrics | grep -E &#x27;^(http_server_request_duration_seconds_count|loja_pedidos_total|process_cpu_seconds_total)&#x27;</code></pre></div></div></li><li><div><p>Veja os baldes (<i>buckets</i>) do histograma de latência da rota <code>/checkout</code>:</p><div class="code"><span class="lang">terminal</span><pre><code>curl -s localhost:9464/metrics | grep &#x27;http_server_request_duration_seconds_bucket&#x27; | grep &#x27;/checkout&#x27; | grep &#x27;status_code=&quot;200&quot;&#x27;</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li><code>http_server_request_duration_seconds_count</code> aparece com os labels <code>http_route</code>, <code>http_request_method</code> e <code>http_response_status_code</code>.</li><li><code>loja_pedidos_total</code> aparece separado por <code>pagamento</code>.</li><li>Os buckets mostram quantas requisições ficaram abaixo de cada limite (<code>le</code>).</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>O nome da métrica OpenTelemetry vira nome Prometheus: pontos viram sublinhado e a unidade vira sufixo.</li><li>Atributos viram labels; cada combinação de labels é uma série temporal.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-1-2"> Exercício 1.2 concluído</label>
   </div>
 </article>
 <!-- 1.4 -->
 <article class="topico" id="a1-t4">
-  <div class="topico-head"><span class="topico-num">1.4</span><h2>Logs correlacionados e investigação</h2></div>
+  <div class="topico-head"><span class="topico-num">1.4</span><h2>Prometheus e PromQL</h2></div>
   <div class="section-label">Conceito</div>
-  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 4 · Do sintoma à causa</div><h3>Um log sem trace_id é uma pista solta</h3><p>O SDK grava o <code>trace_id</code> e o <code>span_id</code> em cada log emitido dentro de um span. No Grafana, isso vira um link: do log para o trace e do trace para os logs.</p></div><div class="slide"><h3>Fluxo de investigação</h3><div class="flow"><div class="node"><b>Sintoma</b><span>reclamação, alerta, métrica fora do normal</span></div><div class="arrow">→</div><div class="node"><b>Métrica</b><span>quando começou, quanto afeta</span></div><div class="arrow">→</div><div class="node"><b>Trace</b><span>qual passo, qual modelo, quantos tokens</span></div><div class="arrow">→</div><div class="node"><b>Log</b><span>argumentos, erro, decisão</span></div><div class="arrow">→</div><div class="node hl"><b>Causa</b><span>prompt, ferramenta, modelo, dado</span></div></div><ul><li>Logs estruturados com <code>service.name</code>, <code>trace_id</code> e nível.</li><li>Não logue o prompt inteiro por padrão: custo e privacidade (Aula 02).</li></ul></div></div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 4 · Séries temporais</div><h3>Um número por instante, para sempre</h3><p>O Prometheus (CNCF, criado na SoundCloud em 2012) busca as métricas de cada alvo em intervalos fixos e guarda séries temporais: nome, labels e valores no tempo.</p></div><div class="slide"><h3>Arquitetura</h3><div class="flow"><div class="node"><b>Aplicação</b><span>expõe /metrics</span></div><div class="arrow">→</div><div class="node"><b>Prometheus</b><span>scrape a cada 5 s, guarda o TSDB</span></div><div class="arrow">→</div><div class="node"><b>PromQL</b><span>consulta e agrega</span></div><div class="arrow">→</div><div class="node hl"><b>Grafana</b><span>visualiza</span></div></div><ul><li>Modelo <b>pull</b>: o Prometheus busca; a aplicação não precisa saber para onde mandar.</li><li>Também aceita <b>push</b> via OTLP e remote write, útil para jobs curtos e para o Collector.</li><li>Alertas: regras no Prometheus + Alertmanager, ou no Grafana.</li></ul><p class="note">Referências: <a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">Prometheus overview</a>.</p></div><div class="slide"><h3>Tipos de métrica</h3><div class="tbl"><table><thead><tr><th>Tipo</th><th>Comportamento</th><th>Exemplo no lab</th></tr></thead><tbody><tr><td><b>Counter</b></td><td>Só cresce (zera ao reiniciar)</td><td><code>loja_pedidos_total</code></td></tr><tr><td><b>Gauge</b></td><td>Sobe e desce</td><td><code>http_server_active_requests</code></td></tr><tr><td><b>Histogram</b></td><td>Contagens por faixa + soma + total</td><td><code>http_server_request_duration_seconds</code></td></tr><tr><td><b>Summary</b></td><td>Percentis calculados no cliente</td><td>pouco usado com OpenTelemetry</td></tr></tbody></table></div></div><div class="slide"><h3>PromQL essencial</h3><div class="code"><span class="lang">promql</span><pre><code># taxa por segundo de um counter, janela de 1 minuto
+rate(http_server_request_duration_seconds_count[1m])
+# agregando por rota
+sum by (http_route) (rate(http_server_request_duration_seconds_count[1m]))
+# percentil 95 a partir do histograma
+histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket[1m])))
+# filtro por regex nos labels
+http_server_request_duration_seconds_count{http_response_status_code=~&quot;5..&quot;}</code></pre></div><ul><li>Nunca use o valor bruto de um counter: use <code>rate()</code> ou <code>increase()</code>.</li><li>Média esconde a cauda: use percentis.</li><li>Cuidado com cardinalidade: IDs de usuário ou pedido <b>não</b> são labels.</li></ul><p class="note">Referências: <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">Querying Prometheus</a>.</p></div></div>
   <div class="section-label">Prática</div>
   <div class="lab">
-    <div class="lab-head"><span class="lab-tag">Exercício 1.4</span><h3>Do log ao trace</h3><span class="lab-time">~20 min</span></div>
-    <p class="lab-goal">Encontrar logs do agente no Loki, saltar para o trace correspondente e investigar uma resposta ruim.</p>
-    <ol class="steps"><li><div><p>No Grafana, <b>Explore → Loki</b>, rode:</p><div class="code"><span class="lang">logql</span><pre><code>{service_name=&quot;atendimento&quot;}
-{service_name=&quot;atendimento&quot;} |= &quot;consultar_pedido&quot;
-{service_name=&quot;atendimento&quot;} | detected_level=&quot;warn&quot;</code></pre></div></div></li><li><div><p>Abra uma linha de log e clique no link do <code>trace_id</code> para abrir o trace no Tempo. No trace, use <b>Logs for this span</b> para voltar.</p></div></li><li><div><p>Force um caminho diferente e investigue:</p><div class="code"><span class="lang">terminal</span><pre><code>pergunta &quot;Quero trocar o pedido 1003 e saber o frete&quot;</code></pre></div></div></li></ol>
-    <div class="expect"><b>Resultado esperado</b><ul><li>Os logs do agente aparecem no Loki com <code>trace_id</code> e <code>span_id</code>.</li><li>O link leva ao trace exato da conversa.</li><li>Na pergunta composta, o trace mostra mais passos e mais tokens.</li></ul></div>
-    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Correlação é o que transforma três ferramentas em uma investigação.</li><li>O caminho padrão de diagnóstico: métrica → trace → log.</li></ul></div>
+    <div class="lab-head"><span class="lab-tag">Exercício 1.3</span><h3>Os 4 golden signals em PromQL</h3><span class="lab-time">~30 min</span></div>
+    <p class="lab-goal">Escrever, no Prometheus, a consulta de cada golden signal da API da Loja.</p>
+    <ol class="steps"><li><div><p>Abra o Prometheus (porta 9090). Em <b>Status → Target health</b>, confira o alvo <code>loja-api</code> como <b>UP</b>.</p></div></li><li><div><p>Em <b>Query</b>, rode cada consulta e alterne entre <b>Table</b> e <b>Graph</b>:</p><div class="code"><span class="lang">promql</span><pre><code># 1. LATÊNCIA: p95 geral e por rota
+histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket[1m])))
+histogram_quantile(0.95, sum by (le, http_route) (rate(http_server_request_duration_seconds_bucket[1m])))
+
+# 2. TRÁFEGO: requisições por segundo, por rota
+sum by (http_route) (rate(http_server_request_duration_seconds_count[1m]))
+
+# 3. ERROS: fração de respostas 5xx (4xx é erro do cliente)
+sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~&quot;5..&quot;}[1m]))
+  / sum(rate(http_server_request_duration_seconds_count[1m]))
+
+# 4. SATURAÇÃO: CPU do processo (1 = um núcleo) e requisições em andamento
+rate(process_cpu_seconds_total{job=&quot;loja-api&quot;}[1m])
+sum(http_server_active_requests{job=&quot;loja-api&quot;})
+
+# BÔNUS: métrica de negócio, pedidos por minuto
+sum by (pagamento) (rate(loja_pedidos_total[1m])) * 60</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>O p95 de <code>/checkout</code> fica perto de 0,6 s; as rotas de produto, abaixo de 0,1 s.</li><li>O tráfego fica entre 3 e 5 requisições por segundo.</li><li>A taxa de erros 5xx fica perto de 0,3% (falhas de pagamento simuladas no checkout).</li><li>A CPU fica bem abaixo de 0,1.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Cada golden signal é uma consulta PromQL sobre a mesma métrica HTTP, mais as métricas do processo.</li><li>Separar por <code>http_route</code> mostra qual rota puxa a média para cima.</li></ul></div><div class="challenge"><b>Desafio</b><p>Escreva o SLI de disponibilidade (fração de respostas que não são 5xx) e calcule quanto do error budget de um SLO de 99,5% já foi consumido na última hora.</p></div>
+    <label class="done"><input type="checkbox" id="ex-1-3"> Exercício 1.3 concluído</label>
+  </div>
+</article>
+<!-- 1.5 -->
+<article class="topico" id="a1-t5">
+  <div class="topico-head"><span class="topico-num">1.5</span><h2>Grafana: dashboards dos golden signals</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 5 · Do número ao painel</div><h3>Um dashboard deve responder uma pergunta em segundos</h3><p>Às 3h da manhã, ninguém vai escrever PromQL. O dashboard dos golden signals mostra, de cima para baixo, se o serviço está saudável e onde olhar quando não está.</p></div><div class="slide"><h3>Boas práticas de dashboard</h3><div class="cols"><div class="card-mini"><h4>Layout</h4><ul><li>Topo: resumo em números (stat)</li><li>Abaixo: um bloco por sinal, com tendência</li><li>Do geral para o detalhe</li></ul></div><div class="card-mini"><h4>Leitura</h4><ul><li>Unidades certas (s, req/s, %)</li><li>Limiares em verde, laranja e vermelho</li><li>Legenda com média, máximo e último valor</li></ul></div><div class="card-mini"><h4>Como código</h4><ul><li>JSON versionado no Git</li><li>Provisionado na subida do Grafana</li><li>Variáveis (ex.: rota) em vez de painéis duplicados</li></ul></div></div></div><div class="slide"><h3>O dashboard do lab</h3><div class="tbl"><table><thead><tr><th>Linha</th><th>Painéis</th></tr></thead><tbody><tr><td>Resumo</td><td>Latência p95 · Tráfego · Taxa de erros 5xx · CPU</td></tr><tr><td>Latência</td><td>p50/p95/p99 · p95 por rota</td></tr><tr><td>Tráfego</td><td>Req/s por rota · Pedidos por minuto (negócio)</td></tr><tr><td>Erros</td><td>Respostas por status · Taxa de 5xx por rota</td></tr><tr><td>Saturação</td><td>Requisições em andamento · CPU · Memória</td></tr></tbody></table></div><p>Arquivo: <a href="https://gersoncarneiro.dev/obs-aulas/lab/aula-1/golden-signals.json" target="_blank" rel="noopener">golden-signals.json</a>. Variável <code>$rota</code> filtra todos os painéis; <code>$__rate_interval</code> ajusta a janela do <code>rate()</code> ao intervalo de scrape.</p><p class="note">Referências: <a href="https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/best-practices/" target="_blank" rel="noopener">Grafana · Dashboard best practices</a> · <a href="https://grafana.com/docs/grafana/latest/administration/provisioning/" target="_blank" rel="noopener">Provisioning</a>.</p></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.4</span><h3>Provisionando o dashboard dos 4 golden signals</h3><span class="lab-time">~20 min</span></div>
+    <p class="lab-goal">Baixar o dashboard em JSON para a pasta provisionada e explorar os painéis no Grafana.</p>
+    <ol class="steps"><li><div><p>Baixe o JSON do dashboard para a pasta que o Grafana lê:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/observability/aula-1
+curl -sL https://gersoncarneiro.dev/obs-aulas/lab/aula-1/golden-signals.json -o grafana/dashboards/golden-signals.json
+python3 -m json.tool grafana/dashboards/golden-signals.json | head -40</code></pre></div></div></li><li><div><p>Reinicie o Grafana para carregar o dashboard:</p><div class="code"><span class="lang">terminal</span><pre><code>docker compose restart grafana</code></pre></div></div></li><li><div><p>Abra o Grafana (porta 3000) → <b>Dashboards → Observability → Loja API · 4 Golden Signals</b>. Use a variável <b>Rota</b> no topo para filtrar só <code>/checkout</code>.</p></div></li><li><div><p>Em qualquer painel, clique em <b>⋮ → Edit</b> e veja a consulta PromQL: é a mesma que você escreveu no exercício anterior.</p></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>O dashboard aparece na pasta <b>Observability</b>, com 4 números no topo e 4 linhas: Latência, Tráfego, Erros e Saturação.</li><li>Filtrando por <code>/checkout</code>, o p95 sobe para perto de 0,6 s.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Dashboard como código: o mesmo JSON sobe igual em qualquer ambiente.</li><li>Variáveis evitam um dashboard por rota ou por serviço.</li></ul></div><div class="challenge"><b>Desafio</b><p>Adicione um painel <b>stat</b> com o SLI de disponibilidade do desafio 1.3 e limiares para um SLO de 99,5%. Exporte o JSON (<b>Share → Export</b>) e salve sobre o arquivo provisionado.</p></div>
     <label class="done"><input type="checkbox" id="ex-1-4"> Exercício 1.4 concluído</label>
+  </div>
+</article>
+<!-- 1.6 -->
+<article class="topico" id="a1-t6">
+  <div class="topico-head"><span class="topico-num">1.6</span><h2>Game day: vendo os sinais reagirem</h2></div>
+  <div class="section-label">Conceito</div>
+  <div class="slides"><div class="slide divider"><div class="dv-eyebrow">Capítulo 6 · Quebrando de propósito</div><h3>Um dashboard só prova que funciona quando algo dá errado</h3><p>A API tem uma rota <code>/chaos</code> que injeta latência e erros, e uma rota <code>/relatorio</code> que consome CPU. Vamos quebrar cada sinal e ver o dashboard contar a história.</p></div><div class="slide"><h3>Roteiro do game day</h3><div class="tbl"><table><thead><tr><th>Rodada</th><th>Ação</th><th>Sinal esperado</th></tr></thead><tbody><tr><td>1</td><td>+1 s de latência em todas as rotas</td><td>Latência p95 sobe; tráfego cai (os clientes esperam mais)</td></tr><tr><td>2</td><td>30% de erros</td><td>Taxa de 5xx sobe em todas as rotas</td></tr><tr><td>3</td><td>Rajada de 150 relatórios pesados</td><td>CPU e requisições em andamento disparam; latência sobe junto</td></tr><tr><td>4</td><td>Volta ao normal</td><td>Todos os sinais se recuperam</td></tr></tbody></table></div><ul><li>Anote o horário de cada rodada: é a sua linha do tempo de incidente.</li><li>Os sinais se influenciam: saturação causa latência; latência reduz tráfego.</li></ul></div></div>
+  <div class="section-label">Prática</div>
+  <div class="lab">
+    <div class="lab-head"><span class="lab-tag">Exercício 1.5</span><h3>Game day: latência, erros e saturação</h3><span class="lab-time">~25 min</span></div>
+    <p class="lab-goal">Injetar falhas na API e identificar cada uma pelo dashboard dos golden signals.</p>
+    <ol class="steps"><li><div><p>Deixe o dashboard aberto com atualização a cada 10 s. <b>Rodada 1</b>, latência:</p><div class="code"><span class="lang">terminal</span><pre><code>curl -s -X POST &quot;localhost:8000/chaos?latencia=1&quot;; echo</code></pre></div><p>Espere 1 minuto e observe Latência e Tráfego.</p></div></li><li><div><p><b>Rodada 2</b>, erros:</p><div class="code"><span class="lang">terminal</span><pre><code>curl -s -X POST &quot;localhost:8000/chaos?latencia=0&amp;erro=0.3&quot;; echo</code></pre></div><p>Observe a taxa de 5xx e o painel de respostas por status.</p></div></li><li><div><p><b>Rodada 3</b>, saturação: desligue os erros e dispare relatórios pesados em paralelo:</p><div class="code"><span class="lang">terminal</span><pre><code>curl -s -X POST &quot;localhost:8000/chaos?latencia=0&amp;erro=0&quot;; echo
+for i in $(seq 1 150); do curl -s localhost:8000/relatorio &gt; /dev/null &amp; done; wait</code></pre></div></div></li><li><div><p><b>Rodada 4</b>, recuperação: aguarde 2 minutos e confira os quatro números do topo.</p></div></li><li><div><p>Ao terminar a aula, pare a stack:</p><div class="code"><span class="lang">terminal</span><pre><code>cd ~/observability/aula-1
+docker compose down</code></pre></div></div></li></ol>
+    <div class="expect"><b>Resultado esperado</b><ul><li>Rodada 1: p95 acima de 1 s e tráfego menor.</li><li>Rodada 2: taxa de 5xx perto de 30% e barras de 500 no painel de status.</li><li>Rodada 3: CPU perto de 1 núcleo, mais de 100 requisições em andamento e p95 de vários segundos.</li><li>Rodada 4: os sinais voltam aos valores normais.</li></ul></div>
+    <div class="lab-learn"><b>O que aprendemos com este exercício?</b><ul><li>Cada falha tem uma assinatura nos golden signals.</li><li>Saturação aparece primeiro como fila (requisições em andamento) e depois como latência.</li><li>Sem os quatro sinais juntos, é fácil confundir causa e efeito.</li></ul></div>
+    <label class="done"><input type="checkbox" id="ex-1-5"> Exercício 1.5 concluído</label>
   </div>
 </article>
 </div>

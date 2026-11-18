@@ -26,10 +26,6 @@
         <button class="dd-btn" id="aulasBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="aulasMenu">Aulas<span class="dd-cur" id="aulasCur"></span><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></button>
         <div class="dd-menu" id="aulasMenu" hidden>
           <button class="tab" role="tab" data-tab="aula-1">Aula 01 <span class="prog"></span></button>
-          <button class="tab" role="tab" data-tab="aula-2">Aula 02 <span class="prog"></span></button>
-          <button class="tab" role="tab" data-tab="aula-3">Aula 03 <span class="prog"></span></button>
-          <button class="tab" role="tab" data-tab="aula-4">Aula 04 <span class="prog"></span></button>
-          <button class="tab" role="tab" data-tab="aula-5">Aula 05 <span class="prog"></span></button>
         </div>
       </div>
     </nav>
@@ -44,16 +40,12 @@
   <div class="hero">
     <div class="eyebrow">MBA AI Engineering &amp; Multi-agents · Módulo 4 · AI Operation · Prof. Gerson Carneiro · <span class="social"><a href="https://www.linkedin.com/in/gerson-carneiro/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a><a href="https://github.com/gersontpc" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a><a href="https://x.com/gersontpc" target="_blank" rel="noopener" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a></span></div>
     <h1>Observability</h1>
-    <p>Como saber se um agente de IA está rápido, barato e certo. Em 5 aulas de 4 horas, o agente de atendimento da Loja sai da caixa-preta: traces com as convenções GenAI do OpenTelemetry, métricas e KPIs, avaliações (evals) offline e online, dashboards e alertas. Cada tópico traz os slides do conceito e, logo abaixo, um exercício para fazer no GitHub Codespaces.</p>
+    <p>Como saber se um sistema, ou um agente de IA, está rápido, saudável e entregando valor. A disciplina parte dos fundamentos (DevOps, SRE e os golden signals) e chega a métricas, KPIs, avaliações de modelos, dashboards e alertas. Cada tópico traz os slides do conceito e, logo abaixo, um exercício para fazer no GitHub Codespaces.</p>
   </div>
 
-  <div class="section-label">Trilha da disciplina · 20h</div>
+  <div class="section-label">Trilha da disciplina</div>
   <div class="roadmap">
-    <button data-go="aula-1"><span class="n">AULA 01</span><h3>Observabilidade para agentes de IA</h3><p>Monitoramento × observabilidade, o que muda com LLMs, OpenTelemetry e Collector, stack Grafana LGTM, traces do agente com convenções GenAI e logs correlacionados.</p></button>
-    <button data-go="aula-2"><span class="n">AULA 02</span><h3>Instrumentação, multi-agentes e privacidade</h3><p>Auto-instrumentação do cliente OpenAI, propagação de contexto entre agentes, PII mascarada no Collector e tail sampling.</p></button>
-    <button data-go="aula-3"><span class="n">AULA 03</span><h3>Métricas e KPIs</h3><p>Golden signals de LLM, métricas GenAI, métricas do agente, custo por token, cardinalidade e KPIs em PromQL: resolução, escalonamento, custo por conversa resolvida.</p></button>
-    <button data-go="aula-4"><span class="n">AULA 04</span><h3>Eval-driven</h3><p>Dataset dourado, eval offline como gate de CI, LLM-as-judge calibrado, eval online por amostragem ligado ao trace e feedback do usuário.</p></button>
-    <button data-go="aula-5"><span class="n">AULA 05</span><h3>Alertas e dashboards</h3><p>Dashboards por público como código, alertas acionáveis com runbook, contact point e game day com chaos no agente.</p></button>
+    <button data-go="aula-1"><span class="n">AULA 01</span><h3>Fundamentos de observabilidade</h3><p>SysAdmin → DevOps → SRE → Platform Engineering, SLA/SLO/SLI e error budget, os 4 golden signals, pilares e OpenTelemetry, Prometheus e PromQL, dashboard dos golden signals no Grafana e game day.</p></button>
   </div>
   <div class="section-label">Como praticar nesta disciplina</div>
   <div class="learn">
@@ -74,27 +66,27 @@
     </div>
   </div>
 
-  <div class="section-label">Antes da primeira aula · GitHub Codespaces e GitHub Models</div>
-  <p class="home-lead">Os exercícios rodam no navegador, num ambiente Linux com Docker e Python. O LLM vem do GitHub Models, gratuito para quem tem conta no GitHub. Não é preciso instalar nada.</p>
+  <div class="section-label">Antes da primeira aula · GitHub Codespaces</div>
+  <p class="home-lead">Os exercícios rodam no navegador, num ambiente Linux com Docker já instalado. Não é preciso instalar nada na sua máquina.</p>
   <div class="cs-steps">
     <div class="cs">
       <span class="cs-n">1</span><h3>Crie o codespace</h3>
       <p>Em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, clique em <b>New codespace</b> (… → New with options) e escolha a máquina de <b>4 cores</b>.</p>
     </div>
     <div class="cs">
-      <span class="cs-n">2</span><h3>Valide o ambiente</h3>
+      <span class="cs-n">2</span><h3>Valide o Docker</h3>
       <p>Em <b>Terminal → New Terminal</b>:</p>
       <div class="code"><span class="lang">terminal</span><pre><code>docker version
-python3 --version</code></pre></div>
+docker compose version</code></pre></div>
     </div>
     <div class="cs">
-      <span class="cs-n">3</span><h3>Acesso ao LLM</h3>
-      <p>O GitHub Models usa a API da OpenAI. No Codespaces, o <code>GITHUB_TOKEN</code> costuma bastar; se não, crie um token fine-grained com <b>Models: read</b>. O plano gratuito tem limite de requisições por minuto e por dia: os scripts de carga já respeitam esse ritmo.</p>
-      <p class="cs-tip">Alternativas: Ollama local (sem conta, mais lento) ou qualquer chave compatível com a API da OpenAI.</p>
+      <span class="cs-n">3</span><h3>Acesse as ferramentas</h3>
+      <p>Quando a stack subir, abra a aba <b>Ports</b> e clique no globo da porta: <code>3000</code> Grafana, <code>9090</code> Prometheus, <code>8000</code> API.</p>
+      <div class="code"><span class="lang">terminal</span><pre><code>echo "https://${CODESPACE_NAME}-3000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"</code></pre></div>
     </div>
     <div class="cs">
       <span class="cs-n">4</span><h3>Pare ao terminar</h3>
-      <p>Ao fim de cada aula, em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, use <b>… → Stop codespace</b>. A pasta <code>~/obs</code> continua lá entre uma aula e outra.</p>
+      <p>Ao fim de cada aula, rode <code>docker compose down</code> e, em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, use <b>… → Stop codespace</b>. A pasta <code>~/observability</code> continua lá entre uma aula e outra.</p>
     </div>
   </div>
 
@@ -105,7 +97,7 @@ python3 --version</code></pre></div>
         <div><b>Uma aba por aula</b><span>Cada tópico traz primeiro os slides do conceito e, logo abaixo, o exercício daquele tópico.</span></div>
         <div><b>Apresentar aula</b><span>Projeta os slides em tela cheia. Setas ← → navegam, Esc sai. Antes de cada exercício aparece o slide “Hora de praticar”.</span></div>
         <div><b>Copiar comandos</b><span>Cada bloco de terminal tem o ícone de copiar no canto superior direito.</span></div>
-        <div><b>Um lab contínuo</b><span>Os exercícios evoluem o mesmo agente em <code>~/obs</code>, da Aula 01 à 05. Faça-os em ordem.</span></div>
+        <div><b>Acompanhar o progresso</b><span>Marque os exercícios concluídos; o contador aparece na aba de cada aula. A marcação fica só no seu navegador.</span></div>
       </div>
     </div>
     <div class="block">
@@ -113,37 +105,22 @@ python3 --version</code></pre></div>
       <div class="tbl"><table>
         <thead><tr><th>Ferramenta</th><th>Aula</th><th>Para quê</th></tr></thead>
         <tbody>
-          <tr><td>OpenTelemetry SDK (Python)</td><td>01–05</td><td>Traces, métricas e logs do agente</td></tr>
-          <tr><td>OpenTelemetry Collector</td><td>01–02</td><td>Receber, mascarar, amostrar e rotear</td></tr>
-          <tr><td>Grafana LGTM (Tempo, Loki, Prometheus)</td><td>01–05</td><td>Armazenar e consultar os sinais</td></tr>
-          <tr><td>GitHub Models / Ollama</td><td>01–05</td><td>LLM do agente e do juiz</td></tr>
-          <tr><td>openai-v2 instrumentation</td><td>02–05</td><td>Spans e métricas GenAI automáticos</td></tr>
-          <tr><td>LLM-as-judge</td><td>04–05</td><td>Evals offline e online</td></tr>
-          <tr><td>Grafana Alerting</td><td>05</td><td>Regras de alerta e notificação</td></tr>
+          <tr><td>Docker Compose</td><td>01</td><td>Subir a stack do laboratório</td></tr>
+          <tr><td>OpenTelemetry SDK (Python)</td><td>01</td><td>Instrumentar a API e criar métricas de negócio</td></tr>
+          <tr><td>Prometheus</td><td>01</td><td>Coletar e consultar métricas (PromQL)</td></tr>
+          <tr><td>Grafana</td><td>01</td><td>Dashboards dos golden signals</td></tr>
         </tbody>
       </table></div>
-      <p class="home-note">Versões fixadas: otel-lgtm 0.41.0, Collector contrib 0.165.0, OpenTelemetry SDK 1.45.2, openai 3.55.1.</p>
+      <p class="home-note">Versões fixadas: Prometheus v3.15.1, Grafana 13.1.10, OpenTelemetry SDK 1.45.2, FastAPI 0.164.0.</p>
     </div>
   </div>
 
-  <div class="combinados"><b>Combinados</b><span>5 aulas de 4 horas</span><span>Materiais, links e gravações no mural da turma</span><span>Notas lançadas em até 15 dias</span></div>
+  <div class="combinados"><b>Combinados</b><span>Aulas de 4 horas</span><span>Materiais, links e gravações no mural da turma</span><span>Notas lançadas em até 15 dias</span></div>
 </section>
 
 <!--AULA-1-->
 <div data-aula="aulas/aula-1.html" hidden></div>
 <!--/AULA-1-->
-<!--AULA-2-->
-<div data-aula="aulas/aula-2.html" hidden></div>
-<!--/AULA-2-->
-<!--AULA-3-->
-<div data-aula="aulas/aula-3.html" hidden></div>
-<!--/AULA-3-->
-<!--AULA-4-->
-<div data-aula="aulas/aula-4.html" hidden></div>
-<!--/AULA-4-->
-<!--AULA-5-->
-<div data-aula="aulas/aula-5.html" hidden></div>
-<!--/AULA-5-->
 </main>
 
 <div class="pres" id="pres" hidden role="dialog" aria-modal="true" aria-label="Modo apresentação">
