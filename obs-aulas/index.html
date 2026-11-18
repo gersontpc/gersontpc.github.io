@@ -22,6 +22,7 @@
     </a>
     <nav class="tabs" role="tablist" aria-label="Aulas">
       <button class="tab" role="tab" data-tab="inicio">Início</button>
+      <button class="tab" role="tab" data-tab="roteiro">Roteiro da aula</button>
       <div class="dd" id="aulasDd">
         <button class="dd-btn" id="aulasBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="aulasMenu">Aulas<span class="dd-cur" id="aulasCur"></span><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></button>
         <div class="dd-menu" id="aulasMenu" hidden>
@@ -70,8 +71,9 @@
   <p class="home-lead">Os exercícios rodam no navegador, num ambiente Linux com Docker já instalado. Não é preciso instalar nada na sua máquina.</p>
   <div class="cs-steps">
     <div class="cs">
-      <span class="cs-n">1</span><h3>Crie o codespace</h3>
-      <p>Em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, clique em <b>New codespace</b> (… → New with options) e escolha a máquina de <b>4 cores</b>.</p>
+      <span class="cs-n">1</span><h3>Crie o repositório e o codespace</h3>
+      <p>Em <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a>, crie o repositório <code>observability-stack</code> com um README. Nele, clique em <b>Code → Codespaces → … → New with options</b> e escolha a máquina de <b>4 cores</b>.</p>
+      <p class="cs-tip">Cada aula ganha uma pasta no repositório (<code>aula-1</code>, <code>aula-2</code>…), commitada no fim do laboratório.</p>
     </div>
     <div class="cs">
       <span class="cs-n">2</span><h3>Valide o Docker</h3>
@@ -86,7 +88,7 @@ docker compose version</code></pre></div>
     </div>
     <div class="cs">
       <span class="cs-n">4</span><h3>Pare ao terminar</h3>
-      <p>Ao fim de cada aula, rode <code>docker compose down</code> e, em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, use <b>… → Stop codespace</b>. A pasta <code>~/observability</code> continua lá entre uma aula e outra.</p>
+      <p>Ao fim de cada aula, rode <code>docker compose down</code> e, em <a href="https://github.com/codespaces" target="_blank" rel="noopener">github.com/codespaces</a>, use <b>… → Stop codespace</b>. Antes de parar, commite e faça push do laboratório: o que está no GitHub não se perde, nem se o codespace for excluído.</p>
     </div>
   </div>
 
@@ -118,6 +120,9 @@ docker compose version</code></pre></div>
   <div class="combinados"><b>Combinados</b><span>Aulas de 4 horas</span><span>Materiais, links e gravações no mural da turma</span><span>Notas lançadas em até 15 dias</span></div>
 </section>
 
+<!--ROTEIRO-->
+<div data-aula="aulas/roteiro.html" hidden></div>
+<!--/ROTEIRO-->
 <!--AULA-1-->
 <div data-aula="aulas/aula-1.html" hidden></div>
 <!--/AULA-1-->

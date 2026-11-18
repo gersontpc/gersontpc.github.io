@@ -53,7 +53,7 @@
   show(h&&document.getElementById(h)&&document.getElementById(h).classList.contains('panel')?h:(store.get('obs-tab')||'inicio'),false);
 
   /* Índice, numeração de slides e exercícios */
-  document.querySelectorAll('.panel[data-panel^="aula"]').forEach(function(panel){
+  document.querySelectorAll('.panel[data-panel^="aula"],.panel[data-panel="roteiro"]').forEach(function(panel){
     var ol=panel.querySelector('.toc ol'); var n=0;
     var total=panel.querySelectorAll('.slide').length;
     panel.querySelectorAll('.slide').forEach(function(s){n++;var sn=document.createElement('span');sn.className='sn';sn.textContent=n+'/'+total;s.appendChild(sn)});
@@ -130,6 +130,7 @@
   function buildDeck(panel){
     var d=[],head=panel.querySelector('.aula-head');
     var sub=head.querySelector('.subtitle');
+    panel.querySelectorAll('template.pres-context').forEach(function(t){d.push({cls:'context',html:'<div class="kicker">Contexto</div>'+t.innerHTML,t:'Contexto'})});
     d.push({cls:'cover',html:'<div class="kicker">'+head.querySelector('.eyebrow').textContent+'</div><h2>'+head.querySelector('h1').innerHTML+'</h2>'+(sub?'<p class="subtitle">'+sub.textContent+'</p>':'')+'<p>'+(head.querySelector('.lead')?head.querySelector('.lead').textContent:'')+'</p>',t:head.querySelector('h1').textContent});
     panel.querySelectorAll('.aula-intro .slide').forEach(function(s){d.push({cls:'',html:'<div class="kicker">Roteiro da aula</div>'+s.outerHTML,t:'Roteiro da aula'})});
     panel.querySelectorAll('.topico').forEach(function(tp){
@@ -192,7 +193,7 @@
     btn.addEventListener('click',function(){resumeToLab(l)});
     doneLabel.insertAdjacentElement('afterend',btn);
   });
-  presentBtn.addEventListener('click',function(){open(document.querySelector('.panel[data-panel^="aula"]:not([hidden])'))});
+  presentBtn.addEventListener('click',function(){open(document.querySelector('.panel:not([hidden]):not([data-panel="inicio"])'))});
 
   document.getElementById('presNext').addEventListener('click',function(){idx===deck.length-1?close():go(1)});
   document.getElementById('presPrev').addEventListener('click',function(){go(-1)});
